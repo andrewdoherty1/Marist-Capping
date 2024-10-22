@@ -72,12 +72,20 @@ nav a {
     color: #1e3a8a;
     text-decoration: none;
     font-size: 1.2em;
-    transition: color 0.3s, background 0.3s;
+    transition: color 0.3s, background-color 0.3s;
+    border-radius: 15px; /* Apply border-radius by default */
 }
+
+/* Hover effect */
 nav a:hover {
     color: #fff;
     background: #fde047;
-    border-radius: 15px;
+}
+
+/* Active link styling */
+nav a.active {
+    color: #fff;
+    background: #fde047;
 }
 .content {
     padding: 30px;
@@ -120,14 +128,52 @@ nav a:hover {
     font-size: 1.3em;
     color: #1e3a8a;
 }
-.scroll-message {
-    text-align: center;
-    margin: 40px 0;
-    font-size: 1.2em;
-    color: #fff;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-    animation: scrollPulse 1.5s infinite;
+
+/* Profile Container */
+.profile-container {
+    display: flex;
+    align-items: center;
+    padding: 30px;
+    background-color: #fff;
+    margin: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
+
+/* Profile Picture Styling */
+.profile-picture {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 20px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.profile-picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* User Description Box Styling */
+.user-description {
+    flex: 1;
+}
+
+.user-description h2 {
+    margin: 0;
+    font-size: 2em;
+    color: #1e3a8a;
+}
+
+.user-description p {
+    margin: 10px 0;
+    font-size: 1.2em;
+    line-height: 1.6;
+}
+
+
 @keyframes scrollPulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }

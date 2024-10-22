@@ -1,60 +1,110 @@
+<!--
+    This is the landing page which is listed as top rated
+    It shows the top rated media baased on past reviews. 
+    -  Whether these past reviews are from people on our site or from pulled data will be decided once we understand what data we are able to gather
+-->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Media Rating Platform</title>
     <link rel="stylesheet" href="styling.css">
-
 </head>
+
 <body>
 
-<header>
-    <div class="logo">Logo</div>
-    <div class="search-bar-header">
-        <input type="text" placeholder="Search...">
-    </div>
-    <div class="profile-icon">
-        <img src="https://via.placeholder.com/50" alt="Profile">
-    </div>
-</header>
+    <!-- Header -->
+    <header>
+        <a onclick="showPage('top-rated', document.querySelector('nav a:first-child'))" style="cursor: pointer;">
+            <div class="logo">Logo</div>
+        </a>
+        <div class="search-bar-header">
+            <input type="text" placeholder="Search for media">
+        </div>
+        <div class="profile-icon">
+            <a href="userProfile.html">
+                <img src="https://via.placeholder.com/50" alt="Profile">
+            </a>
+        </div>
+    </header>
 
-<nav>
-    <a href="#">Top rated</a>
-    <a href="#">Movies</a>
-    <a href="#">Books</a>
-    <a href="#">Music</a>
-    <a href="#">Video Games</a>
-</nav>
+    <!-- Navigation Bar -->
+    <nav>
+        <a onclick="showPage('top-rated', this)" class="active">Top rated</a>
+        <a onclick="showPage('movies', this)">Movies</a>
+        <a onclick="showPage('books', this)">Books</a>
+        <a onclick="showPage('music', this)">Music</a>
+        <a onclick="showPage('games', this)">Video Games</a>
+    </nav>
 
-<div class="content">
-    <div class="media-list">
-        <div class="media-item">
-            <img src="https://via.placeholder.com/80" alt="Media Image">
-            <div class="media-info">
-                <p><strong>Title</strong> - Release Date - Avg. Rating</p>
-                <p>Exciting description of the media item goes here.</p>
+    <!-- Content Sections -->
+    <div class="content">
+        <!-- Top Rated Section -->
+        <div id="top-rated" class="page-section">
+            <h2>Top Rated Media</h2>
+            <div class="media-list">
+                <div class="media-item">
+                    <img src="https://via.placeholder.com/80" alt="Media Image">
+                    <div class="media-info">
+                        <p><strong>Title</strong> - Release Date - Avg. Rating</p>
+                        <p>Exciting description of the media item goes here.</p>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="media-item">
-            <img src="https://via.placeholder.com/80" alt="Media Image">
-            <div class="media-info">
-                <p><strong>Another Title</strong> - Release Date - Avg. Rating</p>
-                <p>Exciting description of another media item goes here.</p>
-            </div>
+
+        <!-- Movies Section (Initially Hidden) -->
+        <div id="movies" class="page-section" style="display: none;">
+            <h2>Movies</h2>
+            <p>List of movies goes here...</p>
         </div>
-        <div class="media-item">
-            <img src="https://via.placeholder.com/80" alt="Media Image">
-            <div class="media-info">
-                <p><strong>Yet Another Title</strong> - Release Date - Avg. Rating</p>
-                <p>Short description of yet another media item.</p>
-            </div>
+
+        <!-- Books Section (Initially Hidden) -->
+        <div id="books" class="page-section" style="display: none;">
+            <h2>Books</h2>
+            <p>List of books goes here...</p>
+        </div>
+
+        <!-- Music Section (Initially Hidden) -->
+        <div id="music" class="page-section" style="display: none;">
+            <h2>Music</h2>
+            <p>List of music goes here...</p>
+        </div>
+
+        <!-- Games Section (Initially Hidden) -->
+        <div id="games" class="page-section" style="display: none;">
+            <h2>Video Games</h2>
+            <p>List of video games goes here...</p>
         </div>
     </div>
-    <div class="scroll-message">
-        Scroll for more
-    </div>
-</div>
+
+    <script>
+        // JavaScript to manage page switching
+        function showPage(pageId, clickedLink) {
+            // Hide all pages
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.style.display = 'none';
+            });
+
+            // Show the selected page
+            document.getElementById(pageId).style.display = 'block';
+
+            // Remove 'active' class from all nav links
+            document.querySelectorAll('nav a').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Add 'active' class to the clicked link
+            clickedLink.classList.add('active');
+        }
+
+        // Optionally, show 'Top Rated' by default on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            showPage('top-rated', document.querySelector('nav a.active'));
+        });
+    </script>
 
 </body>
 </html>
