@@ -1,7 +1,7 @@
 <!--
-    This is the landing page which is listed as top rated
-    It shows the top rated media baased on past reviews. 
-    -  Whether these past reviews are from people on our site or from pulled data will be decided once we understand what data we are able to gather
+    This is the landing page which is listed as top rated.
+    It shows the top rated media based on past reviews.
+    - Whether these past reviews are from people on our site or from pulled data will be decided once we understand what data we are able to gather.
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -58,7 +58,9 @@
         <!-- Movies Section (Initially Hidden) -->
         <div id="movies" class="page-section" style="display: none;">
             <h2>Movies</h2>
-            <p>List of movies goes here...</p>
+            <div id="movies-container" class="media-list">
+                <!-- Movie cards will be populated here dynamically -->
+            </div>
         </div>
 
         <!-- Books Section (Initially Hidden) -->
@@ -81,30 +83,69 @@
     </div>
 
     <script>
-        // JavaScript to manage page switching
+        const API_KEY = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E';
+
+        async function fetchPopularMovies() {
+            try {
+                const response = await fetch('https://api.themoviedb.org/3/movie/popular', {
+                    method: 'GET',
+                    headers: {
+                        accept: 'application/json',
+                        Authorization: API_KEY
+                    }
+                });
+
+                const data = await response.json();
+                displayMovies(data.results);
+            } catch (error) {
+                console.error('Failed to fetch popular movies:', error);
+            }
+        }
+
+        function displayMovies(movies) {
+            const moviesContainer = document.getElementById('movies-container');
+            moviesContainer.innerHTML = ''; // Clear previous content
+
+            movies.forEach(movie => {
+                const movieCard = document.createElement('div');
+                movieCard.classList.add('media-item');
+                movieCard.innerHTML = `
+                    <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
+                    <div class="media-info">
+                        <p><strong>${movie.title}</strong> - ${movie.release_date}</p>
+                        <p>Rating: ${movie.vote_average}</p>
+                    </div>
+                `;
+
+                movieCard.addEventListener('click', () => {
+                    window.open(`https://www.themoviedb.org/movie/${movie.id}`, '_blank');
+                });
+
+                moviesContainer.appendChild(movieCard);
+            });
+        }
+
         function showPage(pageId, clickedLink) {
-            // Hide all pages
             document.querySelectorAll('.page-section').forEach(section => {
                 section.style.display = 'none';
             });
 
-            // Show the selected page
             document.getElementById(pageId).style.display = 'block';
-
-            // Remove 'active' class from all nav links
             document.querySelectorAll('nav a').forEach(link => {
                 link.classList.remove('active');
             });
-
-            // Add 'active' class to the clicked link
             clickedLink.classList.add('active');
+
+            if (pageId === 'movies') {
+                fetchPopularMovies();
+            }
         }
 
-        // Optionally, show 'Top Rated' by default on page load
         document.addEventListener('DOMContentLoaded', () => {
             showPage('top-rated', document.querySelector('nav a.active'));
         });
     </script>
 
 </body>
+
 </html>
