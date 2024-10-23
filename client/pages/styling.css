@@ -173,6 +173,93 @@ nav a.active {
     line-height: 1.6;
 }
 
+/* Styling for the form container */
+.form-container {
+    width: 400px;
+    margin: 50px auto;
+    padding: 30px; /* Uniform padding on all sides */
+    background-color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+}
+
+/* Form group for individual input fields */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+/* Input fields styling */
+.form-group input {
+    width: calc(100% - 20px); /* Ensure inputs fit within the container */
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Center and style the switch link */
+.switch-link {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.switch-link a {
+    font-size: 0.9em; /* Slightly smaller text */
+    color: #1e3a8a;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.switch-link a:hover {
+    text-decoration: underline;
+    color: #25418d;
+}
+
+/* Flex container for sign-in link and profile icon */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Adds space between sign-in link and profile icon */
+}
+
+/* Styling for the sign-in link */
+.sign-in-link {
+    font-size: 1em;
+    color: #1e3a8a;
+    text-decoration: none; /* No underline initially */
+    font-weight: bold;
+    transition: text-decoration 0.3s;
+}
+
+.sign-in-link:hover {
+    text-decoration: underline; /* Underline on hover */
+}
+
+
+
+/* Button styling */
+button {
+    width: 100%; /* Full-width button */
+    padding: 10px;
+    background-color: #1e3a8a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #25418d;
+}
+
 
 @keyframes scrollPulse {
     0%, 100% { opacity: 1; }
