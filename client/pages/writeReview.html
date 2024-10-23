@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opinionate - Review Page</title>
+    <link rel="stylesheet" href="styling.css">
+    <style>
+        /* Styling for the review page */
+        .media-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+        }
+
+        .media-picture {
+            margin-right: 20px;
+        }
+
+        .media-picture img {
+            max-width: 100px;
+            border-radius: 8px;
+        }
+
+        .media-details {
+            flex-grow: 1;
+        }
+
+        .media-title {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .rating-container {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .star-rating {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .star {
+            color: lightgray;
+        }
+
+        .star.filled {
+            color: gold;
+        }
+
+        #rating-value {
+            margin-left: 10px;
+        }
+
+        .media-description {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .submit-container {
+            display: none;
+            text-align: center;
+        }
+
+        .submit-container button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .submit-container button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <a href="index.html">
+        <img src="images\logo.png" alt="Logo" class="logo" style="height: 50px;">
+    </a>
+    <div class="search-bar-header">
+        <input type="text" placeholder="Search for media">
+    </div>
+    <div class="profile-icon">
+        <a href="#">
+            <img src="https://via.placeholder.com/50" alt="Profile">
+        </a>
+    </div>
+</header>
+
+<!-- Media Page Content -->
+<div class="media-container">
+    <div class="media-picture">
+        <img src="images/media-pic.jpg" alt="Media Picture">
+    </div>
+    <div class="media-details">
+        <h2 class="media-title">Media Title</h2>
+        <div class="media-description">
+            <p><strong>Description:</strong> This is where a brief description of the media goes. It gives an overview of the content, release date, and any relevant details.</p>
+        </div>
+        <div class="rating-container">
+            <span class="star-rating" id="star-rating">
+                <span class="star" data-value="1">&#9733;</span>
+                <span class="star" data-value="2">&#9733;</span>
+                <span class="star" data-value="3">&#9733;</span>
+                <span class="star" data-value="4">&#9733;</span>
+                <span class="star" data-value="5">&#9733;</span>
+            </span>
+            <span id="rating-value">0 Stars</span>
+        </div>
+        <textarea id="description" rows="4" placeholder="Write your description here..."></textarea>
+        <div class="submit-container" id="submit-container">
+            <button id="submit-btn">Submit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Star rating system
+    const stars = document.querySelectorAll('.star');
+    const ratingValue = document.getElementById('rating-value');
+    const submitButton = document.getElementById('submit-btn');
+    const description = document.getElementById('description');
+    const submitContainer = document.getElementById('submit-container');
+
+    let ratingSelected = false;
+
+    stars.forEach(star => {
+        star.addEventListener('click', () => {
+            const rating = star.getAttribute('data-value');
+
+            // Reset all stars
+            stars.forEach(s => {
+                s.classList.remove('filled');
+            });
+
+            // Highlight the selected rating
+            for (let i = 0; i < rating; i++) {
+                stars[i].classList.add('filled');
+            }
+
+            // Update the rating value text
+            ratingValue.textContent = `${rating} Stars`;
+            ratingSelected = true;
+
+            toggleSubmitButton();
+        });
+    });
+
+    description.addEventListener('input', toggleSubmitButton);
+
+    function toggleSubmitButton() {
+        if (ratingSelected || description.value.trim()) {
+            submitContainer.style.display = 'block';
+        } else {
+            submitContainer.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
