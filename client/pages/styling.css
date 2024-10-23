@@ -242,6 +242,27 @@ nav a.active {
     text-decoration: underline; /* Underline on hover */
 }
 
+/* Flex container for logo and text */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between logo image and text */
+}
+
+/* Styling for the logo image */
+.logo-image {
+    height: 55px;
+    width: auto;
+}
+
+/* Styling for the logo text */
+.logo-text {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #1e3a8a;
+    white-space: nowrap; /* Prevent text from wrapping */
+}
+
 
 
 /* Button styling */
