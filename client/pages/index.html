@@ -12,23 +12,31 @@
 
     <!-- Header -->
     <header>
-        <div class="logo-container">
-            <a href="index.html">
-                <img src="images/logo.png" alt="Logo" class="logo-image">
-            </a>
-            <span class="logo-text">Opinionate</span>
-        </div>
-    
+        <a onclick="showPage('feed', document.querySelector('nav a:first-child'))" style="cursor: pointer;">
+            <div class="logo-container">
+                <a href="index.html">
+                    <img src="images/logo.png" alt="Logo" class="logo-image">
+                </a>
+                <span class="logo-text">Opinionate</span>
+            </div>
+        </a>
         <div class="search-bar-header">
-            <input type="text" placeholder="Search for friends">
+            <input type="text" placeholder="Search for media">
         </div>
     
-        <div class="profile-icon">
-            <a href="#">
-                <img src="https://via.placeholder.com/50" alt="Profile">
-            </a>
+        <!-- Sign-in Link and Profile Icon -->
+        <div class="header-right">
+            <a href="createAccount.html" class="sign-in-link">Sign In</a>
+            <div class="profile-icon">
+                <a href="userProfile.html">
+                    <img src="https://via.placeholder.com/50" alt="Profile">
+                </a>
+            </div>
         </div>
     </header>
+
+
+    
 
     <!-- Navigation Bar -->
     <nav>
