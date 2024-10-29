@@ -35,9 +35,6 @@
         </div>
     </header>
 
-
-
-
     <!-- Navigation Bar -->
     <nav>
         <a onclick="showPage('feed', this)" class="active">Feed</a>
@@ -54,7 +51,6 @@
             <h2>Feed</h2>
             <p>This is where your friends' reviews will show up.</p>
             <div class="media-list">
-                <!-- Placeholder for future reviews from friends -->
                 <div class="media-item">
                     <img src="https://via.placeholder.com/80" alt="Media Image">
                     <div class="media-info">
@@ -64,35 +60,28 @@
             </div>
         </div>
 
-
         <!-- Movies Section -->
         <div id="movies" class="page-section" style="display: none;">
             <h2>Movies</h2>
-            <div id="movies-container" class="media-list">
-                <!-- Movie cards will be dynamically populated -->
-            </div>
+            <div id="movies-container" class="media-list"></div>
         </div>
 
         <!-- Music Section -->
         <div id="music" class="page-section" style="display: none;">
             <h2>Music</h2>
-            <div id="albums-container" class="media-list">
-                <!-- Albums will be dynamically populated -->
-            </div>
+            <div id="albums-container" class="media-list"></div>
         </div>
 
         <!-- Books Section -->
         <div id="books" class="page-section" style="display: none;">
             <h2>Books</h2>
-            <p>List of books goes here...</p>
+            <div id="books-container" class="media-list"></div>
         </div>
 
         <!-- Games Section -->
         <div id="games" class="page-section" style="display: none;">
             <h2>Video Games</h2>
-            <div id="games-container" class="media-list">
-                <!-- Video Games will be dynamically populated -->
-            </div>
+            <div id="games-container" class="media-list"></div>
         </div>
     </div>
 
@@ -101,7 +90,6 @@
         const CLIENT_SECRET = 'aa0145b7bc214e2fae5c02bc3ff2933b';
         let spotifyAccessToken;
 
-        // Fetch Spotify Access Token
         async function fetchSpotifyAccessToken() {
             const response = await fetch('https://accounts.spotify.com/api/token', {
                 method: 'POST',
@@ -111,76 +99,50 @@
                 },
                 body: 'grant_type=client_credentials'
             });
-
             const data = await response.json();
             spotifyAccessToken = data.access_token;
         }
 
-        // Fetch Popular Movies from TMDB
         async function fetchMovies() {
-            try {
-                const response = await fetch('https://api.themoviedb.org/3/movie/popular', {
-                    headers: {
-                        accept: 'application/json',
-                        Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E'
-                    }
-                });
-
-                const data = await response.json();
-                displayMovies(data.results);
-            } catch (error) {
-                console.error('Failed to fetch movies:', error);
-            }
+            const response = await fetch('https://api.themoviedb.org/3/movie/popular', {
+                headers: {
+                    accept: 'application/json',
+                    Authorization: 'Bearer YOUR_TMDB_ACCESS_TOKEN'
+                }
+            });
+            const data = await response.json();
+            displayMovies(data.results);
         }
 
-        // Display Movies
         function displayMovies(movies) {
-    const moviesContainer = document.getElementById('movies-container');
-    moviesContainer.innerHTML = ''; // Clear previous content
-
-    movies.forEach(movie => {
-        const movieCard = document.createElement('div');
-        movieCard.classList.add('media-item');
-        movieCard.innerHTML = `
-            <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
-            <div class="media-info">
-                <p><strong>${movie.title}</strong> - ${movie.release_date}</p>
-                <p>Rating: ${movie.vote_average}</p>
-            </div>
-        `;
-
-        // Navigate to internal media page with the movie ID
-        movieCard.addEventListener('click', () => {
-            window.location.href = `media.html?mediaType=movie&id=${movie.id}`;
-        });
-
-        moviesContainer.appendChild(movieCard);
-    });
-}
-
-        // Fetch Music (Albums) from Spotify
-        async function fetchMusic() {
-            try {
-                if (!spotifyAccessToken) await fetchSpotifyAccessToken();
-
-                const response = await fetch('https://api.spotify.com/v1/browse/new-releases?limit=10', {
-                    headers: {
-                        Authorization: `Bearer ${spotifyAccessToken}`
-                    }
-                });
-
-                const data = await response.json();
-                displayMusic(data.albums.items);
-            } catch (error) {
-                console.error('Failed to fetch music:', error);
-            }
+            const moviesContainer = document.getElementById('movies-container');
+            moviesContainer.innerHTML = '';
+            movies.forEach(movie => {
+                const movieCard = document.createElement('div');
+                movieCard.classList.add('media-item');
+                movieCard.innerHTML = `
+                    <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
+                    <div class="media-info">
+                        <p><strong>${movie.title}</strong> - ${movie.release_date}</p>
+                        <p>Rating: ${movie.vote_average}</p>
+                    </div>
+                `;
+                moviesContainer.appendChild(movieCard);
+            });
         }
 
-        // Display Music (Albums)
+        async function fetchMusic() {
+            if (!spotifyAccessToken) await fetchSpotifyAccessToken();
+            const response = await fetch('https://api.spotify.com/v1/browse/new-releases?limit=10', {
+                headers: { Authorization: `Bearer ${spotifyAccessToken}` }
+            });
+            const data = await response.json();
+            displayMusic(data.albums.items);
+        }
+
         function displayMusic(albums) {
             const albumsContainer = document.getElementById('albums-container');
-            albumsContainer.innerHTML = ''; // Clear previous content
-
+            albumsContainer.innerHTML = '';
             albums.forEach(album => {
                 const albumCard = document.createElement('div');
                 albumCard.classList.add('media-item');
@@ -190,94 +152,75 @@
                         <p><strong>${album.name}</strong> by ${album.artists[0].name}</p>
                     </div>
                 `;
-
-                albumCard.addEventListener('click', () => {
-                    window.open(album.external_urls.spotify, '_blank');
-                });
-
                 albumsContainer.appendChild(albumCard);
             });
         }
 
-        //GiantBomb
-        const apiKey = '8dfa1038447a4c092e489b3775d27ae4821a1e90';
-        const url = `http://localhost:3000/api/games`;
-
-        // Fetch games from GiantBomb.
-        async function fetchGames() {
-            try {
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
-            
-                        'Accept': 'application/json',
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                console.log("games");
-                displayGames(data.results);
-                
-
-            } catch (error) {
-                console.error('Error fetching popular games:', error);
-            }
+        async function fetchBooks() {
+            const response = await fetch('https://openlibrary.org/search.json?q=bestsellers&limit=10');
+            const data = await response.json();
+            displayBooks(data.docs);
         }
-        // Display Video Games.
+
+        function displayBooks(books) {
+            const booksContainer = document.getElementById('books-container');
+            booksContainer.innerHTML = '';
+            books.forEach(book => {
+                const coverUrl = book.cover_i
+                    ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+                    : 'https://via.placeholder.com/80';
+                const bookCard = document.createElement('div');
+                bookCard.classList.add('media-item');
+                bookCard.innerHTML = `
+                    <img src="${coverUrl}" alt="${book.title}">
+                    <div class="media-info">
+                        <p><strong>${book.title}</strong></p>
+                        <p>Author: ${book.author_name ? book.author_name[0] : 'Unknown'}</p>
+                    </div>
+                `;
+                booksContainer.appendChild(bookCard);
+            });
+        }
+
+        async function fetchGames() {
+            const response = await fetch('http://localhost:3000/api/games');
+            const data = await response.json();
+            displayGames(data.results);
+        }
+
         function displayGames(games) {
             const gamesContainer = document.getElementById('games-container');
-            gamesContainer.innerHTML = '';  // Clear any existing content
-
+            gamesContainer.innerHTML = '';
             games.forEach(game => {
                 const gameCard = document.createElement('div');
                 gameCard.classList.add('media-item');
                 gameCard.innerHTML = `
-            <img src="${game.image?.super_url || 'default-image.jpg'}" alt="${game.name}">
-            <div class="media-info">
-                <p><strong>${game.name}</strong></p>
-                <p>Release Date: ${game.original_release_date || 'N/A'}</p>
-            </div>
-        `;
-
-                // Open the game's GiantBomb page on click, if there's a URL
-                gameCard.addEventListener('click', () => {
-                    if (game.site_detail_url) {
-                        window.open(game.site_detail_url, '_blank');
-                    }
-                });
-
+                    <img src="${game.image?.super_url || 'https://via.placeholder.com/80'}" alt="${game.name}">
+                    <div class="media-info">
+                        <p><strong>${game.name}</strong></p>
+                        <p>Release Date: ${game.original_release_date || 'N/A'}</p>
+                    </div>
+                `;
                 gamesContainer.appendChild(gameCard);
             });
         }
 
-
-        // Page Switching Logic
         function showPage(pageId, clickedLink) {
-            document.querySelectorAll('.page-section').forEach(section => {
-                section.style.display = 'none';
-            });
-
+            document.querySelectorAll('.page-section').forEach(section => section.style.display = 'none');
             document.getElementById(pageId).style.display = 'block';
-            document.querySelectorAll('nav a').forEach(link => {
-                link.classList.remove('active');
-            });
+            document.querySelectorAll('nav a').forEach(link => link.classList.remove('active'));
             clickedLink.classList.add('active');
 
             if (pageId === 'movies') fetchMovies();
             if (pageId === 'music') fetchMusic();
+            if (pageId === 'books') fetchBooks();
             if (pageId === 'games') fetchGames();
         }
 
-        // Show 'Feed' by default
         document.addEventListener('DOMContentLoaded', () => {
             showPage('feed', document.querySelector('nav a.active'));
         });
 
-        // Refresh Spotify Token every 55 minutes
         setInterval(fetchSpotifyAccessToken, 55 * 60 * 1000);
     </script>
 
