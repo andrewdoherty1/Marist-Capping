@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Opinionate - Review Page</title>
+    <title>Opinionate - Movie Review</title>
     <link rel="stylesheet" href="styling.css">
     <style>
         /* Styling for the review page */
@@ -104,6 +104,8 @@
     </div>
     <div class="media-details">
         <h2 class="media-title" id="media-title">Media Title</h2>
+        <p id="media-director"><strong>Director:</strong> Loading...</p>
+        <p id="media-release-date"><strong>Release Date:</strong> Loading...</p>
         <div class="media-description">
             <p id="media-description"><strong>Description:</strong> Loading description...</p>
         </div>
@@ -132,7 +134,7 @@
             const movieResponse = await fetch(`https://api.themoviedb.org/3/movie/${mediaId}`, {
                 headers: {
                     accept: 'application/json',
-                    Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E'
+                    Authorization: 'Bearer YOUR_TMDB_API_KEY'
                 }
             });
             const media = await movieResponse.json();
@@ -141,7 +143,7 @@
             const creditsResponse = await fetch(`https://api.themoviedb.org/3/movie/${mediaId}/credits`, {
                 headers: {
                     accept: 'application/json',
-                    Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E'
+                    Authorization: 'Bearer YOUR_TMDB_API_KEY'
                 }
             });
             const credits = await creditsResponse.json();
@@ -153,12 +155,11 @@
             document.getElementById('media-title').textContent = media.title;
             document.getElementById('media-description').textContent = media.overview;
             document.getElementById('media-image').src = `https://image.tmdb.org/t/p/w500${media.poster_path}`;
+            document.getElementById('media-release-date').innerHTML = `<strong>Release Date:</strong> ${media.release_date}`;
 
             // Display the director's name if available
             if (director) {
-                const directorElement = document.createElement('p');
-                directorElement.innerHTML = `<strong>Director:</strong> ${director.name}`;
-                document.getElementById('media-details').appendChild(directorElement);
+                document.getElementById('media-director').innerHTML = `<strong>Director:</strong> ${director.name}`;
             }
 
         } catch (error) {
