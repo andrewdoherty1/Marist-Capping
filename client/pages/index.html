@@ -135,27 +135,28 @@
 
         // Display Movies
         function displayMovies(movies) {
-            const moviesContainer = document.getElementById('movies-container');
-            moviesContainer.innerHTML = ''; // Clear previous content
+    const moviesContainer = document.getElementById('movies-container');
+    moviesContainer.innerHTML = ''; // Clear previous content
 
-            movies.forEach(movie => {
-                const movieCard = document.createElement('div');
-                movieCard.classList.add('media-item');
-                movieCard.innerHTML = `
-                    <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
-                    <div class="media-info">
-                        <p><strong>${movie.title}</strong> - ${movie.release_date}</p>
-                        <p>Rating: ${movie.vote_average}</p>
-                    </div>
-                `;
+    movies.forEach(movie => {
+        const movieCard = document.createElement('div');
+        movieCard.classList.add('media-item');
+        movieCard.innerHTML = `
+            <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
+            <div class="media-info">
+                <p><strong>${movie.title}</strong> - ${movie.release_date}</p>
+                <p>Rating: ${movie.vote_average}</p>
+            </div>
+        `;
 
-                movieCard.addEventListener('click', () => {
-                    window.open(`https://www.themoviedb.org/movie/${movie.id}`, '_blank');
-                });
+        // Navigate to internal media page with the movie ID
+        movieCard.addEventListener('click', () => {
+            window.location.href = `media.html?mediaType=movie&id=${movie.id}`;
+        });
 
-                moviesContainer.appendChild(movieCard);
-            });
-        }
+        moviesContainer.appendChild(movieCard);
+    });
+}
 
         // Fetch Music (Albums) from Spotify
         async function fetchMusic() {

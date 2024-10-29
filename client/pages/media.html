@@ -19,53 +19,42 @@
             flex-direction: row;
             align-items: flex-start;
         }
-
         .media-picture {
             margin-right: 20px;
         }
-
         .media-picture img {
             max-width: 100px;
             border-radius: 8px;
         }
-
         .media-details {
             flex-grow: 1;
         }
-
         .media-title {
             margin: 0;
             font-size: 24px;
         }
-
         .rating-container {
             display: flex;
             align-items: center;
             margin: 10px 0;
         }
-
         .star-rating {
             font-size: 24px;
             cursor: pointer;
         }
-
         .star {
             color: lightgray;
         }
-
         .star.filled {
             color: gold;
         }
-
         #rating-value {
             margin-left: 10px;
         }
-
         .media-description {
             margin: 10px 0;
             font-size: 16px;
         }
-
         textarea {
             width: 100%;
             padding: 10px;
@@ -74,12 +63,10 @@
             border-radius: 4px;
             margin-bottom: 20px;
         }
-
         .submit-container {
             display: none;
             text-align: center;
         }
-
         .submit-container button {
             padding: 10px 20px;
             background-color: #007bff;
@@ -88,7 +75,6 @@
             border-radius: 4px;
             cursor: pointer;
         }
-
         .submit-container button:hover {
             background-color: #0056b3;
         }
@@ -99,7 +85,7 @@
 
 <header>
     <a href="index.html">
-        <img src="images\logo.png" alt="Logo" class="logo" style="height: 50px;">
+        <img src="images/logo.png" alt="Logo" class="logo" style="height: 50px;">
     </a>
     <div class="search-bar-header">
         <input type="text" placeholder="Search for media">
@@ -112,14 +98,14 @@
 </header>
 
 <!-- Media Page Content -->
-<div class="media-container">
+<div class="media-container" id="media-container">
     <div class="media-picture">
-        <img src="images/media-pic.jpg" alt="Media Picture">
+        <img src="" alt="Media Picture" id="media-image">
     </div>
     <div class="media-details">
-        <h2 class="media-title">Media Title</h2>
+        <h2 class="media-title" id="media-title">Media Title</h2>
         <div class="media-description">
-            <p><strong>Description:</strong> This is where a brief description of the media goes. It gives an overview of the content, release date, and any relevant details.</p>
+            <p id="media-description"><strong>Description:</strong> Loading description...</p>
         </div>
         <div class="rating-container">
             <span class="star-rating" id="star-rating">
@@ -139,6 +125,54 @@
 </div>
 
 <script>
+    // Function to fetch and display media details from the API
+    async function fetchMediaDetails(mediaId) {
+        try {
+            // Fetch the movie details
+            const movieResponse = await fetch(`https://api.themoviedb.org/3/movie/${mediaId}`, {
+                headers: {
+                    accept: 'application/json',
+                    Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E'
+                }
+            });
+            const media = await movieResponse.json();
+
+            // Fetch the movie credits to get the director
+            const creditsResponse = await fetch(`https://api.themoviedb.org/3/movie/${mediaId}/credits`, {
+                headers: {
+                    accept: 'application/json',
+                    Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E'
+                }
+            });
+            const credits = await creditsResponse.json();
+
+            // Find the director from the crew list
+            const director = credits.crew.find(member => member.job === 'Director');
+
+            // Populate media details in the HTML
+            document.getElementById('media-title').textContent = media.title;
+            document.getElementById('media-description').textContent = media.overview;
+            document.getElementById('media-image').src = `https://image.tmdb.org/t/p/w500${media.poster_path}`;
+
+            // Display the director's name if available
+            if (director) {
+                const directorElement = document.createElement('p');
+                directorElement.innerHTML = `<strong>Director:</strong> ${director.name}`;
+                document.getElementById('media-details').appendChild(directorElement);
+            }
+
+        } catch (error) {
+            console.error('Failed to fetch media details:', error);
+        }
+    }
+
+    // Call fetchMediaDetails with an example movie ID to display data on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const mediaId = urlParams.get('id') || '550'; // Replace '550' with a fallback movie ID
+        fetchMediaDetails(mediaId);
+    });
+
     // Star rating system
     const stars = document.querySelectorAll('.star');
     const ratingValue = document.getElementById('rating-value');
