@@ -82,10 +82,12 @@
         </div>
 
         <!-- Books Section -->
-        <div id="books" class="page-section" style="display: none;">
-            <h2>Books</h2>
-            <p>List of books goes here...</p>
-        </div>
+<div id="books" class="page-section" style="display: none;">
+    <h2>Books</h2>
+    <div id="books-container" class="media-list">
+        <!-- Books will be dynamically populated here -->
+    </div>
+</div>
 
         <!-- Games Section -->
         <div id="games" class="page-section" style="display: none;">
@@ -135,27 +137,28 @@
 
         // Display Movies
         function displayMovies(movies) {
-            const moviesContainer = document.getElementById('movies-container');
-            moviesContainer.innerHTML = ''; // Clear previous content
+    const moviesContainer = document.getElementById('movies-container');
+    moviesContainer.innerHTML = ''; // Clear previous content
 
-            movies.forEach(movie => {
-                const movieCard = document.createElement('div');
-                movieCard.classList.add('media-item');
-                movieCard.innerHTML = `
-                    <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
-                    <div class="media-info">
-                        <p><strong>${movie.title}</strong> - ${movie.release_date}</p>
-                        <p>Rating: ${movie.vote_average}</p>
-                    </div>
-                `;
+    movies.forEach(movie => {
+        const movieCard = document.createElement('div');
+        movieCard.classList.add('media-item');
+        movieCard.innerHTML = `
+            <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
+            <div class="media-info">
+                <p><strong>${movie.title}</strong> - ${movie.release_date}</p>
+                <p>Rating: ${movie.vote_average}</p>
+            </div>
+        `;
 
-                movieCard.addEventListener('click', () => {
-                    window.open(`https://www.themoviedb.org/movie/${movie.id}`, '_blank');
-                });
+        // Navigate to internal media page with the movie ID
+        movieCard.addEventListener('click', () => {
+            window.location.href = `media.html?mediaType=movie&id=${movie.id}`;
+        });
 
-                moviesContainer.appendChild(movieCard);
-            });
-        }
+        moviesContainer.appendChild(movieCard);
+    });
+}
 
         // Fetch Music (Albums) from Spotify
         async function fetchMusic() {
@@ -253,23 +256,61 @@
             });
         }
 
+        // Fetch Books from Open Library API
+async function fetchBooks() {
+    try {
+        const response = await fetch('https://openlibrary.org/search.json?q=bestsellers&limit=10');
+        const data = await response.json();
+        displayBooks(data.docs);
+    } catch (error) {
+        console.error('Failed to fetch books:', error);
+    }
+}
+
+// Display Books
+function displayBooks(books) {
+    const booksContainer = document.getElementById('books-container');
+    booksContainer.innerHTML = ''; // Clear previous content
+
+    books.forEach(book => {
+        const coverUrl = book.cover_i
+            ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+            : 'https://via.placeholder.com/80';
+
+        const bookCard = document.createElement('div');
+        bookCard.classList.add('media-item');
+        bookCard.innerHTML = `
+            <img src="${coverUrl}" alt="${book.title}">
+            <div class="media-info">
+                <p><strong>${book.title}</strong></p>
+                <p>Author: ${book.author_name ? book.author_name[0] : 'Unknown'}</p>
+                <p>First Published: ${book.first_publish_year || 'N/A'}</p>
+            </div>
+        `;
+
+        booksContainer.appendChild(bookCard);
+    });
+}
+
 
         // Page Switching Logic
         function showPage(pageId, clickedLink) {
-            document.querySelectorAll('.page-section').forEach(section => {
-                section.style.display = 'none';
-            });
+    document.querySelectorAll('.page-section').forEach(section => {
+        section.style.display = 'none';
+    });
 
-            document.getElementById(pageId).style.display = 'block';
-            document.querySelectorAll('nav a').forEach(link => {
-                link.classList.remove('active');
-            });
-            clickedLink.classList.add('active');
+    document.getElementById(pageId).style.display = 'block';
+    document.querySelectorAll('nav a').forEach(link => {
+        link.classList.remove('active');
+    });
+    clickedLink.classList.add('active');
 
-            if (pageId === 'movies') fetchMovies();
-            if (pageId === 'music') fetchMusic();
-            if (pageId === 'games') fetchGames();
-        }
+    if (pageId === 'movies') fetchMovies();
+    if (pageId === 'music') fetchMusic();
+    if (pageId === 'books') fetchBooks(); // Fetch books when books tab is selected
+    if (pageId === 'games') fetchGames();
+}
+
 
         // Show 'Feed' by default
         document.addEventListener('DOMContentLoaded', () => {
