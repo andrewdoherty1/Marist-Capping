@@ -2,6 +2,8 @@
 import express from 'express';
 import fetch from 'node-fetch';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 //const moviesRoutes = require('./routes/moviesRoutes');
 const app = express();
 //const PORT = process.env.PORT || 3000;
@@ -9,14 +11,21 @@ const PORT = 3000;
 
 //app.use('/api/movies', moviesRoutes);
 
-app.use(express.static('client/pages'));
+// Get the directory name of the current module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(express.static(path.join(__dirname, '../client/pages')));
 
 // Enable CORS for all routes
 app.use(cors());
 
-app.get('/', function (req, res) {
-  res.sendFile('index.html', { root: '../client/pages' })
-})
+// app.get('/', function (req, res) {
+//   res.sendFile('index.html', { root: '../client/pages' })
+// })
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/pages/index.html'));
+});
 
 const API_KEY = '8dfa1038447a4c092e489b3775d27ae4821a1e90';
 
