@@ -25,4 +25,23 @@ const getTableNames = async () => {
     }
   };
 
+  const insertUser = async (username, password, email) => {
+    try {
+      const query = `
+        INSERT INTO users (username, password, email)
+        VALUES ($1, $2, $3)
+        RETURNING *;
+      `;
+      
+      const values = [username, password, email];  
+      
+      const res = await pool.query(query, values);
+      
+      console.log('User inserted:', res.rows[0]); 
+    } catch (err) {
+      console.error('Error executing query', err.stack);
+    }
+  };
+  
+
 getTableNames();
