@@ -135,4 +135,3 @@ const getTableNames = async () => {
   };
   
 
-//getTableNames();
