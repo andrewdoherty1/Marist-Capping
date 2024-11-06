@@ -33,6 +33,8 @@ app.use(express.static(path.join(__dirname, '../client/pages')));
 // Enable CORS for all routes
 app.use(cors());
 
+app.use(express.json()); // Parse JSON request bodies
+
 // app.get('/', function (req, res) {
 //   res.sendFile('index.html', { root: '../client/pages' })
 // })
@@ -59,9 +61,6 @@ app.get('/api/games', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
 
 // Route to Populate Movies tab.
 app.get('/api/random-movies', async (req, res) => {
@@ -126,4 +125,39 @@ app.get('/api/media/:id', async (req, res) => {
     console.error('Error fetching media details:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
+});
+
+// -------------------------------------------------------
+// LOGIN FUNCTION
+
+// Login function to check user credentials
+const loginUser = async (username, password) => {
+  try {
+    const query = 'SELECT * FROM users WHERE username = $1 AND password = $2';
+    const res = await pool.query(query, [username, password]);
+    if (res.rows.length > 0) {
+      console.log('User logged in:', res.rows[0]);
+      return { success: true, message: 'Login successful!' };
+    } else {
+      return { success: false, message: 'Incorrect username or password.' };
+    }
+  } catch (err) {
+    console.error('Error logging in user:', err.stack);
+    return { success: false, message: 'Login error. Please try again.' };
+  }
+};
+
+// Login route
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  const result = await loginUser(username, password);
+  res.json(result);
+});
+
+
+
+
+// connecting to the server
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
