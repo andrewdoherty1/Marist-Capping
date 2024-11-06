@@ -10,112 +10,204 @@
 
 <body>
 
+    <!-- Header -->
     <header>
-        <div class="logo-container">
-            <a href="index.html">
-                <img src="images/logo.png" alt="Logo" class="logo-image">
-            </a>
-            <span class="logo-text">Opinionate</span>
-        </div>
-    
+        <a onclick="showPage('feed', document.querySelector('nav a:first-child'))" style="cursor: pointer;">
+            <div class="logo-container">
+                <a href="index.html">
+                    <img src="images/logo.png" alt="Logo" class="logo-image">
+                </a>
+                <span class="logo-text">Opinionate</span>
+            </div>
+        </a>
         <div class="search-bar-header">
-            <input type="text" placeholder="Search for friends">
+            <input type="text" placeholder="Search for media">
         </div>
-    
-        <div class="profile-icon">
-            <a href="#">
-                <img src="https://via.placeholder.com/50" alt="Profile">
-            </a>
+
+        <!-- Sign-in Link and Profile Icon -->
+        <div class="header-right">
+            <a href="createAccount.html" class="sign-in-link">Sign In</a>
+            <div class="profile-icon">
+                <a href="userProfile.html">
+                    <img src="https://via.placeholder.com/50" alt="Profile">
+                </a>
+            </div>
         </div>
     </header>
 
 
 
-<nav>
-    <a onclick="showSection('library', this)" class="active">Library</a>
-    <a onclick="showSection('bookmarks', this)">Bookmarks</a>
-    <a onclick="showSection('friends', this)">Friends</a>
-    <a onclick="showSection('settings', this)">Settings</a>
-</nav>
-
-<!-- User Profile Section -->
-<div class="profile-container">
-    <div class="profile-picture">
-        <img src="https://via.placeholder.com/150" alt="User Profile Picture">
+    <nav>
+        <a onclick="showSection('library', this)" class="active">Library</a>
+        <a onclick="showSection('bookmarks', this)">Bookmarks</a>
+        <a onclick="showSection('friends', this)">Friends</a>
+        <a onclick="showSection('settings', this)">Settings</a>
+    </nav>
+    
+    <!-- User Profile Section -->
+    <div class="profile-container">
+        <div class="profile-picture">
+            <img src="https://via.placeholder.com/150" alt="User Profile Picture">
+        </div>
+        <div class="user-description">
+            <h2>User Name</h2>
+            <p id="user-description-text">
+                This is your description. You can edit this in your settings.
+            </p>
+        </div>
     </div>
-    <div class="user-description">
-        <h2>User Name</h2>
-        <p id="user-description-text">
-            This is your description. You can edit this in your settings.
-        </p>
-    </div>
-</div>
-
-<!-- Section Container -->
-<div class="content">
-
-    <!-- Library Section -->
-    <div id="library" class="section">
-        <div class="media-list">
-            <div class="media-item">
-                <img src="https://via.placeholder.com/80" alt="Media Image">
-                <div class="media-info">
-                    <p><strong>Title</strong> - Release Date - Avg. Rating</p>
-                    <p>Exciting description of the media item goes here.</p>
+    
+    <!-- Section Container -->
+    <div class="content">
+    
+        <!-- Library Section -->
+        <div id="library" class="section">
+            <div class="media-list">
+                <div class="media-item">
+                    <img src="https://via.placeholder.com/80" alt="Media Image">
+                    <div class="media-info">
+                        <p><strong>Title</strong> - Release Date - Avg. Rating</p>
+                        <p>Exciting description of the media item goes here.</p>
+                    </div>
                 </div>
-            </div>
-            <div class="media-item">
-                <img src="https://via.placeholder.com/80" alt="Media Image">
-                <div class="media-info">
-                    <p><strong>Another Title</strong> - Release Date - Avg. Rating</p>
-                    <p>Exciting description of another media item goes here.</p>
+                <div class="media-item">
+                    <img src="https://via.placeholder.com/80" alt="Media Image">
+                    <div class="media-info">
+                        <p><strong>Another Title</strong> - Release Date - Avg. Rating</p>
+                        <p>Exciting description of another media item goes here.</p>
+                    </div>
                 </div>
             </div>
         </div>
+    
+        <!-- Bookmarks Section (Initially Hidden) -->
+        <div id="bookmarks" class="section" style="display: none;">
+            <h2>Bookmarks</h2>
+            <p>Your bookmarked media items will appear here.</p>
+        </div>
+    
+        <!-- Friends Section (Initially Hidden) -->
+        <div id="friends" class="section" style="display: none;">
+            <h2>Friends List</h2>
+            <p>Your friends list goes here.</p>
+        </div>
+    
+    
+        <!-- Settings -->
+        <div id="settings" class="section" style="display: none;">
+            <div class="form-container" id="sign-in-form">
+                <h2>Update profile settings</h2>
+    
+                <form oninput="showSubmitButton()">
+                    <div class="form-group">
+                        <label for="profile-picture">Profile Picture:</label>
+                        <div class="profile-picture-placeholder">
+                            <img src="https://via.placeholder.com/100" alt="Profile Picture" class="profile-preview">
+                        </div>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="profile-picture" name="profile-picture" accept="image/*" onchange="showSubmitButton()">
+                        </div>
+                    </div>
+            
+                    <!-- Fields to Change User Settings -->
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" data-original="">
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" data-original="">
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm Password:</label>
+                        <input type="password" id="confirm-password" name="confirm-password" data-original="">
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" data-original="">
+                    </div>
+                    
+                    <button id="submit-changes" style="display: none;" onclick="submitChanges(event)">Submit Changes</button>
+                </form>
+            </div>
+        </div>
+    
     </div>
-
-    <!-- Bookmarks Section (Initially Hidden) -->
-    <div id="bookmarks" class="section" style="display: none;">
-        <h2>Bookmarks</h2>
-        <p>Your bookmarked media items will appear here.</p>
-    </div>
-
-    <!-- Friends Section (Initially Hidden) -->
-    <div id="friends" class="section" style="display: none;">
-        <h2>Friends List</h2>
-        <p>Your friends list goes here.</p>
-    </div>
-
-    <!-- Settings Section (Initially Hidden) -->
-    <div id="settings" class="section" style="display: none;">
-        <h2>Settings</h2>
-        <p>Modify your profile settings here.</p>
-    </div>
-</div>
-
-<script>
-    // JavaScript to handle content switching
-    function showSection(sectionId, clickedLink) 
-    {
-        // Hide all sections
-        document.querySelectorAll('.section').forEach(section => 
+    
+    <script>
+        // JavaScript to handle content switching
+        function showSection(sectionId, clickedLink) 
         {
-            section.style.display = 'none';
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => 
+            {
+                section.style.display = 'none';
+            });
+    
+            // Show the selected section
+            document.getElementById(sectionId).style.display = 'block';
+    
+            // Remove 'active' class from all nav links
+            document.querySelectorAll('nav a').forEach(link => 
+            {
+                link.classList.remove('active');
+            });
+    
+            // Add 'active' class to the clicked link
+            clickedLink.classList.add('active');
+        }
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize original values
+            const fields = document.querySelectorAll('#sign-in-form input[data-original]');
+            fields.forEach(field => {
+                field.setAttribute('data-original', field.value);
+            });
         });
-
-        // Show the selected section
-        document.getElementById(sectionId).style.display = 'block';
-
-        // Remove 'active' class from all nav links
-        document.querySelectorAll('nav a').forEach(link => 
-        {
-            link.classList.remove('active');
-        });
-
-        // Add 'active' class to the clicked link
-        clickedLink.classList.add('active');
-    }
-</script>
-
-</body>
-</html>
+    
+        function showSubmitButton() {
+            const submitButton = document.getElementById('submit-changes');
+            let hasChanges = false;
+    
+            // Check if any input's value has changed compared to its data-original attribute
+            document.querySelectorAll('#sign-in-form input[data-original]').forEach(field => {
+                if (field.value !== field.getAttribute('data-original')) {
+                    hasChanges = true;
+                }
+            });
+    
+            // Also check for file input changes
+            const fileInput = document.getElementById('profile-picture');
+            if (fileInput.files.length > 0) {
+                hasChanges = true;
+            }
+    
+            // Show or hide the submit button based on detected changes
+            submitButton.style.display = hasChanges ? 'block' : 'none';
+        }
+    
+        function submitChanges(event) {
+            event.preventDefault(); // Prevent form submission for demonstration purposes
+    
+            // Reset original values after submission
+            const fields = document.querySelectorAll('#sign-in-form input[data-original]');
+            fields.forEach(field => {
+                field.setAttribute('data-original', field.value);
+            });
+    
+            // Clear the file input change
+            document.getElementById('profile-picture').value = "";
+    
+            // Hide the submit button after saving changes
+            document.getElementById('submit-changes').style.display = 'none';
+    
+            // Optional: Provide feedback
+            alert("Changes have been saved!");
+        }
+    </script>
+    
+    </body>
+    </html>
