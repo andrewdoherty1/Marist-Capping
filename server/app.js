@@ -9,6 +9,19 @@ const app = express();
 //const PORT = process.env.PORT || 3000;
 const PORT = 3000;
 
+import pkg from 'pg';
+import axios from 'axios';
+const { Pool } = pkg;
+
+//Connect to the Remote Database.
+const pool = new Pool({
+  user: 'postgres',       // Database user
+  host: '10.11.29.119',  // Remote VM IP address
+  database: 'Opinionate',   // Database name
+  password: 'capping2024', // Database password
+  port: 5432,                 // PostgreSQL default port
+});
+
 //app.use('/api/movies', moviesRoutes);
 
 // Get the directory name of the current module
@@ -48,4 +61,69 @@ app.get('/api/games', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+// Route to Populate Movies tab.
+app.get('/api/random-movies', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const result = await client.query(
+      `SELECT 
+         m."mediaId",
+         m.title,
+         TO_CHAR(m."releaseDate", 'YYYY-MM-DD') AS "releaseDate",
+         m.description,
+         mv.studio,
+         mv.cast,
+         mv.director,
+         mv.poster_url
+       FROM media AS m
+       JOIN movies AS mv ON m."mediaId" = mv."mediaID"
+       ORDER BY RANDOM()
+       LIMIT 20`
+    );
+    client.release();
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching random movies:', error);
+    res.status(500).json({ error: 'Failed to fetch random movies' });
+  }
+});
+
+// Route to fetch media details from the database based on the mediaId.
+app.get('/api/media/:id', async (req, res) => {
+  const mediaId = req.params.id;
+
+  try {
+    const client = await pool.connect();
+
+    const mediaQuery = `
+      SELECT 
+        m."mediaId", 
+        m.title, 
+        m.description, 
+        TO_CHAR(m."releaseDate", 'YYYY-MM-DD') AS "releaseDate",
+        mv.studio, 
+        mv.cast, 
+        mv.director, 
+        mv.poster_url 
+      FROM media AS m
+      JOIN movies AS mv ON m."mediaId" = mv."mediaID"
+      WHERE m."mediaId" = $1;
+    `;
+    
+    const result = await client.query(mediaQuery, [mediaId]);
+
+    client.release();
+
+    if (result.rows.length > 0) {
+      res.json(result.rows[0]);
+    } else {
+      res.status(404).json({ error: 'Media not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching media details:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
