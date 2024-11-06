@@ -13,19 +13,29 @@
 
 <body>
 
-<header>
-    <a onclick="location.href='index.html'" style="cursor: pointer;">
-        <div class="logo">Logo</div>
-    </a>
-    <div class="search-bar-header">
-        <input type="text" placeholder="Search for media">
-    </div>
-    <div class="profile-icon">
-        <a href="userProfile.html">
-            <img src="https://via.placeholder.com/50" alt="Profile">
+    <!-- Header -->
+    <header>
+        <a onclick="showPage('feed', document.querySelector('nav a:first-child'))" style="cursor: pointer;">
+            <div class="logo-container">
+                <a href="index.html">
+                    <img src="images/logo.png" alt="Logo" class="logo-image">
+                </a>
+                <span class="logo-text">Opinionate</span>
+            </div>
         </a>
-    </div>
-</header>
+        <div class="search-bar-header">
+            <input type="text" placeholder="Search for media">
+        </div>
+
+        <!-- Sign-in Link and Profile Icon -->
+        <div class="header-right">
+            <div class="profile-icon">
+                <a href="userProfile.html">
+                    <img src="https://via.placeholder.com/50" alt="Profile">
+                </a>
+            </div>
+        </div>
+    </header>
 
 <!-- Sign-In Form (Visible by Default) -->
 <div class="content">
@@ -86,6 +96,24 @@
 
 <script>
     // Function to toggle between Sign-In and Create Account forms
+    const insertUser = async (username, password, email) => {
+    try {
+      const query = `
+        INSERT INTO users (username, password, email)
+        VALUES ($1, $2, $3)
+        RETURNING *;
+      `;
+      
+      const values = [username, password, email];  
+      
+      const res = await pool.query(query, values);
+      
+      console.log('User inserted:', res.rows[0]); 
+    } catch (err) {
+      console.error('Error executing query', err.stack);
+    }
+  };
+
     function toggleForms() {
         const signInForm = document.getElementById('sign-in-form');
         const createAccountForm = document.getElementById('create-account-form');
@@ -99,7 +127,7 @@
         }
     }
 
-    // Form validation function for Create Account
+    // Form validation function for confirming password entries are the same
     function validateForm() {
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirm-password').value;

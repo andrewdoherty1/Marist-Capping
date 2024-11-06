@@ -106,6 +106,7 @@
         <h2 class="media-title" id="media-title">Media Title</h2>
         <p id="media-director"><strong>Director:</strong> Loading...</p>
         <p id="media-release-date"><strong>Release Date:</strong> Loading...</p>
+        <p id="media-cast"></p>
         <div class="media-description">
             <p id="media-description"><strong>Description:</strong> Loading description...</p>
         </div>
@@ -127,52 +128,97 @@
 </div>
 
 <script>
-    // Function to fetch and display media details from the API
-    async function fetchMediaDetails(mediaId) {
-        try {
-            // Fetch the movie details
-            const movieResponse = await fetch(`https://api.themoviedb.org/3/movie/${mediaId}`, {
-                headers: {
-                    accept: 'application/json',
-                    Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E'
-                }
-            });
-            const media = await movieResponse.json();
+    // // Function to fetch and display media details from the API
+    // async function fetchMediaDetails(mediaId) {
+    //     try {
+    //         // Fetch the movie details
+    //         const movieResponse = await fetch(`https://api.themoviedb.org/3/movie/${mediaId}`, {
+    //             headers: {
+    //                 accept: 'application/json',
+    //                 Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E'
+    //             }
+    //         });
+    //         const media = await movieResponse.json();
 
-            // Fetch the movie credits to get the director
-            const creditsResponse = await fetch(`https://api.themoviedb.org/3/movie/${mediaId}/credits`, {
-                headers: {
-                    accept: 'application/json',
-                    Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E'
-                }
-            });
-            const credits = await creditsResponse.json();
+    //         // Fetch the movie credits to get the director
+    //         const creditsResponse = await fetch(`https://api.themoviedb.org/3/movie/${mediaId}/credits`, {
+    //             headers: {
+    //                 accept: 'application/json',
+    //                 Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E'
+    //             }
+    //         });
+    //         const credits = await creditsResponse.json();
 
-            // Find the director from the crew list
-            const director = credits.crew.find(member => member.job === 'Director');
+    //         // Find the director from the crew list
+    //         const director = credits.crew.find(member => member.job === 'Director');
 
-            // Populate media details in the HTML
-            document.getElementById('media-title').textContent = media.title;
-            document.getElementById('media-description').textContent = media.overview;
-            document.getElementById('media-image').src = `https://image.tmdb.org/t/p/w500${media.poster_path}`;
-            document.getElementById('media-release-date').innerHTML = `<strong>Release Date:</strong> ${media.release_date}`;
+    //         // Populate media details in the HTML
+    //         document.getElementById('media-title').textContent = media.title;
+    //         document.getElementById('media-description').textContent = media.overview;
+    //         document.getElementById('media-image').src = `https://image.tmdb.org/t/p/w500${media.poster_path}`;
+    //         document.getElementById('media-release-date').innerHTML = `<strong>Release Date:</strong> ${media.release_date}`;
 
-            // Display the director's name if available
-            if (director) {
-                document.getElementById('media-director').innerHTML = `<strong>Director:</strong> ${director.name}`;
-            }
+    //         // Display the director's name if available
+    //         if (director) {
+    //             document.getElementById('media-director').innerHTML = `<strong>Director:</strong> ${director.name}`;
+    //         }
 
-        } catch (error) {
-            console.error('Failed to fetch media details:', error);
+    //     } catch (error) {
+    //         console.error('Failed to fetch media details:', error);
+    //     }
+    // }
+
+    // // Call fetchMediaDetails with an example movie ID to display data on page load
+    // document.addEventListener('DOMContentLoaded', () => {
+    //     const urlParams = new URLSearchParams(window.location.search);
+    //     const mediaId = urlParams.get('id') || '550'; // Replace '550' with a fallback movie ID
+    //     fetchMediaDetails(mediaId);
+    // });
+
+    // Function to fetch and display media details from the database
+async function fetchMediaDetails(mediaId) {
+    try {
+        // Fetch the movie details from the Remote Database based on the mediaId.
+        const movieResponse = await fetch(`/api/media/${mediaId}`);
+        
+        // Check
+        if (!movieResponse.ok) {
+            throw new Error('Failed to fetch media details');
         }
-    }
 
-    // Call fetchMediaDetails with an example movie ID to display data on page load
-    document.addEventListener('DOMContentLoaded', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const mediaId = urlParams.get('id') || '550'; // Replace '550' with a fallback movie ID
-        fetchMediaDetails(mediaId);
-    });
+        const media = await movieResponse.json();
+
+        // Populate media details.
+        document.getElementById('media-title').textContent = media.title;
+        document.getElementById('media-description').textContent = media.description;
+        document.getElementById('media-image').src = `https://image.tmdb.org/t/p/w500${media.poster_url}`;
+        document.getElementById('media-release-date').innerHTML = `<strong>Release Date:</strong> ${media.releaseDate}`;
+
+        // Display the director's name.
+        if (media.director) {
+            document.getElementById('media-director').innerHTML = `<strong>Director:</strong> ${media.director}`;
+        } else {
+            document.getElementById('media-director').innerHTML = `<strong>Director:</strong> Not available`;
+        }
+
+        // Display the cast.
+        if (media.cast) {
+            document.getElementById('media-cast').innerHTML = `<strong>Cast:</strong> ${media.cast}`;
+        } else {
+            document.getElementById('media-cast').innerHTML = `<strong>Cast:</strong> Not available`;
+        }
+
+    } catch (error) {
+        console.error('Failed to fetch media details:', error);
+    }
+}
+
+// Call fetchMediaDetails with the movie ID from the URL
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mediaId = urlParams.get('id') || '550';
+    fetchMediaDetails(mediaId);
+});
 
     // Star rating system
     const stars = document.querySelectorAll('.star');
