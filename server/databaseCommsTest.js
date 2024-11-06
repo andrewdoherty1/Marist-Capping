@@ -2,7 +2,7 @@ import pkg from 'pg';
 import axios from 'axios';
 const { Pool } = pkg;
 
-const mediaID = 203;
+const mediaID = 225; // dont change after, must change pre-run
 //Connect to the Remote Database.
 const pool = new Pool({
   user: 'postgres',
@@ -33,23 +33,6 @@ async function fetchSpotifyAccessToken() {
 
     const data = await response.json();
     spotifyAccessToken = data.access_token;
-}
-// Fetch Music (Albums) from Spotify
-async function fetchMusic() {
-  try {
-      if (!spotifyAccessToken) await fetchSpotifyAccessToken();
-
-      const response = await fetch('https://api.spotify.com/v1/browse/new-releases?limit=10', {
-          headers: {
-              Authorization: `Bearer ${spotifyAccessToken}`
-          }
-      });
-
-      const data = await response.json();
-      displayMusic(data.albums.items);
-  } catch (error) {
-      console.error('Failed to fetch music:', error);
-  }
 }
 
 // Function to fetch specific album data, including track names
@@ -128,7 +111,7 @@ const fetchAndSaveAlbum = async (albumId) => {
 };
 
 // Example usage
-fetchAndSaveAlbum('1ATL5GLyefJaxhQzSPVrLX');
+fetchAndSaveAlbum('2pzOAoHNZiVE6Pxo3PQMhE');
 
 // // Function to fetch and insert a movie DO NOT DELETE!
 // (async () => {
