@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Media Rating Platform</title>
     <link rel="stylesheet" href="styling.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 </head>
 
 <body>
@@ -172,27 +174,36 @@
         }
 
         function displayMovies(movies) {
-            const moviesContainer = document.getElementById('movies-container');
-            moviesContainer.innerHTML = ''; // Clear previous content
+    const moviesContainer = document.getElementById('movies-container');
+    moviesContainer.innerHTML = ''; // Clear previous content
 
-            movies.forEach(movie => {
-                const movieCard = document.createElement('div');
-                movieCard.classList.add('media-item');
-                movieCard.innerHTML = `
-      <img src="${movie.poster_url}" alt="${movie.title}">
-      <div class="media-info">
-          <p><strong>${movie.title}</strong> - ${movie.releaseDate}</p>
-          <p>Director: ${movie.director}</p>
-          <p>Studio: ${movie.studio}</p>
-      </div> `;
-                // Navigate to internal media page with the movie ID
-                movieCard.addEventListener('click', () => {
-                    window.location.href = `mediaMovies.html?id=${movie.mediaId}`;
-                });
+    movies.forEach(movie => {
+        const movieCard = document.createElement('div');
+        movieCard.classList.add('media-item');
+        movieCard.innerHTML = `
+            <img src="${movie.poster_url}" alt="${movie.title}">
+            <div class="media-info">
+                <p><strong>${movie.title}</strong> - ${movie.releaseDate}</p>
+                <p>Director: ${movie.director}</p>
+                <p>Studio: ${movie.studio}</p>
+            </div>
+            <div class="star-rating">
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+            </div>
+        `;
+        // Navigate to internal media page with the movie ID
+        movieCard.addEventListener('click', () => {
+            window.location.href = `mediaMovies.html?id=${movie.mediaId}`;
+        });
 
-                moviesContainer.appendChild(movieCard);
-            });
-        }
+        moviesContainer.appendChild(movieCard);
+    });
+}
+
 
         // Fetch Music (Albums) from Spotify
         async function fetchMusic() {
@@ -214,26 +225,33 @@
 
         // Display Music (Albums)
         function displayMusic(albums) {
-            const albumsContainer = document.getElementById('albums-container');
-            albumsContainer.innerHTML = ''; // Clear previous content
+    const albumsContainer = document.getElementById('albums-container');
+    albumsContainer.innerHTML = ''; // Clear previous content
 
-            albums.forEach(album => {
-                const albumCard = document.createElement('div');
-                albumCard.classList.add('media-item');
-                albumCard.innerHTML = `
+    albums.forEach(album => {
+        const albumCard = document.createElement('div');
+        albumCard.classList.add('media-item');
+        albumCard.innerHTML = `
             <img src="${album.images[0].url}" alt="${album.name}">
             <div class="media-info">
                 <p><strong>${album.name}</strong> by ${album.artists[0].name}</p>
             </div>
+            <div class="star-rating">
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+            </div>
         `;
+        albumCard.addEventListener('click', () => {
+            window.location.href = `mediaMusic.html?albumId=${album.id}`;
+        });
 
-                albumCard.addEventListener('click', () => {
-                    window.location.href = `mediaMusic.html?albumId=${album.id}`;
-                });
+        albumsContainer.appendChild(albumCard);
+    });
+}
 
-                albumsContainer.appendChild(albumCard);
-            });
-        }
         //GiantBomb
         const apiKey = '8dfa1038447a4c092e489b3775d27ae4821a1e90';
         const url = `http://localhost:3000/api/games`;
@@ -264,28 +282,34 @@
         }
         // Display Video Games.
         function displayGames(games) {
-            const gamesContainer = document.getElementById('games-container');
-            gamesContainer.innerHTML = ''; // Clear previous content
+    const gamesContainer = document.getElementById('games-container');
+    gamesContainer.innerHTML = ''; // Clear previous content
 
-            games.forEach(game => {
-                const gameCard = document.createElement('div');
-                gameCard.classList.add('media-item');
-                gameCard.innerHTML = `
+    games.forEach(game => {
+        const gameCard = document.createElement('div');
+        gameCard.classList.add('media-item');
+        gameCard.innerHTML = `
             <img src="${game.image?.super_url || 'default-image.jpg'}" alt="${game.name}">
             <div class="media-info">
                 <p><strong>${game.name}</strong></p>
                 <p>Release Date: ${game.original_release_date || 'N/A'}</p>
             </div>
+            <div class="star-rating">
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+            </div>
         `;
+        gameCard.addEventListener('click', () => {
+            window.location.href = `mediaVG.html?mediaType=game&id=${game.id}`;
+        });
 
-                // Navigate to internal media page with the game ID
-                gameCard.addEventListener('click', () => {
-                    window.location.href = `mediaVG.html?mediaType=game&id=${game.id}`;
-                });
+        gamesContainer.appendChild(gameCard);
+    });
+}
 
-                gamesContainer.appendChild(gameCard);
-            });
-        }
 
         // Fetch Books from Open Library API
         async function fetchBooks() {
@@ -300,34 +324,40 @@
 
         // Display Books
         function displayBooks(books) {
-            const booksContainer = document.getElementById('books-container');
-            booksContainer.innerHTML = ''; // Clear previous content
+    const booksContainer = document.getElementById('books-container');
+    booksContainer.innerHTML = ''; // Clear previous content
 
-            books.forEach(book => {
-                const coverUrl = book.cover_i
-                    ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
-                    : 'https://via.placeholder.com/80';
+    books.forEach(book => {
+        const coverUrl = book.cover_i
+            ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+            : 'https://via.placeholder.com/80';
 
-                const bookCard = document.createElement('div');
-                bookCard.classList.add('media-item');
-                bookCard.innerHTML = `
-        <img src="${coverUrl}" alt="${book.title}">
-        <div class="media-info">
-            <p><strong>${book.title}</strong></p>
-            <p>Author: ${book.author_name ? book.author_name[0] : 'Unknown'}</p>
-            <p>First Published: ${book.first_publish_year || 'N/A'}</p>
-        </div>
+        const bookCard = document.createElement('div');
+        bookCard.classList.add('media-item');
+        bookCard.innerHTML = `
+            <img src="${coverUrl}" alt="${book.title}">
+            <div class="media-info">
+                <p><strong>${book.title}</strong></p>
+                <p>Author: ${book.author_name ? book.author_name[0] : 'Unknown'}</p>
+                <p>First Published: ${book.first_publish_year || 'N/A'}</p>
+            </div>
+            <div class="star-rating">
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+            </div>
         `;
+        bookCard.addEventListener('click', () => {
+            const bookId = book.key.split('/').pop(); // Extracting the book ID
+            window.location.href = `mediaBooks.html?id=${bookId}`;
+        });
 
-                // Navigate to internal media page with the book ID
-                bookCard.addEventListener('click', () => {
-                    const bookId = book.key.split('/').pop(); // Extracting the book ID
-                    window.location.href = `mediaBooks.html?id=${bookId}`;
-                });
+        booksContainer.appendChild(bookCard);
+    });
+}
 
-                booksContainer.appendChild(bookCard);
-            });
-        }
 
         // Page Switching Logic
         function showPage(pageId, clickedLink) {
