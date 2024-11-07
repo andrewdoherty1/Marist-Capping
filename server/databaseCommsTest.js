@@ -155,7 +155,64 @@ const getTableNames = async () => {
       console.error('Error executing query', err.stack);
     }
   };
-
+  
+  // BOOKS! ########################################################################
+  
+  const fetchBookDetails = async (bookId) => {
+    try {
+      const response = await fetch(`https://openlibrary.org/works/${bookId}.json`);
+      const book = await response.json();
+  
+      if (book) {
+        // Format the book data
+        const bookData = {
+          title: book.title || 'Unknown Title',
+          author: book.authors ? book.authors.map(author => author.name).join(', ') : 'Unknown',
+          coverUrl: book.covers ? `https://covers.openlibrary.org/b/id/${book.covers[0]}-L.jpg` : 'https://via.placeholder.com/150',
+          releaseDate: book.first_publish_date || 'N/A',
+          description: book.description ? (typeof book.description === 'string' ? book.description : book.description.value) : 'No description available.'
+        };
+  
+        return bookData;
+      } else {
+        throw new Error('Book not found');
+      }
+    } catch (error) {
+      console.error('Failed to fetch book details:', error);
+    }
+  };
+  
+  // Function to insert book data into the database
+  const insertBookData = async (book) => {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+  
+      // Insert book data into the books table
+      await client.query(
+        `INSERT INTO books (media_id, title, author, cover_url, release_date, description)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [mediaID, book.title, book.author, book.coverUrl, book.releaseDate, book.description]
+      );
+  
+      await client.query('COMMIT');
+      console.log(`Book "${book.title}" inserted successfully`);
+    } catch (error) {
+      await client.query('ROLLBACK');
+      console.error('Error inserting book data:', error);
+    } finally {
+      client.release();
+    }
+  };
+  
+  // Example call with a valid Open Library book ID
+  (async () => {
+    const bookId = 'OL362041W'; // Replace with a valid Open Library book ID
+    const book = await fetchBookDetails(bookId);
+    if (book) {
+      await insertBookData(book);
+    }
+  })();
 
   
 
