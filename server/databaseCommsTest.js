@@ -2,7 +2,7 @@ import pkg from 'pg';
 import axios from 'axios';
 const { Pool } = pkg;
 
-const mediaID = 225; // dont change after, must change pre-run
+const mediaID = 301; // dont change after, must change pre-run
 //Connect to the Remote Database.
 const pool = new Pool({
   user: 'postgres',
@@ -110,8 +110,81 @@ const fetchAndSaveAlbum = async (albumId) => {
   }
 };
 
-// Example usage
-fetchAndSaveAlbum('2pzOAoHNZiVE6Pxo3PQMhE');
+//fetchAndSaveAlbum('2pzOAoHNZiVE6Pxo3PQMhE');
+
+// Function to fetch movie data from the TMDB API
+const fetchMovieData = async (movieId) => {
+  try {
+    const response = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}`, {
+      headers: {
+        accept: 'application/json',
+        Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E',
+      },
+      params: {
+        language: 'en-US',
+        append_to_response: 'credits',
+      },
+    });
+    const movie = response.data;
+    
+    const baseImageUrl = 'https://image.tmdb.org/t/p/w500';
+    const posterUrl = movie.poster_path ? `${baseImageUrl}${movie.poster_path}` : null;
+    // Initialize an array for directors
+    const directors = [];
+    // Check if credits exist and access crew info.
+    if (movie.credits && movie.credits.crew) {
+      // Populate the directors array by checking the crew info.
+      for (const credit of movie.credits.crew) {
+        if (credit.job.toLowerCase() === 'director') {
+          directors.push(credit.name); // add director.
+        }
+      }
+    } else {
+      console.warn('No credits found in movie data');
+    }
+    const cast = movie.credits.cast.slice(0, 4).map(actor => actor.name);
+    console.log(directors[0]);
+    return {
+      tmdb_id: movie.id,
+      title: movie.title,
+      releaseDate: movie.release_date,
+      description: movie.overview,
+      posterUrl,
+      studio: movie.production_companies?.[0]?.name || null,
+      cast,
+      director: directors[0], 
+    };
+  } catch (error) {
+    console.error('Error fetching movie data:', error);
+  }
+};
+// Function to insert data into the database.
+const insertMovieData = async (movie) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const mediaID = 101;
+    const mediaResult = await client.query(
+      `INSERT INTO media ("mediaId", title, "releaseDate", description)
+       VALUES ($1, $2, $3, $4) RETURNING "mediaId"`,
+      [mediaID, movie.title, movie.releaseDate, movie.description]
+    );
+    console.log(mediaID);
+    await client.query(
+      `INSERT INTO movies ("mediaID", studio, "cast", director, poster_url)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [mediaID, movie.studio, movie.cast, movie.director, movie.posterUrl]
+    );
+    await client.query('COMMIT');
+    console.log(`Movie "${movie.title}" inserted successfully`);
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error inserting movie data:', error);
+  } finally {
+    client.release();
+  }
+};
+
 
 // // Function to fetch and insert a movie DO NOT DELETE!
 // (async () => {
@@ -121,6 +194,7 @@ fetchAndSaveAlbum('2pzOAoHNZiVE6Pxo3PQMhE');
 //     await insertMovieData(movieData);
 //   }
 // })();
+
 
 const getTableNames = async () => {
     try {
@@ -155,7 +229,73 @@ const getTableNames = async () => {
       console.error('Error executing query', err.stack);
     }
   };
-
+  
+  // BOOKS! ########################################################################
+  
+  const fetchBookDetails = async (bookId) => {
+    try {
+      const response = await fetch(`https://openlibrary.org/works/${bookId}.json`);
+      const book = await response.json();
+  
+      if (book) {
+        // Format the book data
+        const bookData = {
+          title: book.title || 'Unknown Title',
+          author: book.authors ? book.authors.map(author => author.name).join(', ') : 'Unknown',
+          coverUrl: book.covers ? `https://covers.openlibrary.org/b/id/${book.covers[0]}-L.jpg` : 'https://via.placeholder.com/150',
+          releaseDate: book.first_publish_date || 'N/A',
+          description: book.description ? (typeof book.description === 'string' ? book.description : book.description.value) : 'No description available.'
+        };
+  
+        return bookData;
+      } else {
+        throw new Error('Book not found');
+      }
+    } catch (error) {
+      console.error('Failed to fetch book details:', error);
+    }
+  };
+  
+  // Function to insert book data into the database
+  const insertBookData = async (book) => {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const mediaID = 325
+      // Insert into the media table to get a mediaId
+      const mediaResult = await client.query(
+        `INSERT INTO media ("mediaId", title, description)
+         VALUES ($1, $2, $3) RETURNING "mediaId"`,
+        [mediaID, book.title, book.description || null]
+      );
+  
+      
+  
+      // Insert into the books table using the new mediaId
+      await client.query(
+        `INSERT INTO books ("mediaID", author, cover_url, year)
+         VALUES ($1, $2, $3, $4)`,
+        [mediaID, book.author, book.coverUrl, book.releaseDate]
+      );
+  
+      await client.query('COMMIT');
+      console.log(`Book "${book.title}" inserted successfully`);
+    } catch (error) {
+      await client.query('ROLLBACK');
+      console.error('Error inserting book data:', error);
+    } finally {
+      client.release();
+    }
+  };
+  
+  // Example call with a valid Open Library book ID
+  (async () => {
+    const bookId = 'OL3288345M'; // Replace with a valid Open Library book ID
+    const book = await fetchBookDetails(bookId);
+    if (book) {
+      await insertBookData(book);
+    }
+  })();
 
   
 
