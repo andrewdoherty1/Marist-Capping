@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Details</title>
+    <link rel="stylesheet" href="styling.css">
+</head>
+<body>
+    <header>
+        <h1>Video Game Details</h1>
+    </header>
+
+    <main>
+        <section class="media-details-container">
+            <div class="media-image" id="game-image-container">
+                <img src="" alt="Game Image" id="game-image">
+            </div>
+            <div class="media-info">
+                <h2 id="game-title" class="media-title">Game Title</h2>
+                <p class="media-detail" id="game-developer"><strong>Developer:</strong> Loading...</p>
+                <p class="media-detail" id="game-release-date"><strong>Release Date:</strong> Loading...</p>
+                <p class="media-detail" id="game-genre"><strong>Genre:</strong> Loading...</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Fetch game details from the API by game ID
+        async function fetchGameDetails(gameId) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/games/${gameId}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const game = await response.json();
+
+                // Update page content with game details
+                document.getElementById('game-title').textContent = game.name;
+                document.getElementById('game-image').src = game.image?.super_url || 'default-image.jpg';
+                document.getElementById('game-developer').innerHTML = `<strong>Developer:</strong> ${game.developer || 'N/A'}`;
+                document.getElementById('game-release-date').innerHTML = `<strong>Release Date:</strong> ${game.original_release_date || 'N/A'}`;
+                document.getElementById('game-genre').innerHTML = `<strong>Genre:</strong> ${game.genre || 'N/A'}`;
+
+            } catch (error) {
+                console.error('Error fetching game details:', error);
+            }
+        }
+
+        // Get game ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameId = urlParams.get('id');
+
+        // Fetch and display game details if ID exists
+        if (gameId) fetchGameDetails(gameId);
+    </script>
+</body>
+</html>

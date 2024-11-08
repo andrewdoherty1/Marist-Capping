@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Media Rating Platform</title>
     <link rel="stylesheet" href="styling.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 </head>
 
 <body>
@@ -84,7 +86,9 @@
         <!-- Books Section -->
         <div id="books" class="page-section" style="display: none;">
             <h2>Books</h2>
-            <p>List of books goes here...</p>
+            <div id="books-container" class="media-list">
+                <!-- Books will be dynamically populated here -->
+            </div>
         </div>
 
         <!-- Games Section -->
@@ -116,46 +120,90 @@
             spotifyAccessToken = data.access_token;
         }
 
-        // Fetch Popular Movies from TMDB
-        async function fetchMovies() {
-            try {
-                const response = await fetch('https://api.themoviedb.org/3/movie/popular', {
-                    headers: {
-                        accept: 'application/json',
-                        Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E'
-                    }
-                });
+        // // Fetch Popular Movies from TMDB
+        // async function fetchMovies() {
+        //     try {
+        //         const response = await fetch('https://api.themoviedb.org/3/movie/popular', {
+        //             headers: {
+        //                 accept: 'application/json',
+        //                 Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E'
+        //             }
+        //         });
 
-                const data = await response.json();
-                displayMovies(data.results);
+        //         const data = await response.json();
+        //         displayMovies(data.results);
+        //     } catch (error) {
+        //         console.error('Failed to fetch movies:', error);
+        //     }
+        // }
+
+        // // Display Movies
+        // function displayMovies(movies) {
+        //     const moviesContainer = document.getElementById('movies-container');
+        //     moviesContainer.innerHTML = ''; // Clear previous content
+
+        //     movies.forEach(movie => {
+        //         const movieCard = document.createElement('div');
+        //         movieCard.classList.add('media-item');
+        //         movieCard.innerHTML = `
+        //     <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
+        //     <div class="media-info">
+        //         <p><strong>${movie.title}</strong> - ${movie.release_date}</p>
+        //         <p>Rating: ${movie.vote_average}</p>
+        //     </div>
+        // `;
+
+        //         // Navigate to internal media page with the movie ID
+        //         movieCard.addEventListener('click', () => {
+        //             window.location.href = `mediaMovies.html?mediaType=movie&id=${movie.id}`;
+        //         });
+
+        //         moviesContainer.appendChild(movieCard);
+        //     });
+        // }
+
+        async function fetchAndDisplayMovies() {
+            try {
+                const response = await fetch('/api/random-movies');
+                const movies = await response.json();
+
+                displayMovies(movies);
             } catch (error) {
-                console.error('Failed to fetch movies:', error);
+                console.error('Error fetching random movies:', error);
             }
         }
 
-        // Display Movies
         function displayMovies(movies) {
-            const moviesContainer = document.getElementById('movies-container');
-            moviesContainer.innerHTML = ''; // Clear previous content
+    const moviesContainer = document.getElementById('movies-container');
+    moviesContainer.innerHTML = ''; // Clear previous content
 
-            movies.forEach(movie => {
-                const movieCard = document.createElement('div');
-                movieCard.classList.add('media-item');
-                movieCard.innerHTML = `
-                    <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
-                    <div class="media-info">
-                        <p><strong>${movie.title}</strong> - ${movie.release_date}</p>
-                        <p>Rating: ${movie.vote_average}</p>
-                    </div>
-                `;
+    movies.forEach(movie => {
+        const movieCard = document.createElement('div');
+        movieCard.classList.add('media-item');
+        movieCard.innerHTML = `
+            <img src="${movie.poster_url}" alt="${movie.title}">
+            <div class="media-info">
+                <p><strong>${movie.title}</strong> - ${movie.releaseDate}</p>
+                <p>Director: ${movie.director}</p>
+                <p>Studio: ${movie.studio}</p>
+            </div>
+            <div class="star-rating">
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+            </div>
+        `;
+        // Navigate to internal media page with the movie ID
+        movieCard.addEventListener('click', () => {
+            window.location.href = `mediaMovies.html?id=${movie.mediaId}`;
+        });
 
-                movieCard.addEventListener('click', () => {
-                    window.open(`https://www.themoviedb.org/movie/${movie.id}`, '_blank');
-                });
+        moviesContainer.appendChild(movieCard);
+    });
+}
 
-                moviesContainer.appendChild(movieCard);
-            });
-        }
 
         // Fetch Music (Albums) from Spotify
         async function fetchMusic() {
@@ -177,26 +225,32 @@
 
         // Display Music (Albums)
         function displayMusic(albums) {
-            const albumsContainer = document.getElementById('albums-container');
-            albumsContainer.innerHTML = ''; // Clear previous content
+    const albumsContainer = document.getElementById('albums-container');
+    albumsContainer.innerHTML = ''; // Clear previous content
 
-            albums.forEach(album => {
-                const albumCard = document.createElement('div');
-                albumCard.classList.add('media-item');
-                albumCard.innerHTML = `
-                    <img src="${album.images[0].url}" alt="${album.name}">
-                    <div class="media-info">
-                        <p><strong>${album.name}</strong> by ${album.artists[0].name}</p>
-                    </div>
-                `;
+    albums.forEach(album => {
+        const albumCard = document.createElement('div');
+        albumCard.classList.add('media-item');
+        albumCard.innerHTML = `
+            <img src="${album.images[0].url}" alt="${album.name}">
+            <div class="media-info">
+                <p><strong>${album.name}</strong> by ${album.artists[0].name}</p>
+            </div>
+            <div class="star-rating">
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+            </div>
+        `;
+        albumCard.addEventListener('click', () => {
+            window.location.href = `mediaMusic.html?albumId=${album.id}`;
+        });
 
-                albumCard.addEventListener('click', () => {
-                    window.open(album.external_urls.spotify, '_blank');
-                });
-
-                albumsContainer.appendChild(albumCard);
-            });
-        }
+        albumsContainer.appendChild(albumCard);
+    });
+}
 
         //GiantBomb
         const apiKey = '8dfa1038447a4c092e489b3775d27ae4821a1e90';
@@ -208,7 +262,7 @@
                 const response = await fetch(url, {
                     method: 'GET',
                     headers: {
-            
+
                         'Accept': 'application/json',
                     }
                 });
@@ -220,7 +274,7 @@
                 const data = await response.json();
                 console.log("games");
                 displayGames(data.results);
-                
+
 
             } catch (error) {
                 console.error('Error fetching popular games:', error);
@@ -228,30 +282,81 @@
         }
         // Display Video Games.
         function displayGames(games) {
-            const gamesContainer = document.getElementById('games-container');
-            gamesContainer.innerHTML = '';  // Clear any existing content
+    const gamesContainer = document.getElementById('games-container');
+    gamesContainer.innerHTML = ''; // Clear previous content
 
-            games.forEach(game => {
-                const gameCard = document.createElement('div');
-                gameCard.classList.add('media-item');
-                gameCard.innerHTML = `
+    games.forEach(game => {
+        const gameCard = document.createElement('div');
+        gameCard.classList.add('media-item');
+        gameCard.innerHTML = `
             <img src="${game.image?.super_url || 'default-image.jpg'}" alt="${game.name}">
             <div class="media-info">
                 <p><strong>${game.name}</strong></p>
                 <p>Release Date: ${game.original_release_date || 'N/A'}</p>
             </div>
+            <div class="star-rating">
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+            </div>
         `;
+        gameCard.addEventListener('click', () => {
+            window.location.href = `mediaVG.html?mediaType=game&id=${game.id}`;
+        });
 
-                // Open the game's GiantBomb page on click, if there's a URL
-                gameCard.addEventListener('click', () => {
-                    if (game.site_detail_url) {
-                        window.open(game.site_detail_url, '_blank');
-                    }
-                });
+        gamesContainer.appendChild(gameCard);
+    });
+}
 
-                gamesContainer.appendChild(gameCard);
-            });
+
+        // Fetch Books from Open Library API
+        async function fetchBooks() {
+            try {
+                const response = await fetch('https://openlibrary.org/search.json?q=bestsellers&limit=10');
+                const data = await response.json();
+                displayBooks(data.docs);
+            } catch (error) {
+                console.error('Failed to fetch books:', error);
+            }
         }
+
+        // Display Books
+        function displayBooks(books) {
+    const booksContainer = document.getElementById('books-container');
+    booksContainer.innerHTML = ''; // Clear previous content
+
+    books.forEach(book => {
+        const coverUrl = book.cover_i
+            ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+            : 'https://via.placeholder.com/80';
+
+        const bookCard = document.createElement('div');
+        bookCard.classList.add('media-item');
+        bookCard.innerHTML = `
+            <img src="${coverUrl}" alt="${book.title}">
+            <div class="media-info">
+                <p><strong>${book.title}</strong></p>
+                <p>Author: ${book.author_name ? book.author_name[0] : 'Unknown'}</p>
+                <p>First Published: ${book.first_publish_year || 'N/A'}</p>
+            </div>
+            <div class="star-rating">
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+            </div>
+        `;
+        bookCard.addEventListener('click', () => {
+            const bookId = book.key.split('/').pop(); // Extracting the book ID
+            window.location.href = `mediaBooks.html?id=${bookId}`;
+        });
+
+        booksContainer.appendChild(bookCard);
+    });
+}
 
 
         // Page Switching Logic
@@ -266,10 +371,12 @@
             });
             clickedLink.classList.add('active');
 
-            if (pageId === 'movies') fetchMovies();
+            if (pageId === 'movies') fetchAndDisplayMovies();
             if (pageId === 'music') fetchMusic();
+            if (pageId === 'books') fetchBooks(); // Fetch books when books tab is selected
             if (pageId === 'games') fetchGames();
         }
+
 
         // Show 'Feed' by default
         document.addEventListener('DOMContentLoaded', () => {

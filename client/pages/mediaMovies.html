@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opinionate - Movie Review</title>
+    <link rel="stylesheet" href="styling.css">
+    <style>
+        /* Styling for the review page */
+        .media-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+        }
+        .media-picture {
+            margin-right: 20px;
+        }
+        .media-picture img {
+            max-width: 100px;
+            border-radius: 8px;
+        }
+        .media-details {
+            flex-grow: 1;
+        }
+        .media-title {
+            margin: 0;
+            font-size: 24px;
+        }
+        .rating-container {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .star-rating {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .star {
+            color: lightgray;
+        }
+        .star.filled {
+            color: gold;
+        }
+        #rating-value {
+            margin-left: 10px;
+        }
+        .media-description {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .submit-container {
+            display: none;
+            text-align: center;
+        }
+        .submit-container button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .submit-container button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <a href="index.html">
+        <img src="images/logo.png" alt="Logo" class="logo" style="height: 50px;">
+    </a>
+    <div class="search-bar-header">
+        <input type="text" placeholder="Search for media">
+    </div>
+    <div class="profile-icon">
+        <a href="#">
+            <img src="https://via.placeholder.com/50" alt="Profile">
+        </a>
+    </div>
+</header>
+
+<!-- Media Page Content -->
+<div class="media-container" id="media-container">
+    <div class="media-picture">
+        <img src="" alt="Media Picture" id="media-image">
+    </div>
+    <div class="media-details">
+        <h2 class="media-title" id="media-title">Media Title</h2>
+        <p id="media-director"><strong>Director:</strong> Loading...</p>
+        <p id="media-release-date"><strong>Release Date:</strong> Loading...</p>
+        <p id="media-cast"></p>
+        <div class="media-description">
+            <p id="media-description"><strong>Description:</strong> Loading description...</p>
+        </div>
+        <div class="rating-container">
+            <span class="star-rating" id="star-rating">
+                <span class="star" data-value="1">&#9733;</span>
+                <span class="star" data-value="2">&#9733;</span>
+                <span class="star" data-value="3">&#9733;</span>
+                <span class="star" data-value="4">&#9733;</span>
+                <span class="star" data-value="5">&#9733;</span>
+            </span>
+            <span id="rating-value">0 Stars</span>
+        </div>
+        <textarea id="description" rows="4" placeholder="Write your description here..."></textarea>
+        <div class="submit-container" id="submit-container">
+            <button id="submit-btn">Submit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // // Function to fetch and display media details from the API
+    // async function fetchMediaDetails(mediaId) {
+    //     try {
+    //         // Fetch the movie details
+    //         const movieResponse = await fetch(`https://api.themoviedb.org/3/movie/${mediaId}`, {
+    //             headers: {
+    //                 accept: 'application/json',
+    //                 Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E'
+    //             }
+    //         });
+    //         const media = await movieResponse.json();
+
+    //         // Fetch the movie credits to get the director
+    //         const creditsResponse = await fetch(`https://api.themoviedb.org/3/movie/${mediaId}/credits`, {
+    //             headers: {
+    //                 accept: 'application/json',
+    //                 Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E'
+    //             }
+    //         });
+    //         const credits = await creditsResponse.json();
+
+    //         // Find the director from the crew list
+    //         const director = credits.crew.find(member => member.job === 'Director');
+
+    //         // Populate media details in the HTML
+    //         document.getElementById('media-title').textContent = media.title;
+    //         document.getElementById('media-description').textContent = media.overview;
+    //         document.getElementById('media-image').src = `https://image.tmdb.org/t/p/w500${media.poster_path}`;
+    //         document.getElementById('media-release-date').innerHTML = `<strong>Release Date:</strong> ${media.release_date}`;
+
+    //         // Display the director's name if available
+    //         if (director) {
+    //             document.getElementById('media-director').innerHTML = `<strong>Director:</strong> ${director.name}`;
+    //         }
+
+    //     } catch (error) {
+    //         console.error('Failed to fetch media details:', error);
+    //     }
+    // }
+
+    // // Call fetchMediaDetails with an example movie ID to display data on page load
+    // document.addEventListener('DOMContentLoaded', () => {
+    //     const urlParams = new URLSearchParams(window.location.search);
+    //     const mediaId = urlParams.get('id') || '550'; // Replace '550' with a fallback movie ID
+    //     fetchMediaDetails(mediaId);
+    // });
+
+    // Function to fetch and display media details from the database
+async function fetchMediaDetails(mediaId) {
+    try {
+        // Fetch the movie details from the Remote Database based on the mediaId.
+        const movieResponse = await fetch(`/api/media/${mediaId}`);
+        
+        // Check
+        if (!movieResponse.ok) {
+            throw new Error('Failed to fetch media details');
+        }
+
+        const media = await movieResponse.json();
+
+        // Populate media details.
+        document.getElementById('media-title').textContent = media.title;
+        document.getElementById('media-description').textContent = media.description;
+        document.getElementById('media-image').src = `https://image.tmdb.org/t/p/w500${media.poster_url}`;
+        document.getElementById('media-release-date').innerHTML = `<strong>Release Date:</strong> ${media.releaseDate}`;
+
+        // Display the director's name.
+        if (media.director) {
+            document.getElementById('media-director').innerHTML = `<strong>Director:</strong> ${media.director}`;
+        } else {
+            document.getElementById('media-director').innerHTML = `<strong>Director:</strong> Not available`;
+        }
+
+        // Display the cast.
+        if (media.cast) {
+            document.getElementById('media-cast').innerHTML = `<strong>Cast:</strong> ${media.cast}`;
+        } else {
+            document.getElementById('media-cast').innerHTML = `<strong>Cast:</strong> Not available`;
+        }
+
+    } catch (error) {
+        console.error('Failed to fetch media details:', error);
+    }
+}
+
+// Call fetchMediaDetails with the movie ID from the URL
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mediaId = urlParams.get('id') || '550';
+    fetchMediaDetails(mediaId);
+});
+
+    // Star rating system
+    const stars = document.querySelectorAll('.star');
+    const ratingValue = document.getElementById('rating-value');
+    const submitButton = document.getElementById('submit-btn');
+    const description = document.getElementById('description');
+    const submitContainer = document.getElementById('submit-container');
+
+    let ratingSelected = false;
+
+    stars.forEach(star => {
+        star.addEventListener('click', () => {
+            const rating = star.getAttribute('data-value');
+
+            // Reset all stars
+            stars.forEach(s => {
+                s.classList.remove('filled');
+            });
+
+            // Highlight the selected rating
+            for (let i = 0; i < rating; i++) {
+                stars[i].classList.add('filled');
+            }
+
+            // Update the rating value text
+            ratingValue.textContent = `${rating} Stars`;
+            ratingSelected = true;
+
+            toggleSubmitButton();
+        });
+    });
+
+    description.addEventListener('input', toggleSubmitButton);
+
+    function toggleSubmitButton() {
+        if (ratingSelected || description.value.trim()) {
+            submitContainer.style.display = 'block';
+        } else {
+            submitContainer.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>

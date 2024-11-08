@@ -90,34 +90,56 @@ nav a.active {
 .content {
     padding: 30px;
 }
+/* Adjusted Media List Grid Layout */
 .media-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 30px; /* Increased gap for more spacing between cards */
+    padding: 20px;
+    justify-items: center;
+}
+
+/* Media Item Card Styling */
+.media-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-.media-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     background: #fff;
-    width: 90%;
-    margin-bottom: 20px;
+    width: 100%;
+    max-width: 250px; /* Slightly larger cards */
     padding: 20px;
     border-radius: 15px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
 }
+
+/* Increase Image Size */
+.media-item img {
+    width: 100%;
+    height: auto;
+    max-width: 180px; /* Make images larger */
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+/* Adjusted Text Styling for Cleaner Look */
+.media-info p {
+    margin: 5px 0;
+    font-size: 0.9em; /* Reduced font size */
+}
+.media-info p strong {
+    font-size: 1.1em;
+    color: #1e3a8a;
+}
+
+/* Hover effect for Media Items */
 .media-item:hover {
-    transform: translateY(-10px);
+    transform: translateY(-5px);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
 }
-.media-item img {
-    width: 80px;
-    height: 80px;
-    background-color: #1e3a8a;
-    border-radius: 10px;
-    margin-right: 20px;
-}
+
+
 .media-info {
     flex: 1;
 }
@@ -135,7 +157,7 @@ nav a.active {
     align-items: center;
     padding: 30px;
     background-color: #fff;
-    margin: 20px;
+    margin: 20px auto -5px auto; /* Reduced bottom margin for tighter spacing */
     border-radius: 15px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
@@ -154,6 +176,100 @@ nav a.active {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+/* Centered container for the settings form */
+.settings-container {
+    width: 400px;
+    margin: 50px auto;
+    padding: 30px 20px; /* Uniform padding on all sides */
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Form group styling for individual fields */
+.form-group {
+    margin-bottom: 15px;
+}
+
+/* Label styling */
+.form-group label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+    color: #1e3a8a;
+}
+
+/* Input field styling for text, password, and email */
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group input[type="email"] {
+    width: calc(100% - 20px); /* Reduce width to ensure padding on the right */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    font-size: 1em;
+    margin: 0 auto;
+}
+
+/* Profile Picture Placeholder */
+.profile-picture-placeholder {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 10px; /* Center the placeholder */
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Styling for the "Choose File" button wrapper */
+.file-input-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+/* File input button styling */
+input[type="file"] {
+    padding: 10px 15px;
+    background-color: #1e3a8a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 100%; /* Align with other input fields */
+    text-align: center;
+}
+
+input[type="file"]:hover {
+    background-color: #25418d;
+}
+
+/* Submit Changes Button */
+#submit-changes {
+    width: 100%;
+    padding: 10px;
+    background-color: #1e3a8a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 20px;
+    display: none; /* Initially hidden */
+    transition: background-color 0.3s;
+}
+
+#submit-changes:hover {
+    background-color: #25418d;
 }
 
 /* User Description Box Styling */
@@ -263,6 +379,48 @@ nav a.active {
     white-space: nowrap; /* Prevent text from wrapping */
 }
 
+/* Container for the Profile Picture Settings */
+.profile-picture-settings {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+/* Placeholder Profile Picture */
+.profile-picture-placeholder {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 10px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #ddd;
+}
+
+/* Image Preview inside the Placeholder */
+.profile-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* File Input Styling */
+input[type="file"] {
+    font-size: 0.9em;
+    color: #1e3a8a;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s;
+}
+
+input[type="file"]:hover {
+    text-decoration: underline;
+    color: #25418d;
+}
+
 
 
 /* Button styling */
@@ -280,6 +438,21 @@ button {
 button:hover {
     background-color: #25418d;
 }
+/* Star Rating Styling */
+.star-rating {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    color: #ccc; /* Light gray for empty stars */
+}
+
+.star-rating .fa-star {
+    font-size: 2em; /* Increased size for more prominence */
+    margin: 0 2px;
+    transition: color 0.3s;
+}
+
+
 
 
 @keyframes scrollPulse {

@@ -13,71 +13,79 @@
 
 <body>
 
-<header>
-    <a onclick="location.href='index.html'" style="cursor: pointer;">
-        <div class="logo">Logo</div>
-    </a>
-    <div class="search-bar-header">
-        <input type="text" placeholder="Search for media">
-    </div>
-    <div class="profile-icon">
-        <a href="userProfile.html">
-            <img src="https://via.placeholder.com/50" alt="Profile">
+    <!-- Header -->
+    <header>
+        <a onclick="showPage('feed', document.querySelector('nav a:first-child'))" style="cursor: pointer;">
+            <div class="logo-container">
+                <a href="index.html">
+                    <img src="images/logo.png" alt="Logo" class="logo-image">
+                </a>
+                <span class="logo-text">Opinionate</span>
+            </div>
         </a>
-    </div>
-</header>
+        <div class="search-bar-header">
+            <input type="text" placeholder="Search for media">
+        </div>
+
+        <!-- Sign-in Link and Profile Icon -->
+        <div class="header-right">
+            <div class="profile-icon">
+                <a href="userProfile.html">
+                    <img src="https://via.placeholder.com/50" alt="Profile">
+                </a>
+            </div>
+        </div>
+    </header>
 
 <!-- Sign-In Form (Visible by Default) -->
 <div class="content">
     <div class="form-container" id="sign-in-form">
         <h2>Sign In</h2>
-        <form>
+        <form id="login-form">
             <div class="form-group">
                 <label for="sign-in-username">Username:</label>
                 <input type="text" id="sign-in-username" name="username" required>
             </div>
-
             <div class="form-group">
                 <label for="sign-in-password">Password:</label>
                 <input type="password" id="sign-in-password" name="password" required>
             </div>
-
             <button type="submit">Sign In</button>
+            <p id="login-error" style="color: red; display: none;">Incorrect username or password.</p>
         </form>
 
-        <!-- Centered Link to Switch to Create Account -->
+        <!-- Link to Switch to Create Account -->
         <p class="switch-link">
             <a href="#" onclick="toggleForms()">Or click here to create an account</a>
         </p>
     </div>
 
+
+    <!-- create account -->
     <div class="form-container" id="create-account-form" style="display: none;">
         <h2>Create an Account</h2>
-        <form onsubmit="return validateForm()">
+        <form id="register-form" onsubmit="return validateForm()">
             <div class="form-group">
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" required>
             </div>
-
             <div class="form-group">
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" required>
             </div>
-
             <div class="form-group">
                 <label for="password">Password:</label>
                 <input type="password" id="password" name="password" required>
             </div>
-
             <div class="form-group">
                 <label for="confirm-password">Confirm Password:</label>
                 <input type="password" id="confirm-password" name="confirm-password" required>
             </div>
-
             <button type="submit">Create Account</button>
+            <p id="register-error" style="color: red; display: none;">An error occurred. Please try again.</p>
         </form>
 
-        <!-- Centered Link to Switch Back to Sign-In -->
+        <!-- Link to Switch Back to Sign-In -->
         <p class="switch-link">
             <a href="#" onclick="toggleForms()">Already have an account? Sign in here</a>
         </p>
@@ -86,6 +94,24 @@
 
 <script>
     // Function to toggle between Sign-In and Create Account forms
+    const insertUser = async (username, password, email) => {
+    try {
+      const query = `
+        INSERT INTO users (username, password, email)
+        VALUES ($1, $2, $3)
+        RETURNING *;
+      `;
+      
+      const values = [username, password, email];  
+      
+      const res = await pool.query(query, values);
+      
+      console.log('User inserted:', res.rows[0]); 
+    } catch (err) {
+      console.error('Error executing query', err.stack);
+    }
+  };
+
     function toggleForms() {
         const signInForm = document.getElementById('sign-in-form');
         const createAccountForm = document.getElementById('create-account-form');
@@ -99,7 +125,7 @@
         }
     }
 
-    // Form validation function for Create Account
+    // Form validation function for confirming password entries are the same
     function validateForm() {
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirm-password').value;
@@ -112,6 +138,34 @@
         alert('Account created successfully (not connected to a database).');
         return false; // Prevent default form submission for now
     }
+
+    // sign in 
+    document.getElementById('login-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const username = document.getElementById('sign-in-username').value;
+            const password = document.getElementById('sign-in-password').value;
+            const loginError = document.getElementById('login-error');
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    window.location.href = 'index.html';
+                } else {
+                    loginError.textContent = result.message || 'Incorrect username or password.';
+                    loginError.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login request error:', error);
+                loginError.textContent = 'An error occurred. Please try again.';
+                loginError.style.display = 'block';
+            }
+        });
 </script>
 
 </body>
