@@ -3,6 +3,7 @@ import axios from 'axios';
 const { Pool } = pkg;
 
 const mediaID = 225; // dont change after, must change pre-run
+const mediaID = 301; // dont change after, must change pre-run
 //Connect to the Remote Database.
 const pool = new Pool({
   user: 'postgres',
@@ -110,8 +111,13 @@ const fetchAndSaveAlbum = async (albumId) => {
   }
 };
 
+<<<<<<< HEAD
 //fetchAndSaveAlbum('2pzOAoHNZiVE6Pxo3PQMhE');
 
+=======
+// Example usage
+//fetchAndSaveAlbum('2pzOAoHNZiVE6Pxo3PQMhE');
+>>>>>>> Andrew
 // Function to fetch movie data from the TMDB API
 const fetchMovieData = async (movieId) => {
   try {
@@ -229,7 +235,73 @@ const getTableNames = async () => {
       console.error('Error executing query', err.stack);
     }
   };
-
+  
+  // BOOKS! ########################################################################
+  
+  const fetchBookDetails = async (bookId) => {
+    try {
+      const response = await fetch(`https://openlibrary.org/works/${bookId}.json`);
+      const book = await response.json();
+  
+      if (book) {
+        // Format the book data
+        const bookData = {
+          title: book.title || 'Unknown Title',
+          author: book.authors ? book.authors.map(author => author.name).join(', ') : 'Unknown',
+          coverUrl: book.covers ? `https://covers.openlibrary.org/b/id/${book.covers[0]}-L.jpg` : 'https://via.placeholder.com/150',
+          releaseDate: book.first_publish_date || 'N/A',
+          description: book.description ? (typeof book.description === 'string' ? book.description : book.description.value) : 'No description available.'
+        };
+  
+        return bookData;
+      } else {
+        throw new Error('Book not found');
+      }
+    } catch (error) {
+      console.error('Failed to fetch book details:', error);
+    }
+  };
+  
+  // Function to insert book data into the database
+  const insertBookData = async (book) => {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      const mediaID = 325
+      // Insert into the media table to get a mediaId
+      const mediaResult = await client.query(
+        `INSERT INTO media ("mediaId", title, description)
+         VALUES ($1, $2, $3) RETURNING "mediaId"`,
+        [mediaID, book.title, book.description || null]
+      );
+  
+      
+  
+      // Insert into the books table using the new mediaId
+      await client.query(
+        `INSERT INTO books ("mediaID", author, cover_url, year)
+         VALUES ($1, $2, $3, $4)`,
+        [mediaID, book.author, book.coverUrl, book.releaseDate]
+      );
+  
+      await client.query('COMMIT');
+      console.log(`Book "${book.title}" inserted successfully`);
+    } catch (error) {
+      await client.query('ROLLBACK');
+      console.error('Error inserting book data:', error);
+    } finally {
+      client.release();
+    }
+  };
+  
+  // Example call with a valid Open Library book ID
+  (async () => {
+    const bookId = 'OL3288345M'; // Replace with a valid Open Library book ID
+    const book = await fetchBookDetails(bookId);
+    if (book) {
+      await insertBookData(book);
+    }
+  })();
 
   
 
