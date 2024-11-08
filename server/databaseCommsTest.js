@@ -2,7 +2,7 @@ import pkg from 'pg';
 import axios from 'axios';
 const { Pool } = pkg;
 
-const mediaID = 225; // dont change after, must change pre-run
+const mediaID = 301; // dont change after, must change pre-run
 //Connect to the Remote Database.
 const pool = new Pool({
   user: 'postgres',
@@ -111,7 +111,7 @@ const fetchAndSaveAlbum = async (albumId) => {
 };
 
 // Example usage
-fetchAndSaveAlbum('2pzOAoHNZiVE6Pxo3PQMhE');
+//fetchAndSaveAlbum('2pzOAoHNZiVE6Pxo3PQMhE');
 
 // // Function to fetch and insert a movie DO NOT DELETE!
 // (async () => {
@@ -187,12 +187,21 @@ const getTableNames = async () => {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
+      const mediaID = 325
+      // Insert into the media table to get a mediaId
+      const mediaResult = await client.query(
+        `INSERT INTO media ("mediaId", title, description)
+         VALUES ($1, $2, $3) RETURNING "mediaId"`,
+        [mediaID, book.title, book.description || null]
+      );
   
-      // Insert book data into the books table
+      
+  
+      // Insert into the books table using the new mediaId
       await client.query(
-        `INSERT INTO books (media_id, title, author, cover_url, release_date, description)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [mediaID, book.title, book.author, book.coverUrl, book.releaseDate, book.description]
+        `INSERT INTO books ("mediaID", author, cover_url, year)
+         VALUES ($1, $2, $3, $4)`,
+        [mediaID, book.author, book.coverUrl, book.releaseDate]
       );
   
       await client.query('COMMIT');
@@ -207,7 +216,7 @@ const getTableNames = async () => {
   
   // Example call with a valid Open Library book ID
   (async () => {
-    const bookId = 'OL362041W'; // Replace with a valid Open Library book ID
+    const bookId = 'OL3288345M'; // Replace with a valid Open Library book ID
     const book = await fetchBookDetails(bookId);
     if (book) {
       await insertBookData(book);
