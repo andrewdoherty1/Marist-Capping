@@ -112,6 +112,37 @@
         alert('Account created successfully (not connected to a database).');
         return false; // Prevent default form submission for now
     }
+<<<<<<< Updated upstream
+=======
+
+    // sign in 
+    document.getElementById('login-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const username = document.getElementById('sign-in-username').value;
+            const password = document.getElementById('sign-in-password').value;
+            const loginError = document.getElementById('login-error');
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    window.location.href = 'userprofile.html';
+                } else {
+                    loginError.textContent = result.message || 'Incorrect username or password.';
+                    loginError.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login request error:', error);
+                loginError.textContent = 'An error occurred. Please try again.';
+                loginError.style.display = 'block';
+            }
+        });
+>>>>>>> Stashed changes
 </script>
 
 </body>

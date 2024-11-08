@@ -37,6 +37,7 @@
 
 
 
+<<<<<<< Updated upstream
 <nav>
     <a onclick="showSection('library', this)" class="active">Library</a>
     <a onclick="showSection('bookmarks', this)">Bookmarks</a>
@@ -48,6 +49,26 @@
 <div class="profile-container">
     <div class="profile-picture">
         <img src="https://via.placeholder.com/150" alt="User Profile Picture">
+=======
+    <nav>
+        <a onclick="showSection('library', this)" class="active">Library</a>
+        <a onclick="showSection('bookmarks', this)">Bookmarks</a>
+        <a onclick="showSection('friends', this)">Friends</a>
+        <a onclick="showSection('settings', this)">Settings</a>
+    </nav>
+    
+    <!-- User Profile Section -->
+    <div class="profile-container">
+        <div class="profile-picture">
+            <img src="https://via.placeholder.com/150" alt="User Profile Picture">
+        </div>
+        <div class="user-description">
+            <h2 id="username-display">User Name</h2>
+            <p id="user-description-text">
+                This is your description. You can edit this in your settings.
+            </p>
+        </div>
+>>>>>>> Stashed changes
     </div>
     <div class="user-description">
         <h2>User Name</h2>
@@ -78,6 +99,75 @@
                 </div>
             </div>
         </div>
+<<<<<<< Updated upstream
+=======
+    
+        <!-- Bookmarks Section (Initially Hidden) -->
+        <div id="bookmarks" class="section" style="display: none;">
+            <h2>Bookmarks</h2>
+            <p>Your bookmarked media items will appear here.</p>
+        </div>
+    
+        <!-- Friends Section (Initially Hidden) -->
+        <div id="friends" class="section" style="display: none;">
+            <h2>Friends List</h2>
+            <p>Your friends list goes here.</p>
+        </div>
+    
+    
+        <!-- Settings -->
+        <div id="settings" class="section" style="display: none;">
+            <div class="form-container" id="sign-in-form">
+                <h2>Update profile settings</h2>
+    
+                <form oninput="showSubmitButton()">
+
+                    <!-- Chage profile picture-->
+                    <div class="form-group">
+                        <label for="profile-picture">Profile Picture:</label>
+                        <div class="profile-picture-placeholder">
+                            <img src="https://via.placeholder.com/100" alt="Profile Picture" class="profile-preview">
+                        </div>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="profile-picture" name="profile-picture" accept="image/*" onchange="showSubmitButton()">
+                        </div>
+                    </div>
+            
+                    <!-- Fields to Change User Settings -->
+
+                    <!-- Username field-->
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" data-original="">
+                    </div>
+            
+                    <!-- Password field -->
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" data-original="">
+                    </div>
+            
+                    <!-- password confirm field-->
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm Password:</label>
+                        <input type="password" id="confirm-password" name="confirm-password" data-original="">
+                    </div>
+            
+                    <!-- Email field-->
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" data-original="">
+                    </div>
+
+                    <!-- Need to add delete account button-->
+                     <!-- Log out should be displayed where "sign in" was once they are signed in. clicking it will log them out/end the session-->
+                    
+                    <button id="submit-changes" style="display: none;" onclick="submitChanges(event)">Submit Changes</button>
+                </form>
+            </div>
+        </div>
+    
+>>>>>>> Stashed changes
     </div>
 
     <!-- Bookmarks Section (Initially Hidden) -->
@@ -147,6 +237,7 @@
             section.style.display = 'none';
         });
 
+<<<<<<< Updated upstream
         // Show the selected section
         document.getElementById(sectionId).style.display = 'block';
 
@@ -175,6 +266,68 @@
         // Check if any input's value has changed compared to its data-original attribute
         document.querySelectorAll('#sign-in-form input[data-original]').forEach(field => {
             if (field.value !== field.getAttribute('data-original')) {
+=======
+        // Check if user is already logged in on page load
+        async function checkSession() {
+            const response = await fetch('/check-session');
+            const data = await response.json();
+            // put something else here
+            /*
+            if (data.loggedIn) {
+                window.location.href = 'index.html'; // Redirect to main page if logged in
+            }
+            */
+        }
+
+        checkSession(); // Run on page load
+
+        // Logout function
+        async function logout() {
+            const response = await fetch('/logout', { method: 'POST' });
+            const result = await response.json();
+            
+            if (result.success) {
+                alert(result.message);
+                window.location.href = 'createAccount.html'; // Redirect to login page after logout
+            }
+        }
+
+        // function to load the use's profile
+        async function loadUserProfile() {
+            try {
+            const response = await fetch('/user-info');
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('username-display').textContent = data.username;
+            } else {
+                // If not logged in, redirect to index.html
+                window.location.href = 'userProfile.html';
+            }
+            } catch (error) {
+            console.error('Error fetching user info:', error);
+            window.location.href = 'index.html'; // Redirect if an error occurs
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadUserProfile);
+        
+        // function to allow the submit button to be hidded until a change in any of the fields is changed
+        function showSubmitButton() {
+            const submitButton = document.getElementById('submit-changes');
+            let hasChanges = false;
+    
+            // Check if any input's value has changed compared to its data-original attribute
+            document.querySelectorAll('#sign-in-form input[data-original]').forEach(field => {
+                if (field.value !== field.getAttribute('data-original')) {
+                    hasChanges = true;
+                }
+            });
+    
+            // Also check for file input changes
+            const fileInput = document.getElementById('profile-picture');
+            if (fileInput.files.length > 0) {
+>>>>>>> Stashed changes
                 hasChanges = true;
             }
         });
@@ -184,6 +337,7 @@
         if (fileInput.files.length > 0) {
             hasChanges = true;
         }
+<<<<<<< Updated upstream
 
         // Show or hide the submit button based on detected changes
         submitButton.style.display = hasChanges ? 'block' : 'none';
@@ -211,3 +365,42 @@
 
 </body>
 </html>
+=======
+    
+        // function to submit the changes. this will deffinetly be changed as we work on 
+        function submitChanges(event) {
+            event.preventDefault(); // Prevent form submission for demonstration purposes
+    
+            // Reset original values after submission
+            const fields = document.querySelectorAll('#sign-in-form input[data-original]');
+            fields.forEach(field => {
+                field.setAttribute('data-original', field.value);
+            });
+    
+            // Clear the file input change
+            document.getElementById('profile-picture').value = "";
+    
+            // Hide the submit button after saving changes
+            document.getElementById('submit-changes').style.display = 'none';
+    
+            // Optional: Provide feedback
+            alert("Changes have been saved!");
+        }
+
+        // ensures each page that needs to display session elements such as user's name first checks the endpoint
+        fetch('/check-session')
+            .then(response => response.json())
+            .then(data => {
+                if (data.loggedIn) {
+                    // Show user info or a "Logout" button
+                } else {
+                    // Redirect to login if needed
+                    window.location.href = '/createAccount.html';
+                }
+            });
+
+    </script>
+    
+    </body>
+    </html>
+>>>>>>> Stashed changes
