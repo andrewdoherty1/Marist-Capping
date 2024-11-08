@@ -223,22 +223,34 @@
           //  }
         //}
 
-        async function fetchAlbums() {
-    try {
-        const response = await fetch('/api/albums');
+//         async function fetchAlbums() {
+//     try {
+//         const response = await fetch('/api/random-albums');
         
-        if (!response.ok) {
-            throw new Error('Failed to fetch albums');
-        }
+//         if (!response.ok) {
+//             throw new Error('Failed to fetch albums');
+//         }
 
-        const albums = await response.json(); 
+//         const albums = await response.json(); 
 
-        displayMusic(albums); 
+//         displayMusic(albums); 
 
+//     } catch (error) {
+//         console.error('Error fetching albums:', error);
+//     }
+// }
+
+async function fetchAndDisplayAlbums() {
+    try {
+        const response = await fetch('/api/random-albums');  
+        const albums = await response.json();
+
+        displayMusic(albums);  
     } catch (error) {
-        console.error('Error fetching albums:', error);
+        console.error('Error fetching random albums:', error);
     }
 }
+
 
 function displayMusic(albums) {
     const albumsContainer = document.getElementById('albums-container');
@@ -275,34 +287,34 @@ function displayMusic(albums) {
 
 
 
-        // Display Music (Albums)
-        function displayMusic(albums) {
-    const albumsContainer = document.getElementById('albums-container');
-    albumsContainer.innerHTML = ''; // Clear previous content
+//         Display Music (Albums)
+//        function displayMusic(albums) {
+//    const albumsContainer = document.getElementById('albums-container');
+//     albumsContainer.innerHTML = ''; // Clear previous content
 
-    albums.forEach(album => {
-        const albumCard = document.createElement('div');
-        albumCard.classList.add('media-item');
-        albumCard.innerHTML = `
-            <img src="${album.images[0].url}" alt="${album.name}">
-            <div class="media-info">
-                <p><strong>${album.name}</strong> by ${album.artists[0].name}</p>
-            </div>
-            <div class="star-rating">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-            </div>
-        `;
-        albumCard.addEventListener('click', () => {
-            window.location.href = `mediaMusic.html?albumId=${album.id}`;
-        });
+//     albums.forEach(album => {
+//         const albumCard = document.createElement('div');
+//         albumCard.classList.add('media-item');
+//         albumCard.innerHTML = `
+//             <img src="${album.images[0].url}" alt="${album.name}">
+//             <div class="media-info">
+//                 <p><strong>${album.name}</strong> by ${album.artists[0].name}</p>
+//             </div>
+//             <div class="star-rating">
+//                 <i class="fa fa-star"></i>
+//                 <i class="fa fa-star"></i>
+//                 <i class="fa fa-star"></i>
+//                 <i class="fa fa-star"></i>
+//                 <i class="fa fa-star"></i>
+//             </div>
+//         `;
+//         albumCard.addEventListener('click', () => {
+//             window.location.href = `mediaMusic.html?albumId=${album.id}`;
+//         });
 
-        albumsContainer.appendChild(albumCard);
-    });
-}
+//         albumsContainer.appendChild(albumCard);
+//     });
+// }
 
         //GiantBomb
         const apiKey = '8dfa1038447a4c092e489b3775d27ae4821a1e90';
@@ -424,7 +436,7 @@ function displayMusic(albums) {
             clickedLink.classList.add('active');
 
             if (pageId === 'movies') fetchAndDisplayMovies();
-            if (pageId === 'music') fetchAlbums();
+            if (pageId === 'music') fetchAndDisplayAlbums();
             if (pageId === 'books') fetchBooks(); // Fetch books when books tab is selected
             if (pageId === 'games') fetchGames();
         }

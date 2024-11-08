@@ -91,9 +91,7 @@ app.get('/api/random-movies', async (req, res) => {
 });
 
 // Route to fetch album details from the database based on the albumId
-app.get('/api/albums/:id', async (req, res) => {
-  const albumId = req.params.id;  
-
+app.get('/api/random-albums', async (req, res) => {
   try {
     const client = await pool.connect();
 
@@ -106,22 +104,24 @@ app.get('/api/albums/:id', async (req, res) => {
         m.title
       FROM albums AS a
       JOIN media AS m ON a."mediaID" = m."mediaId"
-      WHERE a."mediaID" = $1;
+      ORDER BY RANDOM()
+      LIMIT 20;  -- Limit to 20 random albums, can adjust as needed
     `;
     
-    const result = await client.query(albumQuery, [albumId]);
+    const result = await client.query(albumQuery);
     client.release();
 
     if (result.rows.length > 0) {
-      res.json(result.rows[0]); 
+      res.json(result.rows);  // Return all random albums
     } else {
-      res.status(404).json({ error: 'Album not found' });
+      res.status(404).json({ error: 'No albums found' });
     }
   } catch (error) {
-    console.error('Error fetching album details:', error);
+    console.error('Error fetching random albums:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 
 // Route to fetch media details from the database based on the mediaId.
