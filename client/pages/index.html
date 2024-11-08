@@ -206,22 +206,75 @@
 
 
         // Fetch Music (Albums) from Spotify
-        async function fetchMusic() {
-            try {
-                if (!spotifyAccessToken) await fetchSpotifyAccessToken();
+//        async function fetchMusic() {
+  //          try {
+    //            if (!spotifyAccessToken) await fetchSpotifyAccessToken();
+//
+  //              const response = await fetch('https://api.spotify.com/v1/browse/new-releases?limit=10', {
+    //                headers: {
+      //                  Authorization: `Bearer ${spotifyAccessToken}`
+        //            }
+          //      });
+//
+  //              const data = await response.json();
+    //            displayMusic(data.albums.items);
+      //      } catch (error) {
+        //        console.error('Failed to fetch music:', error);
+          //  }
+        //}
 
-                const response = await fetch('https://api.spotify.com/v1/browse/new-releases?limit=10', {
-                    headers: {
-                        Authorization: `Bearer ${spotifyAccessToken}`
-                    }
-                });
-
-                const data = await response.json();
-                displayMusic(data.albums.items);
-            } catch (error) {
-                console.error('Failed to fetch music:', error);
-            }
+        async function fetchAlbums() {
+    try {
+        // Fetch the album data from your own database API
+        const response = await fetch('/api/albums');
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch albums');
         }
+
+        const albums = await response.json(); // Assuming albums data is returned as JSON
+
+        displayMusic(albums); // Call display function with the fetched data
+
+    } catch (error) {
+        console.error('Error fetching albums:', error);
+    }
+}
+
+function displayMusic(albums) {
+    const albumsContainer = document.getElementById('albums-container');
+    albumsContainer.innerHTML = ''; // Clear previous content
+
+    albums.forEach(album => {
+        const albumCard = document.createElement('div');
+        albumCard.classList.add('media-item');
+
+        // Updated based on database fields: artist, title, cover_url
+        albumCard.innerHTML = `
+            <img src="${album.cover_url}" alt="${album.title}">
+            <div class="media-info">
+                <p><strong>${album.title}</strong> by ${album.artist}</p>
+            </div>
+            <div class="star-rating">
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+            </div>
+        `;
+
+        // Event listener for clicking on an album card
+        albumCard.addEventListener('click', () => {
+            window.location.href = `mediaMusic.html?albumId=${album.mediaID}`; // Use mediaID from the database
+        });
+
+        albumsContainer.appendChild(albumCard);
+    });
+}
+
+
+
 
         // Display Music (Albums)
         function displayMusic(albums) {
@@ -372,7 +425,7 @@
             clickedLink.classList.add('active');
 
             if (pageId === 'movies') fetchAndDisplayMovies();
-            if (pageId === 'music') fetchMusic();
+            if (pageId === 'music') fetchAlbums();
             if (pageId === 'books') fetchBooks(); // Fetch books when books tab is selected
             if (pageId === 'games') fetchGames();
         }

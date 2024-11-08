@@ -90,6 +90,40 @@ app.get('/api/random-movies', async (req, res) => {
   }
 });
 
+// Route to fetch album details from the database based on the albumId
+app.get('/api/albums/:id', async (req, res) => {
+  const albumId = req.params.id;  
+
+  try {
+    const client = await pool.connect();
+
+    const albumQuery = `
+      SELECT 
+        a."mediaID",
+        a.artist,
+        a.tracks,
+        a.cover_url,
+        m.title
+      FROM albums AS a
+      JOIN media AS m ON a."mediaID" = m."mediaId"
+      WHERE a."mediaID" = $1;
+    `;
+    
+    const result = await client.query(albumQuery, [albumId]);
+    client.release();
+
+    if (result.rows.length > 0) {
+      res.json(result.rows[0]); 
+    } else {
+      res.status(404).json({ error: 'Album not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching album details:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 // Route to fetch media details from the database based on the mediaId.
 app.get('/api/media/:id', async (req, res) => {
   const mediaId = req.params.id;
