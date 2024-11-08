@@ -163,7 +163,7 @@ const insertMovieData = async (movie) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const mediaID = 101;
+    const mediaID = 103;
     const mediaResult = await client.query(
       `INSERT INTO media ("mediaId", title, "releaseDate", description)
        VALUES ($1, $2, $3, $4) RETURNING "mediaId"`,
@@ -188,7 +188,7 @@ const insertMovieData = async (movie) => {
 
 // // Function to fetch and insert a movie DO NOT DELETE!
 // (async () => {
-//   const movieId = 631; // Desired movie ID
+//   const movieId = 293660; // Desired movie ID
 //   const movieData = await fetchMovieData(movieId);
 //   if (movieData) {
 //     await insertMovieData(movieData);

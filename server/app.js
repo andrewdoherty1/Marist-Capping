@@ -88,7 +88,7 @@ const insertGameData = async (gameData) => {
   const client = await pool.connect();
   try {
       await client.query('BEGIN');
-      const theMediaID = 422;
+      const theMediaID = 423;
       const mediaResult = await client.query(
           `INSERT INTO media ("mediaId", title, "releaseDate", description)
            VALUES ($1, $2, $3, $4) RETURNING "mediaId"`,
