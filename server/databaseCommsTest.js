@@ -2,7 +2,6 @@ import pkg from 'pg';
 import axios from 'axios';
 const { Pool } = pkg;
 
-const mediaID = 225; // dont change after, must change pre-run
 const mediaID = 301; // dont change after, must change pre-run
 //Connect to the Remote Database.
 const pool = new Pool({
@@ -111,13 +110,8 @@ const fetchAndSaveAlbum = async (albumId) => {
   }
 };
 
-<<<<<<< HEAD
 //fetchAndSaveAlbum('2pzOAoHNZiVE6Pxo3PQMhE');
 
-=======
-// Example usage
-//fetchAndSaveAlbum('2pzOAoHNZiVE6Pxo3PQMhE');
->>>>>>> Andrew
 // Function to fetch movie data from the TMDB API
 const fetchMovieData = async (movieId) => {
   try {
