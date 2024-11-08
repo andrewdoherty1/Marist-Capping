@@ -225,16 +225,15 @@
 
         async function fetchAlbums() {
     try {
-        // Fetch the album data from your own database API
         const response = await fetch('/api/albums');
         
         if (!response.ok) {
             throw new Error('Failed to fetch albums');
         }
 
-        const albums = await response.json(); // Assuming albums data is returned as JSON
+        const albums = await response.json(); 
 
-        displayMusic(albums); // Call display function with the fetched data
+        displayMusic(albums); 
 
     } catch (error) {
         console.error('Error fetching albums:', error);
