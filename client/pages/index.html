@@ -250,35 +250,65 @@ function displayGames(games) {
 
 
         // Fetch Music (Albums) from Spotify
-        async function fetchMusic() {
-            try {
-                if (!spotifyAccessToken) await fetchSpotifyAccessToken();
+//        async function fetchMusic() {
+  //          try {
+    //            if (!spotifyAccessToken) await fetchSpotifyAccessToken();
+//
+  //              const response = await fetch('https://api.spotify.com/v1/browse/new-releases?limit=10', {
+    //                headers: {
+      //                  Authorization: `Bearer ${spotifyAccessToken}`
+        //            }
+          //      });
+//
+  //              const data = await response.json();
+    //            displayMusic(data.albums.items);
+      //      } catch (error) {
+        //        console.error('Failed to fetch music:', error);
+          //  }
+        //}
 
-                const response = await fetch('https://api.spotify.com/v1/browse/new-releases?limit=10', {
-                    headers: {
-                        Authorization: `Bearer ${spotifyAccessToken}`
-                    }
-                });
+//         async function fetchAlbums() {
+//     try {
+//         const response = await fetch('/api/random-albums');
+        
+//         if (!response.ok) {
+//             throw new Error('Failed to fetch albums');
+//         }
 
-                const data = await response.json();
-                displayMusic(data.albums.items);
-            } catch (error) {
-                console.error('Failed to fetch music:', error);
-            }
-        }
+//         const albums = await response.json(); 
 
-        // Display Music (Albums)
-        function displayMusic(albums) {
+//         displayMusic(albums); 
+
+//     } catch (error) {
+//         console.error('Error fetching albums:', error);
+//     }
+// }
+
+async function fetchAndDisplayAlbums() {
+    try {
+        const response = await fetch('/api/random-albums');  
+        const albums = await response.json();
+
+        displayMusic(albums);  
+    } catch (error) {
+        console.error('Error fetching random albums:', error);
+    }
+}
+
+
+function displayMusic(albums) {
     const albumsContainer = document.getElementById('albums-container');
     albumsContainer.innerHTML = ''; // Clear previous content
 
     albums.forEach(album => {
         const albumCard = document.createElement('div');
         albumCard.classList.add('media-item');
+
+        // Updated based on database fields: artist, title, cover_url
         albumCard.innerHTML = `
-            <img src="${album.images[0].url}" alt="${album.name}">
+            <img src="${album.cover_url}" alt="${album.title}">
             <div class="media-info">
-                <p><strong>${album.name}</strong> by ${album.artists[0].name}</p>
+                <p><strong>${album.title}</strong> by ${album.artist}</p>
             </div>
             <div class="star-rating">
                 <i class="fa fa-star"></i>
@@ -288,14 +318,51 @@ function displayGames(games) {
                 <i class="fa fa-star"></i>
             </div>
         `;
+
+        // Event listener for clicking on an album card
         albumCard.addEventListener('click', () => {
-            window.location.href = `mediaMusic.html?albumId=${album.id}`;
+            window.location.href = `mediaMusic.html?albumId=${album.mediaID}`; // Use mediaID from the database
         });
 
         albumsContainer.appendChild(albumCard);
     });
 }
 
+
+
+
+//         Display Music (Albums)
+//        function displayMusic(albums) {
+//    const albumsContainer = document.getElementById('albums-container');
+//     albumsContainer.innerHTML = ''; // Clear previous content
+
+//     albums.forEach(album => {
+//         const albumCard = document.createElement('div');
+//         albumCard.classList.add('media-item');
+//         albumCard.innerHTML = `
+//             <img src="${album.images[0].url}" alt="${album.name}">
+//             <div class="media-info">
+//                 <p><strong>${album.name}</strong> by ${album.artists[0].name}</p>
+//             </div>
+//             <div class="star-rating">
+//                 <i class="fa fa-star"></i>
+//                 <i class="fa fa-star"></i>
+//                 <i class="fa fa-star"></i>
+//                 <i class="fa fa-star"></i>
+//                 <i class="fa fa-star"></i>
+//             </div>
+//         `;
+//         albumCard.addEventListener('click', () => {
+//             window.location.href = `mediaMusic.html?albumId=${album.id}`;
+//         });
+
+//         albumsContainer.appendChild(albumCard);
+//     });
+// }
+
+        //GiantBomb
+        const apiKey = '8dfa1038447a4c092e489b3775d27ae4821a1e90';
+        const url = `http://localhost:3000/api/games`;
 //         //GiantBomb
 //         const apiKey = '8dfa1038447a4c092e489b3775d27ae4821a1e90';
 //         const url = `http://localhost:3000/api/games`;
@@ -416,7 +483,7 @@ function displayGames(games) {
             clickedLink.classList.add('active');
 
             if (pageId === 'movies') fetchAndDisplayMovies();
-            if (pageId === 'music') fetchMusic();
+            if (pageId === 'music') fetchAndDisplayAlbums();
             if (pageId === 'books') fetchBooks(); // Fetch books when books tab is selected
             if (pageId === 'games') fetchAndDisplayGames()
         }

@@ -144,18 +144,44 @@
         return data.access_token;
     }
 
+    //async function fetchAlbumDetails(albumId) {
+    //    const accessToken = await fetchSpotifyAccessToken();
+//
+  //      const response = await fetch(`https://api.spotify.com/v1/albums/${albumId}`, {
+    //        headers: {
+      //          Authorization: `Bearer ${accessToken}`
+        //    }
+        //});
+//
+  //      const album = await response.json();
+    //    displayAlbumDetails(album);
+    //}
+
     async function fetchAlbumDetails(albumId) {
-        const accessToken = await fetchSpotifyAccessToken();
+    try {
+        const albumResponse = await fetch(`/api/albums/${albumId}`);
 
-        const response = await fetch(`https://api.spotify.com/v1/albums/${albumId}`, {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
-            }
-        });
+        if (!albumResponse.ok) {
+            throw new Error('Failed to fetch album details');
+        }
 
-        const album = await response.json();
-        displayAlbumDetails(album);
+        const album = await albumResponse.json();
+
+        document.getElementById('album-title').textContent = album.title;
+        document.getElementById('album-artist').textContent = album.artist;
+        document.getElementById('album-cover').src = `https://image.tmdb.org/t/p/w500${album.cover_url}`;
+
+        if (album.tracks && album.tracks.length > 0) {
+            document.getElementById('album-tracks').innerHTML = `<strong>Tracks:</strong><br>` + album.tracks.map(track => `<li>${track}</li>`).join('');
+        } else {
+            document.getElementById('album-tracks').innerHTML = `<strong>Tracks:</strong> Not available`;
+        }
+
+    } catch (error) {
+        console.error('Failed to fetch album details:', error);
     }
+}
+
 
     function displayAlbumDetails(album) {
         document.getElementById('album-title').textContent = album.name;
