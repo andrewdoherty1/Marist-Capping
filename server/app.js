@@ -88,7 +88,7 @@ const insertGameData = async (gameData) => {
   const client = await pool.connect();
   try {
       await client.query('BEGIN');
-      const theMediaID = 423;
+      const theMediaID = 500;
       const mediaResult = await client.query(
           `INSERT INTO media ("mediaId", title, "releaseDate", description)
            VALUES ($1, $2, $3, $4) RETURNING "mediaId"`,
@@ -203,6 +203,41 @@ app.get('/api/random-games', async (req, res) => {
   } catch (error) {
     console.error('Error fetching random video games:', error);
     res.status(500).json({ error: 'Failed to fetch video game data' });
+  }
+});
+// Route to fetch videogame details from the database based on the mediaId.
+app.get('/api/games/:id', async (req, res) => {
+  const mediaId = req.params.id;
+
+  try {
+    const client = await pool.connect();
+
+    const mediaQuery = `
+      SELECT 
+        m."mediaId", 
+        m.title, 
+        m.description, 
+        TO_CHAR(m."releaseDate", 'YYYY-MM-DD') AS "releaseDate",
+        mv.developer, 
+        mv.publisher, 
+        mv.poster_url 
+      FROM media AS m
+      JOIN "videoGames" AS mv ON m."mediaId" = mv."mediaID"
+      WHERE m."mediaId" = $1;
+    `;
+    
+    const result = await client.query(mediaQuery, [mediaId]);
+
+    client.release();
+
+    if (result.rows.length > 0) {
+      res.json(result.rows[0]);
+    } else {
+      res.status(404).json({ error: 'Media not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching media details:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
