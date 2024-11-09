@@ -12,8 +12,6 @@
 
 <body>
 
-    <!-- This is a test-->
-
     <!-- Header -->
     <header>
         <a onclick="showPage('feed', document.querySelector('nav a:first-child'))" style="cursor: pointer;">
@@ -27,11 +25,11 @@
         <div class="search-bar-header">
             <input type="text" placeholder="Search for media">
         </div>
-
-        <!-- Sign-in Link and Profile Icon -->
+    
+        <!-- Sign-in / Log-out Link and Profile Icon -->
         <div class="header-right">
-            <a href="createAccount.html" class="sign-in-link">Sign In</a>
-            <div class="profile-icon">
+            <a href="createAccount.html" id="auth-link" class="sign-in-link">Sign In</a>
+            <div class="profile-icon" id="profile-icon">
                 <a href="userProfile.html">
                     <img src="https://via.placeholder.com/50" alt="Profile">
                 </a>
@@ -103,6 +101,54 @@
     </div>
 
     <script>
+        // user session details
+        // Check if user is logged in and update auth link
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const response = await fetch('/check-session');
+                const result = await response.json();
+
+                if (result.loggedIn) {
+                    const authLink = document.getElementById("auth-link");
+                    authLink.textContent = "Log Out";
+                    authLink.href = "#";
+                    authLink.addEventListener("click", handleLogout);
+                    
+                    // Update UI with the user's name
+                    document.getElementById("profile-icon").title = result.user.username;
+                }
+            } catch (error) {
+                console.error("Error checking session status:", error);
+            }
+        });
+
+    // Function to handle logging out
+    async function handleLogout(event) {
+        event.preventDefault();
+        try {
+            const response = await fetch('/logout', { method: 'POST' });
+            const result = await response.json();
+            if (result.success) {
+                window.location.href = 'index.html'; // Redirect after logging out
+            } else {
+                console.error("Error logging out:", result.message);
+            }
+        } catch (error) {
+            console.error("Logout request error:", error);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
         const CLIENT_ID = 'caff6515bb5c4394a35ad9b11ee09f31';
         const CLIENT_SECRET = 'aa0145b7bc214e2fae5c02bc3ff2933b';
         let spotifyAccessToken;
