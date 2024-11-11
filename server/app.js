@@ -161,6 +161,41 @@ app.get('/api/media/:id', async (req, res) => {
   }
 });
 
+app.get('/api/albums/:id', async (req, res) => {
+  const mediaId = req.params.id;
+
+  try {
+    const client = await pool.connect();
+
+    const mediaQuery = `
+      SELECT 
+        m."mediaId", 
+        m.title, 
+        m.description, 
+        TO_CHAR(m."releaseDate", 'YYYY-MM-DD') AS "releaseDate",
+        mv.artist, 
+        mv.tracks, 
+        mv.cover_url 
+      FROM media AS m
+      JOIN albums AS mv ON m."mediaId" = mv."mediaID"
+      WHERE m."mediaId" = $1;
+    `;
+    
+    const result = await client.query(mediaQuery, [mediaId]);
+
+    client.release();
+
+    if (result.rows.length > 0) {
+      res.json(result.rows[0]);
+    } else {
+      res.status(404).json({ error: 'Media not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching media details:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // -------------------------------------------------------
 // LOGIN FUNCTION
 

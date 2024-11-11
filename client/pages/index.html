@@ -277,7 +277,7 @@ function displayMusic(albums) {
 
         // Event listener for clicking on an album card
         albumCard.addEventListener('click', () => {
-            window.location.href = `mediaMusic.html?albumId=${album.mediaID}`; // Use mediaID from the database
+            window.location.href = `mediaMusic.html?id=${album.mediaID}`; // Use mediaID from the database
         });
 
         albumsContainer.appendChild(albumCard);
