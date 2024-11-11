@@ -76,20 +76,20 @@ app.get('/api/games', async (req, res) => {
 // Function to fetch game details from GiantBomb
 const fetchGameDetails = async (gameId) => {
   try {
-      const response = await axios.get(`https://www.giantbomb.com/api/game/${gameId}/?api_key=${API_KEY}&format=json`);
-      const game = response.data.results;
+    const response = await axios.get(`https://www.giantbomb.com/api/game/${gameId}/?api_key=${API_KEY}&format=json`);
+    const game = response.data.results;
 
-      return {
-          title: game.name,
-          releaseDate: game.original_release_date,
-          description: game.deck,
-          posterUrl: game.image ? game.image.medium_url : null,
-          developer: game.developers[0]?.name || null,
-          publisher: game.publishers[0]?.name || null,
-      };
+    return {
+      title: game.name,
+      releaseDate: game.original_release_date,
+      description: game.deck,
+      posterUrl: game.image ? game.image.medium_url : null,
+      developer: game.developers[0]?.name || null,
+      publisher: game.publishers[0]?.name || null,
+    };
   } catch (error) {
-      console.error('Error fetching game details:', error);
-      throw error;
+    console.error('Error fetching game details:', error);
+    throw error;
   }
 };
 
@@ -97,28 +97,28 @@ const fetchGameDetails = async (gameId) => {
 const insertGameData = async (gameData) => {
   const client = await pool.connect();
   try {
-      await client.query('BEGIN');
-      const theMediaID = 500;
-      const mediaResult = await client.query(
-          `INSERT INTO media ("mediaId", title, "releaseDate", description)
+    await client.query('BEGIN');
+    const theMediaID = 500;
+    const mediaResult = await client.query(
+      `INSERT INTO media ("mediaId", title, "releaseDate", description)
            VALUES ($1, $2, $3, $4) RETURNING "mediaId"`,
-          [theMediaID, gameData.title, gameData.releaseDate, gameData.description]
-      );
-      
+      [theMediaID, gameData.title, gameData.releaseDate, gameData.description]
+    );
 
-      await client.query(
-          `INSERT INTO "videoGames" ("mediaID", developer, publisher, poster_url)
+
+    await client.query(
+      `INSERT INTO "videoGames" ("mediaID", developer, publisher, poster_url)
            VALUES ($1, $2, $3, $4)`,
-          [theMediaID, gameData.developer, gameData.publisher, gameData.posterUrl]
-      );
+      [theMediaID, gameData.developer, gameData.publisher, gameData.posterUrl]
+    );
 
-      await client.query('COMMIT');
-      console.log(`Game "${gameData.title}" inserted successfully`);
+    await client.query('COMMIT');
+    console.log(`Game "${gameData.title}" inserted successfully`);
   } catch (error) {
-      await client.query('ROLLBACK');
-      console.error('Error inserting game data:', error);
+    await client.query('ROLLBACK');
+    console.error('Error inserting game data:', error);
   } finally {
-      client.release();
+    client.release();
   }
 };
 
@@ -126,11 +126,11 @@ const insertGameData = async (gameData) => {
 app.get('/api/insert-game/:gameId', async (req, res) => {
   const gameId = req.params.gameId;
   try {
-      const gameData = await fetchGameDetails(gameId);
-      await insertGameData(gameData);
-      res.json({ message: `Game "${gameData.title}" inserted successfully` });
+    const gameData = await fetchGameDetails(gameId);
+    await insertGameData(gameData);
+    res.json({ message: `Game "${gameData.title}" inserted successfully` });
   } catch (error) {
-      res.status(500).json({ error: 'Failed to insert game data' });
+    res.status(500).json({ error: 'Failed to insert game data' });
   }
 });
 
@@ -181,7 +181,7 @@ app.get('/api/random-albums', async (req, res) => {
       ORDER BY RANDOM()
       LIMIT 20;  -- Limit to 20 random albums, can adjust as needed
     `;
-    
+
     const result = await client.query(albumQuery);
     client.release();
 
@@ -215,6 +215,34 @@ app.get('/api/random-games', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch video game data' });
   }
 });
+// Route to retrieve and display books
+app.get('/api/random-books', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const result = await client.query(
+      `SELECT 
+         m."mediaId",
+         m.title,
+         m.description,
+         b.author,
+         b.cover_url,
+         b.year
+       FROM media AS m
+       JOIN books AS b ON m."mediaId" = b."mediaID"
+       ORDER BY RANDOM()
+       LIMIT 20`
+    );
+    client.release();
+
+    res.json(result.rows); // Send books data to the frontend
+  } catch (error) {
+    console.error('Error fetching books:', error);
+    res.status(500).json({ error: 'Failed to fetch books' });
+  }
+});
+
+//Books Media page
+
 // Route to fetch videogame details from the database based on the mediaId.
 app.get('/api/games/:id', async (req, res) => {
   const mediaId = req.params.id;
@@ -235,7 +263,7 @@ app.get('/api/games/:id', async (req, res) => {
       JOIN "videoGames" AS mv ON m."mediaId" = mv."mediaID"
       WHERE m."mediaId" = $1;
     `;
-    
+
     const result = await client.query(mediaQuery, [mediaId]);
 
     client.release();
@@ -250,6 +278,11 @@ app.get('/api/games/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
+
+
+
 
 // Route to fetch media details from the database based on the mediaId.
 app.get('/api/media/:id', async (req, res) => {
@@ -272,7 +305,7 @@ app.get('/api/media/:id', async (req, res) => {
       JOIN movies AS mv ON m."mediaId" = mv."mediaID"
       WHERE m."mediaId" = $1;
     `;
-    
+
     const result = await client.query(mediaQuery, [mediaId]);
 
     client.release();
@@ -307,7 +340,7 @@ app.get('/api/albums/:id', async (req, res) => {
       JOIN albums AS mv ON m."mediaId" = mv."mediaID"
       WHERE m."mediaId" = $1;
     `;
-    
+
     const result = await client.query(mediaQuery, [mediaId]);
 
     client.release();
@@ -322,6 +355,42 @@ app.get('/api/albums/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+//For Books media page
+app.get('/api/books/:id', async (req, res) => {
+  const mediaId = req.params.id;
+
+  try {
+    const client = await pool.connect();
+
+    const mediaQuery = `
+    SELECT 
+      m."mediaId",
+      m.title,
+      m.description,
+      b.author,
+      b.cover_url,
+      b.year
+    FROM media AS m
+    JOIN books AS b ON m."mediaId" = b."mediaID"
+    WHERE m."mediaId" = $1;
+    `;
+
+    const result = await client.query(mediaQuery, [mediaId]);
+
+    client.release();
+
+    if (result.rows.length > 0) {
+      res.json(result.rows[0]);
+    } else {
+      res.status(404).json({ error: 'Media not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching media details:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 // -------------------------------------------------------
 // LOGIN FUNCTION
@@ -395,7 +464,7 @@ app.get('/user-info', (req, res) => {
 // ensures the user must be logged in before accessing the user profile page
 app.get('/userProfile.html', (req, res) => {
   if (!req.session.user) {
-      return res.redirect('/index.html'); // Redirect to the index page if not logged in
+    return res.redirect('/index.html'); // Redirect to the index page if not logged in
   }
   res.sendFile(path.join(__dirname, '../client/pages/userProfile.html'));
 });
@@ -403,13 +472,13 @@ app.get('/userProfile.html', (req, res) => {
 app.get('/api/search', async (req, res) => {
   const searchTerm = req.query.q;
   if (!searchTerm) {
-      return res.status(400).json({ error: 'Missing search term' });
+    return res.status(400).json({ error: 'Missing search term' });
   }
 
   try {
-      const client = await pool.connect();
+    const client = await pool.connect();
 
-      const query = `
+    const query = `
           SELECT m."mediaId", m.title, 'Movie' as "mediaType", mv.poster_url
           FROM media m
           JOIN movies mv ON m."mediaId" = mv."mediaID"
@@ -432,13 +501,13 @@ app.get('/api/search', async (req, res) => {
           LIMIT 10;
       `;
 
-      const values = [`%${searchTerm}%`];
-      const result = await client.query(query, values);
-      client.release();
-      res.json(result.rows);
+    const values = [`%${searchTerm}%`];
+    const result = await client.query(query, values);
+    client.release();
+    res.json(result.rows);
   } catch (error) {
-      console.error('Error executing search query:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    console.error('Error executing search query:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
