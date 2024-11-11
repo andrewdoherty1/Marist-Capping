@@ -10,53 +10,185 @@ body {
     color: #333;
     overflow-x: hidden;
 }
+/* Header Styling */
 header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    justify-content: space-between;
+    padding: 10px 20px; /* Adjusted padding for better alignment */
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     position: sticky;
     top: 0;
     z-index: 100;
 }
-header .logo {
-    font-size: 2em;
+
+/* Logo Container Styling */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.logo-container a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+}
+
+.logo-image {
+    height: 55px;
+    width: auto;
+}
+
+.logo-text {
+    font-size: 1.5em;
     font-weight: bold;
     color: #1e3a8a;
+    white-space: nowrap;
 }
-.search-bar-header {
-    flex: 1;
+
+/* Header Styling */
+header {
     display: flex;
-    justify-content: center;
-    padding: 0 20px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 20px; /* Optional gap for more spacing */
 }
-.search-bar-header input {
-    width: 60%;
-    padding: 10px;
+
+/* Centered Search Bar */
+.search-bar-header {
+    position: relative; /* Set relative positioning for the dropdown alignment */
+    flex: 1;
+    max-width: 600px; /* Adjust based on desired width */
+    margin: 0 auto; /* Center the search bar in its container */
+}
+
+/* Search Bar Input */
+.search-bar-header input[type="text"] {
+    width: 100%;
+    padding: 10px 20px;
     border: none;
     border-radius: 30px;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-    font-size: 1.2em;
+    font-size: 1em;
     transition: all 0.3s ease;
 }
-.search-bar-header input:focus {
+
+.search-bar-header input[type="text"]:focus {
     outline: none;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
-header .profile-icon {
+
+/* Search Suggestions Dropdown */
+.search-suggestions {
+    position: absolute;
+    top: calc(100% + 5px); /* Position it directly below the search bar */
+    left: 0;
+    width: 100%; /* Match the width of the search bar input */
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    max-height: 300px; /* Adjust max height as needed */
+    overflow-y: auto;
+    z-index: 1000;
+    padding: 12px 0;
+    display: none; /* Hide initially */
+}
+
+/* Individual Suggestion Item Styling */
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px; /* Increase padding for readability */
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.suggestion-item:hover {
+    background-color: #f5f5f5; /* Subtle hover effect */
+}
+
+.suggestion-item img {
+    width: 100px; /* Larger image */
+    height: 100px;
+    border-radius: 5px; /* Rounded corners for images */
+    margin-right: 15px;
+}
+
+.suggestion-item p {
+    margin: 0;
+    font-size: 1em; /* Slightly larger text */
+    color: #333;
+}
+
+.suggestion-item p strong {
+    font-weight: 600; /* Emphasize titles */
+    font-size: 1.4em; /* Larger title text */
+}
+
+.suggestion-item p:last-child {
+    font-size: 0.9em; /* Smaller text for media type */
+    color: #666;
+}
+
+
+
+
+/* Header Right Section */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.sign-in-link {
+    font-size: 1em;
+    color: #1e3a8a;
+    text-decoration: none;
+    font-weight: bold;
+    transition: text-decoration 0.3s;
+}
+
+.sign-in-link:hover {
+    text-decoration: underline;
+}
+
+.profile-icon {
     width: 50px;
     height: 50px;
     border-radius: 50%;
+    overflow: hidden;
     background-color: #fff;
-    display: inline-block;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
 }
-header .profile-icon img {
+
+.profile-icon img {
     width: 100%;
-    border-radius: 50%;
+    height: 100%;
+    object-fit: cover;
 }
+
+/* Adjustments to fix any residual header issues */
+header a {
+    text-decoration: none;
+    color: inherit;
+}
+
+header a:hover {
+    text-decoration: none;
+}
+
+
 nav {
     display: flex;
     justify-content: center;

@@ -24,10 +24,10 @@
             <input type="text" placeholder="Search for media">
         </div>
 
-        <!-- Sign-in Link and Profile Icon -->
+        <!-- Sign-in / Log-out Link and Profile Icon -->
         <div class="header-right">
-            <a href="createAccount.html" class="sign-in-link">Sign In</a>
-            <div class="profile-icon">
+            <a href="createAccount.html" id="auth-link" class="sign-in-link">Sign In</a>
+            <div class="profile-icon" id="profile-icon">
                 <a href="userProfile.html">
                     <img src="https://via.placeholder.com/50" alt="Profile">
                 </a>
@@ -44,13 +44,13 @@
         <a onclick="showSection('settings', this)">Settings</a>
     </nav>
     
-    <!-- User Profile Section -->
-    <div class="profile-container">
+     <!-- User Profile Section -->
+     <div class="profile-container">
         <div class="profile-picture">
             <img src="https://via.placeholder.com/150" alt="User Profile Picture">
         </div>
         <div class="user-description">
-            <h2>User Name</h2>
+            <h2 id="username-display">User Name</h2>
             <p id="user-description-text">
                 This is your description. You can edit this in your settings.
             </p>
@@ -138,6 +138,77 @@
     </div>
     
     <script>
+         // Fetch and display the logged-in user's username
+         async function loadUserProfile() {
+            const response = await fetch('/user-info');
+            const data = await response.json();
+
+            if (data.success) {
+                // Display the username in the profile section
+                document.getElementById('username-display').textContent = data.username;
+            } else {
+                // Optionally handle case where user is not logged in
+                console.error(data.message);
+                document.getElementById('username-display').textContent = "Guest";
+            }
+        }
+         // Load user profile on page load
+         document.addEventListener('DOMContentLoaded', loadUserProfile);
+
+         // Check if user is logged in and update auth link
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const response = await fetch('/session-status');
+                const result = await response.json();
+
+                if (result.loggedIn) {
+                    // User is logged in: show Log Out button
+                    const authLink = document.getElementById("auth-link");
+                    authLink.textContent = "Log Out";
+                    authLink.href = "#"; // Prevent navigation for log-out action
+                    authLink.addEventListener("click", handleLogout); // Set up log-out click event
+                }
+            } catch (error) {
+                console.error("Error checking session status:", error);
+            }
+        });
+
+        // Function to handle logging out
+        async function handleLogout(event) {
+            event.preventDefault();
+            try {
+                const response = await fetch('/logout', { method: 'POST' });
+                const result = await response.json();
+                if (result.success) {
+                    window.location.href = 'index.html'; // Redirect after logging out
+                } else {
+                    console.error("Error logging out:", result.message);
+                }
+            } catch (error) {
+                console.error("Logout request error:", error);
+            }
+        }
+
+        fetch('/check-session')
+            .then(response => response.json())
+            .then(data => {
+                if (data.loggedIn) {
+                    // Show user info or a "Logout" button
+                } else {
+                    // Redirect to login if needed
+                    window.location.href = '/createAccount.html';
+                }
+            });
+
+
+
+
+
+
+
+
+
+
         // JavaScript to handle content switching
         function showSection(sectionId, clickedLink) 
         {
