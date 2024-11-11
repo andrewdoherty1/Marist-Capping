@@ -205,7 +205,7 @@ app.get('/api/random-games', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch video game data' });
   }
 });
-// Route to Populate Books tab.
+// Route to retrieve and display books
 app.get('/api/random-books', async (req, res) => {
   try {
     const client = await pool.connect();
@@ -216,20 +216,58 @@ app.get('/api/random-books', async (req, res) => {
          m.description,
          b.author,
          b.cover_url,
-         b.year,
+         b.year
        FROM media AS m
-       JOIN movies AS mv ON m."mediaId" = b."mediaID"
+       JOIN books AS b ON m."mediaId" = b."mediaID"
        ORDER BY RANDOM()
        LIMIT 20`
     );
     client.release();
 
-    res.json(result.rows);
+    res.json(result.rows); // Send books data to the frontend
   } catch (error) {
-    console.error('Error fetching random movies:', error);
-    res.status(500).json({ error: 'Failed to fetch random movies' });
+    console.error('Error fetching books:', error);
+    res.status(500).json({ error: 'Failed to fetch books' });
   }
 });
+
+//Books Media page
+app.get('/api/books/:id', async (req, res) => {
+  const mediaId = req.params.id;
+
+  try {
+    const client = await pool.connect();
+
+    const mediaQuery = `
+      SELECT 
+        m."mediaId", 
+        m.title, 
+        m.description, 
+        b.author, 
+        b.cover_url, 
+        b.year, 
+      FROM media AS m
+      JOIN books AS b ON m."mediaId" = b."mediaID"
+      WHERE m."mediaId" = $1;
+    `;
+    
+    const result = await client.query(mediaQuery, [mediaId]);
+
+    client.release();
+
+    if (result.rows.length > 0) {
+      res.json(result.rows[0]);
+    } else {
+      res.status(404).json({ error: 'Media not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching media details:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
 
 
 

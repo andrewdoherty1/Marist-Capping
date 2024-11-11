@@ -129,40 +129,45 @@
 <script>
     // Function to fetch and display book details from Open Library API
     // Fetch and display book details from Open Library API
-async function fetchBookDetails(bookId) {
+    async function fetchMediaDetails(mediaId) {
     try {
-        const response = await fetch(`https://openlibrary.org/works/${bookId}.json`);
-        const book = await response.json();
-
-        if (book) {
-            // Populate media details in the HTML
-            document.getElementById('media-title').textContent = book.title || 'Unknown Title';
-            document.getElementById('media-author').innerHTML = `<strong>Author:</strong> ${book.authors ? book.authors.map(author => author.name).join(', ') : 'Unknown'}`;
-            document.getElementById('media-image').src = book.covers ? `https://covers.openlibrary.org/b/id/${book.covers[0]}-L.jpg` : 'https://via.placeholder.com/150';
-            document.getElementById('media-release-date').innerHTML = `<strong>First Published:</strong> ${book.first_publish_date || 'N/A'}`;
-            document.getElementById('media-description').textContent = book.description ? (typeof book.description === 'string' ? book.description : book.description.value) : 'No description available.';
-        } else {
-            document.getElementById('media-description').textContent = 'Book details not found.';
+        // Fetch the book details from the Remote Database based on the mediaId.
+        const bookResponse = await fetch(`/api/books/${mediaId}`);
+        
+        // Check
+        if (!bookResponse.ok) {
+            throw new Error('Failed to fetch media details');
         }
 
+        const media = await bookResponse.json();
+
+        // Populate media details.
+        document.getElementById('media-title').textContent = media.title;
+        document.getElementById('media-description').textContent = media.description;
+        //document.getElementById('media-image').src = `https://image.tmdb.org/t/p/w500${media.poster_url}`;
+        //document.getElementById('media-release-date').innerHTML = `<strong>Release Date:</strong> ${media.releaseDate}`;
+        // Display the author's name.
+        if (media.author) {
+            document.getElementById('media-author').innerHTML = `<strong>Author:</strong> ${media.author}`;
+        } else {
+            document.getElementById('media-author').innerHTML = `<strong>Author:</strong> Not available`;
+        }
+
+        // Display the cas.
+
+
     } catch (error) {
-        console.error('Failed to fetch book details:', error);
+        console.error('Failed to fetch media details:', error);
     }
+    
 }
 
-// Call fetchBookDetails with the selected book ID
+// Call fetchMediaDetails with the book ID from the URL
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const bookId = urlParams.get('id'); // Get the book ID from the URL
-    fetchBookDetails(bookId);
+    const mediaId = urlParams.get('id') || '550';
+    fetchMediaDetails(mediaId);
 });
-
-    // Call fetchBookDetails with the selected book ID
-    document.addEventListener('DOMContentLoaded', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const bookId = urlParams.get('id'); // Get the book ID from the URL
-        fetchBookDetails(bookId);
-    });
 
     // Star rating system
     const stars = document.querySelectorAll('.star');
