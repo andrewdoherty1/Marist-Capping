@@ -1,17 +1,18 @@
 //const express = require('express');
-import express from 'express';
 import fetch from 'node-fetch';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import axios from 'axios';
+import pkg from 'pg';
+const { Pool } = pkg;
+import express from 'express';
+import session from 'express-session';
+
+
 //const moviesRoutes = require('./routes/moviesRoutes');
 const app = express();
-//const PORT = process.env.PORT || 3000;
 const PORT = 3000;
-
-import pkg from 'pg';
-import axios from 'axios';
-const { Pool } = pkg;
 
 //Connect to the Remote Database.
 const pool = new Pool({
@@ -22,6 +23,10 @@ const pool = new Pool({
   port: 5432,                 // PostgreSQL default port
 });
 
+// Enable CORS for all routes
+app.use(cors());
+app.use(express.json());
+
 //app.use('/api/movies', moviesRoutes);
 
 // Get the directory name of the current module
@@ -30,10 +35,15 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.static(path.join(__dirname, '../client/pages')));
 
-// Enable CORS for all routes
-app.use(cors());
-
-app.use(express.json()); // Parse JSON request bodies
+// Configure session middleware
+app.use(
+  session({
+    secret: 'your-secret-key', // Replace with a secure secret key
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false } // Set to true in production with HTTPS
+  })
+);
 
 // app.get('/', function (req, res) {
 //   res.sendFile('index.html', { root: '../client/pages' })
@@ -301,8 +311,58 @@ const loginUser = async (username, password) => {
 // Login route
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  const result = await loginUser(username, password);
-  res.json(result);
+  try {
+    const query = 'SELECT * FROM users WHERE username = $1 AND password = $2';
+    const result = await pool.query(query, [username, password]);
+
+    if (result.rows.length > 0) {
+      // User authenticated, create session
+      req.session.user = { username: result.rows[0].username, id: result.rows[0].id };
+      res.json({ success: true, message: 'Login successful!' });
+    } else {
+      res.json({ success: false, message: 'Incorrect username or password.' });
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    res.json({ success: false, message: 'Login error. Please try again.' });
+  }
+});
+
+// Route to check if user is logged in
+app.get('/check-session', (req, res) => {
+  if (req.session.user) {
+    res.json({ loggedIn: true, user: req.session.user });
+  } else {
+    res.json({ loggedIn: false });
+  }
+});
+
+// Logout route
+app.post('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Error logging out:', err);
+      return res.json({ success: false, message: 'Logout error' });
+    }
+    res.json({ success: true, message: 'Logged out successfully' });
+  });
+});
+
+// get's user info
+app.get('/user-info', (req, res) => {
+  if (req.session.user) {
+    res.json({ success: true, username: req.session.user.username });
+  } else {
+    res.json({ success: false, message: 'User not logged in' });
+  }
+});
+
+// ensures the user must be logged in before accessing the user profile page
+app.get('/userProfile.html', (req, res) => {
+  if (!req.session.user) {
+      return res.redirect('/index.html'); // Redirect to the index page if not logged in
+  }
+  res.sendFile(path.join(__dirname, '../client/pages/userProfile.html'));
 });
 
 app.get('/api/search', async (req, res) => {
