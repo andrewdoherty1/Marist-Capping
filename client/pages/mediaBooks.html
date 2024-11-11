@@ -105,7 +105,7 @@
     <div class="media-details">
         <h2 class="media-title" id="media-title">Media Title</h2>
         <p id="media-author"><strong>Author:</strong> Loading...</p>
-        <p id="media-release-date"><strong>First Published:</strong> Loading...</p>
+        <p id="media-release-date"><strong>Year:</strong> Loading...</p>
         <div class="media-description">
             <p id="media-description"><strong>Description:</strong> Loading description...</p>
         </div>
@@ -144,9 +144,12 @@
         // Populate media details.
         document.getElementById('media-title').textContent = media.title;
         document.getElementById('media-description').textContent = media.description;
+        //document.getElementById('media-release-date').textContent = media.year;
         //document.getElementById('media-image').src = `https://image.tmdb.org/t/p/w500${media.poster_url}`;
-        //document.getElementById('media-release-date').innerHTML = `<strong>Release Date:</strong> ${media.releaseDate}`;
+        document.getElementById('media-release-date').innerHTML = `<strong>Release Date:</strong> ${media.year}`;
+        document.getElementById('media-image').src = media.cover_url;
         // Display the author's name.
+        
         if (media.author) {
             document.getElementById('media-author').innerHTML = `<strong>Author:</strong> ${media.author}`;
         } else {
