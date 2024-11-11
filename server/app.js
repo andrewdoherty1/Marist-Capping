@@ -62,6 +62,70 @@ app.get('/api/games', async (req, res) => {
 });
 
 
+
+// Function to fetch game details from GiantBomb
+const fetchGameDetails = async (gameId) => {
+  try {
+      const response = await axios.get(`https://www.giantbomb.com/api/game/${gameId}/?api_key=${API_KEY}&format=json`);
+      const game = response.data.results;
+
+      return {
+          title: game.name,
+          releaseDate: game.original_release_date,
+          description: game.deck,
+          posterUrl: game.image ? game.image.medium_url : null,
+          developer: game.developers[0]?.name || null,
+          publisher: game.publishers[0]?.name || null,
+      };
+  } catch (error) {
+      console.error('Error fetching game details:', error);
+      throw error;
+  }
+};
+
+// Function to insert game data into the database
+const insertGameData = async (gameData) => {
+  const client = await pool.connect();
+  try {
+      await client.query('BEGIN');
+      const theMediaID = 422;
+      const mediaResult = await client.query(
+          `INSERT INTO media ("mediaId", title, "releaseDate", description)
+           VALUES ($1, $2, $3, $4) RETURNING "mediaId"`,
+          [theMediaID, gameData.title, gameData.releaseDate, gameData.description]
+      );
+      
+
+      await client.query(
+          `INSERT INTO "videoGames" ("mediaID", developer, publisher, poster_url)
+           VALUES ($1, $2, $3, $4)`,
+          [theMediaID, gameData.developer, gameData.publisher, gameData.posterUrl]
+      );
+
+      await client.query('COMMIT');
+      console.log(`Game "${gameData.title}" inserted successfully`);
+  } catch (error) {
+      await client.query('ROLLBACK');
+      console.error('Error inserting game data:', error);
+  } finally {
+      client.release();
+  }
+};
+
+// Endpoint to fetch game data and insert it into the database
+app.get('/api/insert-game/:gameId', async (req, res) => {
+  const gameId = req.params.gameId;
+  try {
+      const gameData = await fetchGameDetails(gameId);
+      await insertGameData(gameData);
+      res.json({ message: `Game "${gameData.title}" inserted successfully` });
+  } catch (error) {
+      res.status(500).json({ error: 'Failed to insert game data' });
+  }
+});
+
+
+
 // Route to Populate Movies tab.
 app.get('/api/random-movies', async (req, res) => {
   try {
@@ -123,6 +187,24 @@ app.get('/api/random-albums', async (req, res) => {
 });
 
 
+
+// Route to Populate Videogame Tab.
+app.get('/api/random-games', async (req, res) => {
+  try {
+    const query = `
+      SELECT m."mediaId", m.title, TO_CHAR(m."releaseDate", 'YYYY-MM-DD') AS "releaseDate", m.description, vg.developer, vg.publisher, vg.poster_url
+      FROM media m
+      JOIN "videoGames" vg ON m."mediaId" = vg."mediaID"
+      ORDER BY RANDOM()
+      LIMIT 20;
+    `;
+    const result = await pool.query(query);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching random video games:', error);
+    res.status(500).json({ error: 'Failed to fetch video game data' });
+  }
+});
 
 // Route to fetch media details from the database based on the mediaId.
 app.get('/api/media/:id', async (req, res) => {
@@ -222,6 +304,49 @@ app.post('/login', async (req, res) => {
   const result = await loginUser(username, password);
   res.json(result);
 });
+
+app.get('/api/search', async (req, res) => {
+  const searchTerm = req.query.q;
+  if (!searchTerm) {
+      return res.status(400).json({ error: 'Missing search term' });
+  }
+
+  try {
+      const client = await pool.connect();
+
+      const query = `
+          SELECT m."mediaId", m.title, 'Movie' as "mediaType", mv.poster_url
+          FROM media m
+          JOIN movies mv ON m."mediaId" = mv."mediaID"
+          WHERE LOWER(m.title) LIKE LOWER($1)
+          UNION
+          SELECT m."mediaId", m.title, 'Album' as "mediaType", a.cover_url as poster_url
+          FROM media m
+          JOIN albums a ON m."mediaId" = a."mediaID"
+          WHERE LOWER(m.title) LIKE LOWER($1)
+          UNION
+          SELECT m."mediaId", m.title, 'Book' as "mediaType", b.cover_url as poster_url
+          FROM media m
+          JOIN books b ON m."mediaId" = b."mediaID"
+          WHERE LOWER(m.title) LIKE LOWER($1)
+          UNION
+          SELECT m."mediaId", m.title, 'Video Game' as "mediaType", vg.poster_url
+          FROM media m
+          JOIN "videoGames" vg ON m."mediaId" = vg."mediaID"
+          WHERE LOWER(m.title) LIKE LOWER($1)
+          LIMIT 10;
+      `;
+
+      const values = [`%${searchTerm}%`];
+      const result = await client.query(query, values);
+      client.release();
+      res.json(result.rows);
+  } catch (error) {
+      console.error('Error executing search query:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 
 

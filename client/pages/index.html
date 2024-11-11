@@ -11,19 +11,20 @@
 </head>
 
 <body>
-
     <!-- Header -->
     <header>
-        <a onclick="showPage('feed', document.querySelector('nav a:first-child'))" style="cursor: pointer;">
-            <div class="logo-container">
-                <a href="index.html">
-                    <img src="images/logo.png" alt="Logo" class="logo-image">
-                </a>
-                <span class="logo-text">Opinionate</span>
-            </div>
-        </a>
+        <!-- Logo -->
+        <div class="logo-container">
+            <a href="index.html">
+                <img src="images/logo.png" alt="Logo" class="logo-image">
+            </a>
+            <span class="logo-text">Opinionate</span>
+        </div>
+
+        <!-- Centered Search Bar -->
         <div class="search-bar-header">
-            <input type="text" placeholder="Search for media">
+            <input type="text" placeholder="Search for media" id="search-input">
+            <div id="search-suggestions" class="search-suggestions"></div>
         </div>
 
         <!-- Sign-in Link and Profile Icon -->
@@ -204,6 +205,50 @@
     });
 }
 
+async function fetchAndDisplayGames() {
+    try {
+        const response = await fetch('/api/random-games');
+        const games = await response.json();
+
+        displayGames(games);
+    } catch (error) {
+        console.error('Error fetching random games:', error);
+    }
+}
+
+function displayGames(games) {
+    const gamesContainer = document.getElementById('games-container');
+    gamesContainer.innerHTML = ''; // Clear previous content
+
+    games.forEach(game => {
+        const gameCard = document.createElement('div');
+        gameCard.classList.add('media-item');
+        gameCard.innerHTML = `
+            <img src="${game.poster_url}" alt="${game.title}">
+            <div class="media-info">
+                <p><strong>${game.title}</strong> - ${game.releaseDate}</p>
+                <p>Developer: ${game.developer}</p>
+                <p>Publisher: ${game.publisher}</p>
+            </div>
+            <div class="star-rating">
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+                <i class="fa fa-star"></i>
+            </div>
+        `;
+        
+        // Navigate to internal media page with the game ID
+        gameCard.addEventListener('click', () => {
+            window.location.href = `mediaGame.html?id=${game.mediaId}`;
+        });
+
+        gamesContainer.appendChild(gameCard);
+    });
+}
+
+
 
         // Fetch Music (Albums) from Spotify
 //        async function fetchMusic() {
@@ -319,60 +364,63 @@ function displayMusic(albums) {
         //GiantBomb
         const apiKey = '8dfa1038447a4c092e489b3775d27ae4821a1e90';
         const url = `http://localhost:3000/api/games`;
+//         //GiantBomb
+//         const apiKey = '8dfa1038447a4c092e489b3775d27ae4821a1e90';
+//         const url = `http://localhost:3000/api/games`;
 
-        // Fetch games from GiantBomb.
-        async function fetchGames() {
-            try {
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
+//         // Fetch games from GiantBomb.
+//         async function fetchGames() {
+//             try {
+//                 const response = await fetch(url, {
+//                     method: 'GET',
+//                     headers: {
 
-                        'Accept': 'application/json',
-                    }
-                });
+//                         'Accept': 'application/json',
+//                     }
+//                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+//                 if (!response.ok) {
+//                     throw new Error(`HTTP error! status: ${response.status}`);
+//                 }
 
-                const data = await response.json();
-                console.log("games");
-                displayGames(data.results);
+//                 const data = await response.json();
+//                 console.log("games");
+//                 displayGames(data.results);
 
 
-            } catch (error) {
-                console.error('Error fetching popular games:', error);
-            }
-        }
-        // Display Video Games.
-        function displayGames(games) {
-    const gamesContainer = document.getElementById('games-container');
-    gamesContainer.innerHTML = ''; // Clear previous content
+//             } catch (error) {
+//                 console.error('Error fetching popular games:', error);
+//             }
+//         }
+//         // Display Video Games.
+//         function displayGames(games) {
+//     const gamesContainer = document.getElementById('games-container');
+//     gamesContainer.innerHTML = ''; // Clear previous content
 
-    games.forEach(game => {
-        const gameCard = document.createElement('div');
-        gameCard.classList.add('media-item');
-        gameCard.innerHTML = `
-            <img src="${game.image?.super_url || 'default-image.jpg'}" alt="${game.name}">
-            <div class="media-info">
-                <p><strong>${game.name}</strong></p>
-                <p>Release Date: ${game.original_release_date || 'N/A'}</p>
-            </div>
-            <div class="star-rating">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-            </div>
-        `;
-        gameCard.addEventListener('click', () => {
-            window.location.href = `mediaVG.html?mediaType=game&id=${game.id}`;
-        });
+//     games.forEach(game => {
+//         const gameCard = document.createElement('div');
+//         gameCard.classList.add('media-item');
+//         gameCard.innerHTML = `
+//             <img src="${game.image?.super_url || 'default-image.jpg'}" alt="${game.name}">
+//             <div class="media-info">
+//                 <p><strong>${game.name}</strong></p>
+//                 <p>Release Date: ${game.original_release_date || 'N/A'}</p>
+//             </div>
+//             <div class="star-rating">
+//                 <i class="fa fa-star"></i>
+//                 <i class="fa fa-star"></i>
+//                 <i class="fa fa-star"></i>
+//                 <i class="fa fa-star"></i>
+//                 <i class="fa fa-star"></i>
+//             </div>
+//         `;
+//         gameCard.addEventListener('click', () => {
+//             window.location.href = `mediaVG.html?mediaType=game&id=${game.id}`;
+//         });
 
-        gamesContainer.appendChild(gameCard);
-    });
-}
+//         gamesContainer.appendChild(gameCard);
+//     });
+// }
 
 
         // Fetch Books from Open Library API
@@ -438,7 +486,7 @@ function displayMusic(albums) {
             if (pageId === 'movies') fetchAndDisplayMovies();
             if (pageId === 'music') fetchAndDisplayAlbums();
             if (pageId === 'books') fetchBooks(); // Fetch books when books tab is selected
-            if (pageId === 'games') fetchGames();
+            if (pageId === 'games') fetchAndDisplayGames()
         }
 
 
@@ -446,6 +494,89 @@ function displayMusic(albums) {
         document.addEventListener('DOMContentLoaded', () => {
             showPage('feed', document.querySelector('nav a.active'));
         });
+
+        document.addEventListener('DOMContentLoaded', () => {
+    // ... existing code ...
+
+    // Search functionality
+    const searchInput = document.getElementById('search-input');
+    const suggestionsContainer = document.getElementById('search-suggestions');
+
+    let searchTimeout;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+
+        if (query.length > 0) {
+            searchTimeout = setTimeout(() => {
+                fetchSearchSuggestions(query);
+            }, 300); // Delay to reduce the number of requests
+        } else {
+            suggestionsContainer.innerHTML = '';
+            suggestionsContainer.style.display = 'none';
+        }
+    });
+
+    function fetchSearchSuggestions(query) {
+        fetch(`/api/search?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                displaySearchSuggestions(data);
+            })
+            .catch(error => {
+                console.error('Error fetching search suggestions:', error);
+            });
+    }
+
+    function displaySearchSuggestions(suggestions) {
+        suggestionsContainer.innerHTML = '';
+
+        if (suggestions.length > 0) {
+            suggestions.forEach(item => {
+                const suggestionItem = document.createElement('div');
+                suggestionItem.classList.add('suggestion-item');
+
+                suggestionItem.innerHTML = `
+                    <img src="${item.poster_url || 'https://via.placeholder.com/50'}" alt="${item.title}">
+                    <div>
+                        <p><strong>${item.title}</strong></p>
+                        <p>${item.mediaType}</p>
+                    </div>
+                `;
+
+                suggestionItem.addEventListener('click', () => {
+                    let url = '';
+                    if (item.mediaType === 'Movie') {
+                        url = `mediaMovies.html?id=${item.mediaId}`;
+                    } else if (item.mediaType === 'Album') {
+                        url = `mediaMusic.html?albumId=${item.mediaId}`;
+                    } else if (item.mediaType === 'Book') {
+                        url = `mediaBooks.html?id=${item.mediaId}`;
+                    } else if (item.mediaType === 'Video Game') {
+                        url = `mediaGame.html?id=${item.mediaId}`;
+                    }
+                    window.location.href = url;
+                });
+
+                suggestionsContainer.appendChild(suggestionItem);
+            });
+
+            suggestionsContainer.style.display = 'block';
+        } else {
+            suggestionsContainer.style.display = 'none';
+        }
+    }
+
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!suggestionsContainer.contains(event.target) && event.target !== searchInput) {
+            suggestionsContainer.innerHTML = '';
+            suggestionsContainer.style.display = 'none';
+        }
+    });
+});
+
 
         // Refresh Spotify Token every 55 minutes
         setInterval(fetchSpotifyAccessToken, 55 * 60 * 1000);
