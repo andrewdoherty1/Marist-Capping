@@ -11,25 +11,26 @@
 </head>
 
 <body>
-
     <!-- Header -->
     <header>
-        <a onclick="showPage('feed', document.querySelector('nav a:first-child'))" style="cursor: pointer;">
-            <div class="logo-container">
-                <a href="index.html">
-                    <img src="images/logo.png" alt="Logo" class="logo-image">
-                </a>
-                <span class="logo-text">Opinionate</span>
-            </div>
-        </a>
-        <div class="search-bar-header">
-            <input type="text" placeholder="Search for media">
+        <!-- Logo -->
+        <div class="logo-container">
+            <a href="index.html">
+                <img src="images/logo.png" alt="Logo" class="logo-image">
+            </a>
+            <span class="logo-text">Opinionate</span>
         </div>
 
-        <!-- Sign-in Link and Profile Icon -->
+        <!-- Centered Search Bar -->
+        <div class="search-bar-header">
+            <input type="text" placeholder="Search for media" id="search-input">
+            <div id="search-suggestions" class="search-suggestions"></div>
+        </div>
+    
+        <!-- Sign-in / Log-out Link and Profile Icon -->
         <div class="header-right">
-            <a href="createAccount.html" class="sign-in-link">Sign In</a>
-            <div class="profile-icon">
+            <a href="createAccount.html" id="auth-link" class="sign-in-link">Sign In</a>
+            <div class="profile-icon" id="profile-icon">
                 <a href="userProfile.html">
                     <img src="https://via.placeholder.com/50" alt="Profile">
                 </a>
@@ -101,6 +102,54 @@
     </div>
 
     <script>
+        // user session details
+        // Check if user is logged in and update auth link
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const response = await fetch('/check-session');
+                const result = await response.json();
+
+                if (result.loggedIn) {
+                    const authLink = document.getElementById("auth-link");
+                    authLink.textContent = "Log Out";
+                    authLink.href = "#";
+                    authLink.addEventListener("click", handleLogout);
+                    
+                    // Update UI with the user's name
+                    document.getElementById("profile-icon").title = result.user.username;
+                }
+            } catch (error) {
+                console.error("Error checking session status:", error);
+            }
+        });
+
+    // Function to handle logging out
+    async function handleLogout(event) {
+        event.preventDefault();
+        try {
+            const response = await fetch('/logout', { method: 'POST' });
+            const result = await response.json();
+            if (result.success) {
+                window.location.href = 'index.html'; // Redirect after logging out
+            } else {
+                console.error("Error logging out:", result.message);
+            }
+        } catch (error) {
+            console.error("Logout request error:", error);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
         const CLIENT_ID = 'caff6515bb5c4394a35ad9b11ee09f31';
         const CLIENT_SECRET = 'aa0145b7bc214e2fae5c02bc3ff2933b';
         let spotifyAccessToken;
@@ -240,7 +289,7 @@ function displayGames(games) {
         
         // Navigate to internal media page with the game ID
         gameCard.addEventListener('click', () => {
-            window.location.href = `mediaGame.html?id=${game.mediaId}`;
+            window.location.href = `mediaVG.html?id=${game.mediaId}`;
         });
 
         gamesContainer.appendChild(gameCard);
@@ -365,7 +414,7 @@ function displayMusic(albums) {
 
         // Event listener for clicking on an album card
         albumCard.addEventListener('click', () => {
-            window.location.href = `mediaMusic.html?albumId=${album.mediaID}`; // Use mediaID from the database
+            window.location.href = `mediaMusic.html?id=${album.mediaID}`; // Use mediaID from the database
         });
 
         albumsContainer.appendChild(albumCard);
@@ -540,6 +589,89 @@ function displayMusic(albums) {
         document.addEventListener('DOMContentLoaded', () => {
             showPage('feed', document.querySelector('nav a.active'));
         });
+
+        document.addEventListener('DOMContentLoaded', () => {
+    // ... existing code ...
+
+    // Search functionality
+    const searchInput = document.getElementById('search-input');
+    const suggestionsContainer = document.getElementById('search-suggestions');
+
+    let searchTimeout;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+
+        if (query.length > 0) {
+            searchTimeout = setTimeout(() => {
+                fetchSearchSuggestions(query);
+            }, 300); // Delay to reduce the number of requests
+        } else {
+            suggestionsContainer.innerHTML = '';
+            suggestionsContainer.style.display = 'none';
+        }
+    });
+
+    function fetchSearchSuggestions(query) {
+        fetch(`/api/search?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                displaySearchSuggestions(data);
+            })
+            .catch(error => {
+                console.error('Error fetching search suggestions:', error);
+            });
+    }
+
+    function displaySearchSuggestions(suggestions) {
+        suggestionsContainer.innerHTML = '';
+
+        if (suggestions.length > 0) {
+            suggestions.forEach(item => {
+                const suggestionItem = document.createElement('div');
+                suggestionItem.classList.add('suggestion-item');
+
+                suggestionItem.innerHTML = `
+                    <img src="${item.poster_url || 'https://via.placeholder.com/50'}" alt="${item.title}">
+                    <div>
+                        <p><strong>${item.title}</strong></p>
+                        <p>${item.mediaType}</p>
+                    </div>
+                `;
+
+                suggestionItem.addEventListener('click', () => {
+                    let url = '';
+                    if (item.mediaType === 'Movie') {
+                        url = `mediaMovies.html?id=${item.mediaId}`;
+                    } else if (item.mediaType === 'Album') {
+                        url = `mediaMusic.html?albumId=${item.mediaId}`;
+                    } else if (item.mediaType === 'Book') {
+                        url = `mediaBooks.html?id=${item.mediaId}`;
+                    } else if (item.mediaType === 'Video Game') {
+                        url = `mediaGame.html?id=${item.mediaId}`;
+                    }
+                    window.location.href = url;
+                });
+
+                suggestionsContainer.appendChild(suggestionItem);
+            });
+
+            suggestionsContainer.style.display = 'block';
+        } else {
+            suggestionsContainer.style.display = 'none';
+        }
+    }
+
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!suggestionsContainer.contains(event.target) && event.target !== searchInput) {
+            suggestionsContainer.innerHTML = '';
+            suggestionsContainer.style.display = 'none';
+        }
+    });
+});
+
 
         // Refresh Spotify Token every 55 minutes
         setInterval(fetchSpotifyAccessToken, 55 * 60 * 1000);

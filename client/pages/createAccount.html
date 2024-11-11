@@ -93,7 +93,7 @@
 </div>
 
 <script>
-    // Function to toggle between Sign-In and Create Account forms
+
     const insertUser = async (username, password, email) => {
     try {
       const query = `
@@ -112,6 +112,17 @@
     }
   };
 
+  // Check if user is already logged in on page load
+  async function checkSession() {
+        const response = await fetch('/check-session');
+        const data = await response.json();
+        
+        if (data.loggedIn) {
+            window.location.href = 'index.html'; // Redirect to main page if logged in
+        }
+    }
+
+    // Function to toggle between Sign-In and Create Account forms
     function toggleForms() {
         const signInForm = document.getElementById('sign-in-form');
         const createAccountForm = document.getElementById('create-account-form');
@@ -141,31 +152,31 @@
 
     // sign in 
     document.getElementById('login-form').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const username = document.getElementById('sign-in-username').value;
-            const password = document.getElementById('sign-in-password').value;
-            const loginError = document.getElementById('login-error');
+        event.preventDefault();
+        const username = document.getElementById('sign-in-username').value;
+        const password = document.getElementById('sign-in-password').value;
+        const loginError = document.getElementById('login-error');
 
-            try {
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const result = await response.json();
+        try {
+            const response = await fetch('http://localhost:3000/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const result = await response.json();
 
-                if (result.success) {
-                    window.location.href = 'index.html';
-                } else {
-                    loginError.textContent = result.message || 'Incorrect username or password.';
-                    loginError.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Login request error:', error);
-                loginError.textContent = 'An error occurred. Please try again.';
+            if (result.success) {
+                window.location.href = 'index.html';
+            } else {
+                loginError.textContent = result.message;
                 loginError.style.display = 'block';
             }
-        });
+        } catch (error) {
+            loginError.textContent = 'An error occurred during login. Please try again.';
+            loginError.style.display = 'block';
+            console.error('Login request error:', error); // Log client-side errors for debugging
+        }
+    });
 </script>
 
 </body>
