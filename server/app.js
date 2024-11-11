@@ -205,6 +205,33 @@ app.get('/api/random-games', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch video game data' });
   }
 });
+// Route to Populate Books tab.
+app.get('/api/random-books', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const result = await client.query(
+      `SELECT 
+         m."mediaId",
+         m.title,
+         m.description,
+         b.author,
+         b.cover_url,
+         b.year,
+       FROM media AS m
+       JOIN movies AS mv ON m."mediaId" = b."mediaID"
+       ORDER BY RANDOM()
+       LIMIT 20`
+    );
+    client.release();
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching random movies:', error);
+    res.status(500).json({ error: 'Failed to fetch random movies' });
+  }
+});
+
+
 
 // Route to fetch media details from the database based on the mediaId.
 app.get('/api/media/:id', async (req, res) => {
