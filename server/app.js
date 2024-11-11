@@ -270,6 +270,49 @@ app.post('/login', async (req, res) => {
   res.json(result);
 });
 
+app.get('/api/search', async (req, res) => {
+  const searchTerm = req.query.q;
+  if (!searchTerm) {
+      return res.status(400).json({ error: 'Missing search term' });
+  }
+
+  try {
+      const client = await pool.connect();
+
+      const query = `
+          SELECT m."mediaId", m.title, 'Movie' as "mediaType", mv.poster_url
+          FROM media m
+          JOIN movies mv ON m."mediaId" = mv."mediaID"
+          WHERE LOWER(m.title) LIKE LOWER($1)
+          UNION
+          SELECT m."mediaId", m.title, 'Album' as "mediaType", a.cover_url as poster_url
+          FROM media m
+          JOIN albums a ON m."mediaId" = a."mediaID"
+          WHERE LOWER(m.title) LIKE LOWER($1)
+          UNION
+          SELECT m."mediaId", m.title, 'Book' as "mediaType", b.cover_url as poster_url
+          FROM media m
+          JOIN books b ON m."mediaId" = b."mediaID"
+          WHERE LOWER(m.title) LIKE LOWER($1)
+          UNION
+          SELECT m."mediaId", m.title, 'Video Game' as "mediaType", vg.poster_url
+          FROM media m
+          JOIN "videoGames" vg ON m."mediaId" = vg."mediaID"
+          WHERE LOWER(m.title) LIKE LOWER($1)
+          LIMIT 10;
+      `;
+
+      const values = [`%${searchTerm}%`];
+      const result = await client.query(query, values);
+      client.release();
+      res.json(result.rows);
+  } catch (error) {
+      console.error('Error executing search query:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 
 
 
