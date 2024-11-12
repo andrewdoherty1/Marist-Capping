@@ -396,6 +396,7 @@ app.get('/api/books/:id', async (req, res) => {
 // LOGIN FUNCTION
 
 // Login function to check user credentials
+/*
 const loginUser = async (username, password) => {
   try {
     const query = 'SELECT * FROM users WHERE username = $1 AND password = $2';
@@ -411,6 +412,7 @@ const loginUser = async (username, password) => {
     return { success: false, message: 'Login error. Please try again.' };
   }
 };
+*/
 
 // Login route
 app.post('/login', async (req, res) => {
