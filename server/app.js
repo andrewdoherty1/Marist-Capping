@@ -423,7 +423,9 @@ app.post('/login', async (req, res) => {
 
     if (result.rows.length > 0) {
       // User authenticated, create session
-      req.session.user = { username: result.rows[0].username, id: result.rows[0].id };
+      req.session.user = { username: result.rows[0].username, id: result.rows[0].userID };
+      // Log the session user information to the terminal
+    console.log('Session User:', req.session.user);
       res.json({ success: true, message: 'Login successful!' });
     } else {
       res.json({ success: false, message: 'Incorrect username or password.' });
@@ -510,6 +512,32 @@ app.get('/api/search', async (req, res) => {
   } catch (error) {
     console.error('Error executing search query:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Route to submit a review
+app.post('/submitReview', async (req, res) => {
+  // Ensure the user is logged in
+  if (!req.session.user) {
+      return res.status(401).json({ success: false, message: 'User not logged in' });
+  }
+
+  const { mediaID, reviewText, rating } = req.body;
+  const userID = req.session.user.id; // Retrieve userID from session
+
+  try {
+      const query = `
+          INSERT INTO reviews ("userID", "mediaID", "ratingTxt", "ratingStar")
+          VALUES ($1, $2, $3, $4)
+          RETURNING *;
+      `;
+      const values = [userID, mediaID, reviewText, rating];
+      const result = await pool.query(query, values);
+
+      res.status(200).json({ success: true, review: result.rows[0] });
+  } catch (error) {
+      console.error('Error inserting review:', error);
+      res.status(500).json({ success: false, message: 'Error saving review' });
   }
 });
 
