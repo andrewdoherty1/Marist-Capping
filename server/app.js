@@ -541,6 +541,21 @@ app.post('/submitReview', async (req, res) => {
   }
 });
 
+app.get('/getReviews', async (req, res) => {
+  try {
+      const query = `
+          SELECT reviews."ratingTxt", reviews."ratingStar", users.username, media.title
+          FROM reviews
+          JOIN users ON reviews."userID" = users."userID"
+          JOIN media ON reviews."mediaID" = media."mediaId";
+      `;
+      const result = await pool.query(query);
+      res.status(200).json({ success: true, reviews: result.rows });
+  } catch (error) {
+      console.error('Error fetching reviews:', error);
+      res.status(500).json({ success: false, message: 'Error fetching reviews' });
+  }
+});
 
 
 

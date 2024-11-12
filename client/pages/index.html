@@ -55,18 +55,12 @@
         <!-- Feed Section -->
         <div id="feed" class="page-section">
             <h2>Feed</h2>
-            <p>This is where your friends' reviews will show up.</p>
             <div class="media-list">
                 <!-- Placeholder for future reviews from friends -->
-                <div class="media-item">
-                    <img src="https://via.placeholder.com/80" alt="Media Image">
-                    <div class="media-info">
-                        <p><strong>Friend's Review:</strong> "Amazing movie! 10/10 would recommend!"</p>
-                    </div>
-                </div>
             </div>
         </div>
-
+        
+        
 
         <!-- Movies Section -->
         <div id="movies" class="page-section" style="display: none;">
@@ -582,6 +576,7 @@ function displayMusic(albums) {
             if (pageId === 'music') fetchAndDisplayAlbums();
             if (pageId === 'books') fetchAndDisplayBooks(); // Fetch books when books tab is selected
             if (pageId === 'games') fetchAndDisplayGames()
+            if (pageId === 'feed') loadFeed();
         }
 
 
@@ -673,8 +668,41 @@ function displayMusic(albums) {
 });
 
 
+
         // Refresh Spotify Token every 55 minutes
         setInterval(fetchSpotifyAccessToken, 55 * 60 * 1000);
+
+        async function loadFeed() {
+    try {
+        const response = await fetch('/getReviews');
+        const data = await response.json();
+
+        if (data.success) {
+            const mediaList = document.querySelector('.media-list');
+            mediaList.innerHTML = ''; // Clear existing placeholder content
+
+            data.reviews.forEach(review => {
+                const reviewHTML = `
+                    <div class="media-item">
+                        <img src="https://via.placeholder.com/80" alt="Media Image">
+                        <div class="media-info">
+                            <p><strong>${review.username}'s Review on ${review.title}:</strong> "${review.ratingTxt}"</p>
+                            <p>Rating: ${review.ratingStar} / 10</p>
+                        </div>
+                    </div>
+                `;
+                mediaList.insertAdjacentHTML('beforeend', reviewHTML);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading feed:', error);
+    }
+}
+
+
+
+
+        
     </script>
 
 </body>
