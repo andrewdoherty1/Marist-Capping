@@ -121,6 +121,47 @@
             spotifyAccessToken = data.access_token;
         }
 
+        // // Fetch Popular Movies from TMDB
+        // async function fetchMovies() {
+        //     try {
+        //         const response = await fetch('https://api.themoviedb.org/3/movie/popular', {
+        //             headers: {
+        //                 accept: 'application/json',
+        //                 Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E'
+        //             }
+        //         });
+
+        //         const data = await response.json();
+        //         displayMovies(data.results);
+        //     } catch (error) {
+        //         console.error('Failed to fetch movies:', error);
+        //     }
+        // }
+
+        // // Display Movies
+        // function displayMovies(movies) {
+        //     const moviesContainer = document.getElementById('movies-container');
+        //     moviesContainer.innerHTML = ''; // Clear previous content
+
+        //     movies.forEach(movie => {
+        //         const movieCard = document.createElement('div');
+        //         movieCard.classList.add('media-item');
+        //         movieCard.innerHTML = `
+        //     <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
+        //     <div class="media-info">
+        //         <p><strong>${movie.title}</strong> - ${movie.release_date}</p>
+        //         <p>Rating: ${movie.vote_average}</p>
+        //     </div>
+        // `;
+
+        //         // Navigate to internal media page with the movie ID
+        //         movieCard.addEventListener('click', () => {
+        //             window.location.href = `mediaMovies.html?mediaType=movie&id=${movie.id}`;
+        //         });
+
+        //         moviesContainer.appendChild(movieCard);
+        //     });
+        // }
 
         async function fetchAndDisplayMovies() {
             try {
@@ -155,7 +196,7 @@
                 <i class="fa fa-star"></i>
             </div>
         `;
-        // Navigate to media page with the movie ID
+        // Navigate to internal media page with the movie ID
         movieCard.addEventListener('click', () => {
             window.location.href = `mediaMovies.html?id=${movie.mediaId}`;
         });
@@ -198,7 +239,7 @@ function displayGames(games) {
             </div>
         `;
         
-        // Navigate to media page with the game ID
+        // Navigate to internal media page with the game ID
         gameCard.addEventListener('click', () => {
             window.location.href = `mediaGame.html?id=${game.mediaId}`;
         });
@@ -206,55 +247,43 @@ function displayGames(games) {
         gamesContainer.appendChild(gameCard);
     });
 }
-<<<<<<< Updated upstream
-=======
-// Display Books from the database
-async function fetchAndDisplayBooks() {
-    try {
-        const response = await fetch('/api/random-books');
-        const books = await response.json();
-        displayBooks(books);
-    } catch (error) {
-        console.error('Error fetching books', error);
-    }
-}
-
-// Function to display books on the page
-function displayBooks(books) {
-    const booksContainer = document.getElementById('books-container');
-    booksContainer.innerHTML = ''; // Clear previous content
-
-    books.forEach(book => {
-        const bookCard = document.createElement('div');
-        bookCard.classList.add('media-item');
-        bookCard.innerHTML = `
-            <img src="${book.cover_url}" alt="${book.title}">
-            <div class="media-info">
-                <p><strong>${book.title}</strong>
-                <p>Author: ${book.author}</p>
-                <p>Date: ${book.year}</p>
-            </div>
-            <div class="star-rating">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-            </div>
-        `;
-
-        // Navigate to media page with the book ID
-        bookCard.addEventListener('click', () => {
-            window.location.href = `mediaBooks.html?id=${book.mediaId}`;
-        });
-
-        booksContainer.appendChild(bookCard);
-    });
-}
-// Load books when the page loads
->>>>>>> Stashed changes
 
 
+
+        // Fetch Music (Albums) from Spotify
+//        async function fetchMusic() {
+  //          try {
+    //            if (!spotifyAccessToken) await fetchSpotifyAccessToken();
+//
+  //              const response = await fetch('https://api.spotify.com/v1/browse/new-releases?limit=10', {
+    //                headers: {
+      //                  Authorization: `Bearer ${spotifyAccessToken}`
+        //            }
+          //      });
+//
+  //              const data = await response.json();
+    //            displayMusic(data.albums.items);
+      //      } catch (error) {
+        //        console.error('Failed to fetch music:', error);
+          //  }
+        //}
+
+//         async function fetchAlbums() {
+//     try {
+//         const response = await fetch('/api/random-albums');
+        
+//         if (!response.ok) {
+//             throw new Error('Failed to fetch albums');
+//         }
+
+//         const albums = await response.json(); 
+
+//         displayMusic(albums); 
+
+//     } catch (error) {
+//         console.error('Error fetching albums:', error);
+//     }
+// }
 
 async function fetchAndDisplayAlbums() {
     try {
@@ -303,13 +332,62 @@ function displayMusic(albums) {
 
 
 
+//         Display Music (Albums)
+//        function displayMusic(albums) {
+//    const albumsContainer = document.getElementById('albums-container');
+//     albumsContainer.innerHTML = ''; // Clear previous content
+
+//     albums.forEach(album => {
+//         const albumCard = document.createElement('div');
+//         albumCard.classList.add('media-item');
+//         albumCard.innerHTML = `
+//             <img src="${album.images[0].url}" alt="${album.name}">
+//             <div class="media-info">
+//                 <p><strong>${album.name}</strong> by ${album.artists[0].name}</p>
+//             </div>
+//             <div class="star-rating">
+//                 <i class="fa fa-star"></i>
+//                 <i class="fa fa-star"></i>
+//                 <i class="fa fa-star"></i>
+//                 <i class="fa fa-star"></i>
+//                 <i class="fa fa-star"></i>
+//             </div>
+//         `;
+//         albumCard.addEventListener('click', () => {
+//             window.location.href = `mediaMusic.html?albumId=${album.id}`;
+//         });
+
+//         albumsContainer.appendChild(albumCard);
+//     });
+// }
 
         //GiantBomb
         const apiKey = '8dfa1038447a4c092e489b3775d27ae4821a1e90';
         const url = `http://localhost:3000/api/games`;
+//         //GiantBomb
+//         const apiKey = '8dfa1038447a4c092e489b3775d27ae4821a1e90';
+//         const url = `http://localhost:3000/api/games`;
+
+//         // Fetch games from GiantBomb.
+//         async function fetchGames() {
+//             try {
+//                 const response = await fetch(url, {
+//                     method: 'GET',
+//                     headers: {
+
+//                         'Accept': 'application/json',
+//                     }
+//                 });
+
+//                 if (!response.ok) {
+//                     throw new Error(`HTTP error! status: ${response.status}`);
+//                 }
+
+//                 const data = await response.json();
+//                 console.log("games");
+//                 displayGames(data.results);
 
 
-<<<<<<< Updated upstream
 //             } catch (error) {
 //                 console.error('Error fetching popular games:', error);
 //             }
@@ -393,8 +471,6 @@ function displayMusic(albums) {
 }
 
 
-=======
->>>>>>> Stashed changes
         // Page Switching Logic
         function showPage(pageId, clickedLink) {
             document.querySelectorAll('.page-section').forEach(section => {
@@ -409,13 +485,8 @@ function displayMusic(albums) {
 
             if (pageId === 'movies') fetchAndDisplayMovies();
             if (pageId === 'music') fetchAndDisplayAlbums();
-<<<<<<< Updated upstream
             if (pageId === 'books') fetchBooks(); // Fetch books when books tab is selected
             if (pageId === 'games') fetchAndDisplayGames()
-=======
-            if (pageId === 'books') fetchAndDisplayBooks(); 
-            if (pageId === 'games') fetchAndDisplayGames();
->>>>>>> Stashed changes
         }
 
 
@@ -425,6 +496,7 @@ function displayMusic(albums) {
         });
 
         document.addEventListener('DOMContentLoaded', () => {
+    // ... existing code ...
 
     // Search functionality
     const searchInput = document.getElementById('search-input');
@@ -439,7 +511,7 @@ function displayMusic(albums) {
         if (query.length > 0) {
             searchTimeout = setTimeout(() => {
                 fetchSearchSuggestions(query);
-            }, 300); 
+            }, 300); // Delay to reduce the number of requests
         } else {
             suggestionsContainer.innerHTML = '';
             suggestionsContainer.style.display = 'none';
