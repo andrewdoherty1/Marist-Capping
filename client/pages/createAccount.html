@@ -61,10 +61,10 @@
     </div>
 
 
-    <!-- create account -->
+     <!-- Create Account Section -->
     <div class="form-container" id="create-account-form" style="display: none;">
         <h2>Create an Account</h2>
-        <form id="register-form" onsubmit="return validateForm()">
+        <form id="register-form">
             <div class="form-group">
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" required>
@@ -90,40 +90,29 @@
             <a href="#" onclick="toggleForms()">Already have an account? Sign in here</a>
         </p>
     </div>
+
+
+
+
+
 </div>
 
 <script>
 
-    const insertUser = async (username, password, email) => {
-    try {
-      const query = `
-        INSERT INTO users (username, password, email)
-        VALUES ($1, $2, $3)
-        RETURNING *;
-      `;
-      
-      const values = [username, password, email];  
-      
-      const res = await pool.query(query, values);
-      
-      console.log('User inserted:', res.rows[0]); 
-    } catch (err) {
-      console.error('Error executing query', err.stack);
-    }
-  };
-
-  // Check if user is already logged in on page load
-  async function checkSession() {
+    // Check if user is already logged in on page load
+    async function checkSession() 
+    {
         const response = await fetch('/check-session');
         const data = await response.json();
         
         if (data.loggedIn) {
-            window.location.href = 'index.html'; // Redirect to main page if logged in
+            window.location.href = 'profile.html'; // Redirect to the profile page if logged in
         }
     }
 
     // Function to toggle between Sign-In and Create Account forms
-    function toggleForms() {
+    function toggleForms() 
+    {
         const signInForm = document.getElementById('sign-in-form');
         const createAccountForm = document.getElementById('create-account-form');
 
@@ -134,20 +123,6 @@
             signInForm.style.display = 'none';
             createAccountForm.style.display = 'block';
         }
-    }
-
-    // Form validation function for confirming password entries are the same
-    function validateForm() {
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
-
-        if (password !== confirmPassword) {
-            alert('Passwords do not match. Please try again.');
-            return false; // Prevent form submission
-        }
-
-        alert('Account created successfully (not connected to a database).');
-        return false; // Prevent default form submission for now
     }
 
     // sign in 
@@ -177,6 +152,62 @@
             console.error('Login request error:', error); // Log client-side errors for debugging
         }
     });
+
+     // Handle Account Creation Form Submission
+    document.getElementById('register-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        const registerError = document.getElementById('register-error');
+
+        // Check if passwords match
+        if (password !== confirmPassword) {
+            registerError.textContent = 'Passwords do not match. Please try again.';
+            registerError.style.display = 'block';
+            return;
+        }
+
+        try {
+            // Send request to server to create a new account
+            const response = await fetch('http://localhost:3000/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, email })
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                // Account created successfully; redirect to sign-in or another page
+                alert(result.message);  // shows success message (do we want this)
+                window.location.href = 'userProfile.html';
+            } else {
+                // Show error message from server response
+                registerError.textContent = result.message;
+                registerError.style.display = 'block';
+            }
+        } catch (error) {
+            registerError.textContent = 'An error occurred. Please try again.';
+            registerError.style.display = 'block';
+        }
+    });
+
+    // Form validation function for confirming password entries are the same
+    function validateForm() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        if (password !== confirmPassword) {
+            alert('Passwords do not match. Please try again.');
+            return false; // Prevent form submission
+        }
+
+        alert('Account created successfully (not connected to a database).');
+        return false; // Prevent default form submission for now
+    }
 </script>
 
 </body>

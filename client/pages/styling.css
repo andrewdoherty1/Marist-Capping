@@ -211,13 +211,13 @@ nav a {
 /* Hover effect */
 nav a:hover {
     color: #fff;
-    background: #fde047;
+    background: #433f3f;
 }
 
 /* Active link styling */
 nav a.active {
     color: #fff;
-    background: #fde047;
+    background: #433f3f;
 }
 .content {
     padding: 30px;
