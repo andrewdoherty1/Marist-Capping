@@ -490,10 +490,20 @@ app.post('/register', async (req, res) => {
       // Username already exists
       return res.json({ success: false, message: 'Username already exists. Please choose another.' });
     }
-    
+
     // Insert new user into the database
-    return res.json({ success: false, message: 'starting insert query.' });
-   
+    const insertQuery = 'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *';
+    const insertResult = await pool.query(insertQuery, [username, email, password]);
+
+    if (insertResult.rows.length > 0) {
+      // User registered, create session
+      req.session.user = { username: insertResult.rows[0].username, id: insertResult.rows[0].id };
+      console.log('User registered and session created:', req.session.user);
+      return res.json({ success: true, message: 'Account created successfully!' });
+    } else {
+      // Insertion failed
+      return res.json({ success: false, message: 'Failed to create account. Please try again.' });
+    }
   } catch (error) {
     console.error('Registration error:', error);
     return res.json({ success: false, message: 'An error occurred during registration. Please try again.' });
@@ -612,14 +622,6 @@ app.get('/getReviews', async (req, res) => {
 
 
 
-
-
-// -------------------------------------------------------------
-// Server connection
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
-
 app.post('/submitBookmark', async (req, res) => {
   // Ensure the user is logged in
   if (!req.session.user) {
@@ -643,4 +645,11 @@ app.post('/submitBookmark', async (req, res) => {
       console.error('Error inserting bookmark:', error);
       res.status(500).json({ success: false, message: 'Error saving bookmark' });
   }
+});
+
+
+// -------------------------------------------------------------
+// Server connection
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
