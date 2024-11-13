@@ -141,9 +141,14 @@
                 </span>
                 <span id="rating-value">0 Stars</span>
             </div>
-            <textarea id="description" rows="4" placeholder="Write your description here..."></textarea>
-            <div class="submit-container" id="submit-container">
-                <button id="submit-btn">Submit</button>
+            <form id="reviewForm">
+                <textarea id="reviewText" rows="4" placeholder="Write your review here..."></textarea>
+                <div class="submit-container" id="submit-container">
+                    <button type="button" id="submit-btn">Submit</button>
+                </div>
+            </form>
+            <div id="success-message" style="display: none; color: green; text-align: center; margin-top: 20px;">
+                Your review has been submitted successfully!
             </div>
         </div>
     </div>
@@ -187,34 +192,15 @@
         const stars = document.querySelectorAll('.star');
         const ratingValue = document.getElementById('rating-value');
         const submitButton = document.getElementById('submit-btn');
-        const description = document.getElementById('description');
         const submitContainer = document.getElementById('submit-container');
+        const reviewText = document.getElementById('reviewText');
 
         let ratingSelected = false;
+        let selectedRating = 0; // Store the selected rating
 
-        stars.forEach(star => {
-            star.addEventListener('click', () => {
-                const rating = star.getAttribute('data-value');
-
-                // Reset all stars
-                stars.forEach(s => {
-                    s.classList.remove('filled');
-                });
-
-                // Highlight the selected rating
-                for (let i = 0; i < rating; i++) {
-                    stars[i].classList.add('filled');
-                }
-
-                // Update the rating value text
-                ratingValue.textContent = `${rating} Stars`;
-                ratingSelected = true;
-
-                toggleSubmitButton();
-            });
-        });
-
-        description.addEventListener('input', toggleSubmitButton);
+        // function toggleSubmitButton() {
+        //     submitButton.disabled = !ratingSelected;
+        // }
 
         function toggleSubmitButton() {
             if (ratingSelected || description.value.trim()) {
@@ -223,6 +209,70 @@
                 submitContainer.style.display = 'none';
             }
         }
+
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                const rating = parseInt(star.getAttribute('data-value'));
+                stars.forEach(s => s.classList.remove('filled'));
+
+                for (let i = 0; i < rating; i++) {
+                    stars[i].classList.add('filled');
+                }
+
+                ratingValue.textContent = `${rating} Stars`;
+                selectedRating = rating;
+                ratingSelected = true;
+                toggleSubmitButton();
+            });
+        });
+        // Toggle submit button visibility based on review text
+        reviewText.addEventListener('input', toggleSubmitButton);
+
+         // Form submission event handler
+         submitButton.addEventListener('click', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mediaID = urlParams.get('id');  // Fetch 'id' as per query parameter in the URL
+            const reviewTextValue = reviewText.value;
+
+            // Log values to verify data being sent
+            console.log("Submitting review:", { mediaID, reviewTextValue, rating: selectedRating });
+
+            try {
+                const response = await fetch('/submitReview', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mediaID,
+                        reviewText: reviewTextValue,
+                        rating: selectedRating
+                    })
+                });
+
+                if (response.ok) {
+                    console.log("Review submitted successfully");
+                    // Clear the review text and reset the rating
+                    document.getElementById('reviewText').value = '';  // Clear review text
+                    selectedRating = 0;  // Reset rating
+                    document.getElementById('rating-value').textContent = '0 Stars';
+                    // Hide the submit button again
+                    document.getElementById('submit-container').style.display = 'none';
+                    // Show the success message
+                    const successMessage = document.getElementById('success-message');
+                    successMessage.style.display = 'block';
+
+                    // Hide the success message after 3 seconds
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 5000); // 3 seconds
+                } else {
+                    console.error("Failed to submit review", response.statusText);
+                    // Handle errors if submission fails
+                    alert('Something went wrong. Please try again.');
+                }
+            } catch (error) {
+                console.error("Error submitting review:", error);
+            }
+        });
 
         const bookmarkButton = document.getElementById('bookmark-btn');
         bookmarkButton.addEventListener('click', async () => {

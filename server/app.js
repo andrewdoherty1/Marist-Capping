@@ -541,19 +541,52 @@ app.post('/submitReview', async (req, res) => {
   }
 });
 
+// app.get('/getReviews', async (req, res) => {
+//   try {
+//       const query = `
+//           SELECT reviews."ratingTxt", reviews."ratingStar", users.username, media.title
+//           FROM reviews
+//           JOIN users ON reviews."userID" = users."userID"
+//           JOIN media ON reviews."mediaID" = media."mediaId";
+//       `;
+//       const result = await pool.query(query);
+//       res.status(200).json({ success: true, reviews: result.rows });
+//   } catch (error) {
+//       console.error('Error fetching reviews:', error);
+//       res.status(500).json({ success: false, message: 'Error fetching reviews' });
+//   }
+// });
+
 app.get('/getReviews', async (req, res) => {
   try {
-      const query = `
-          SELECT reviews."ratingTxt", reviews."ratingStar", users.username, media.title
-          FROM reviews
-          JOIN users ON reviews."userID" = users."userID"
-          JOIN media ON reviews."mediaID" = media."mediaId";
-      `;
-      const result = await pool.query(query);
-      res.status(200).json({ success: true, reviews: result.rows });
+    const query = `
+      SELECT 
+                reviews.*, 
+                media.title, 
+                users.username,
+                COALESCE(movies.poster_url, albums.cover_url, books.cover_url, "videoGames".poster_url) AS cover_url,
+                CASE
+                    WHEN movies."mediaID" IS NOT NULL THEN 'Movie'
+                    WHEN albums."mediaID" IS NOT NULL THEN 'Album'
+                    WHEN books."mediaID" IS NOT NULL THEN 'Book'
+                    WHEN "videoGames"."mediaID" IS NOT NULL THEN 'Video Game'
+                END AS mediaType
+            FROM reviews
+            JOIN media ON reviews."mediaID" = media."mediaId"
+            JOIN users ON reviews."userID" = users."userID"
+            LEFT JOIN movies ON media."mediaId" = movies."mediaID"
+            LEFT JOIN albums ON media."mediaId" = albums."mediaID"
+            LEFT JOIN books ON media."mediaId" = books."mediaID"
+            LEFT JOIN "videoGames" ON media."mediaId" = "videoGames"."mediaID";
+    `;
+
+    const result = await pool.query(query);
+
+    //res.json(result.rows);
+    res.status(200).json({ success: true, reviews: result.rows });
   } catch (error) {
-      console.error('Error fetching reviews:', error);
-      res.status(500).json({ success: false, message: 'Error fetching reviews' });
+    console.error('Error fetching reviews with cover URLs:', error);
+    res.status(500).json({ error: 'An error occurred while fetching reviews.' });
   }
 });
 
