@@ -67,12 +67,14 @@
         }
 
         textarea {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-bottom: 20px;
+    width: 95%;
+    height: 100px; /* Set a fixed height */
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    resize: none; /* Disable resizing */
         }
 
         .submit-container {
@@ -115,6 +117,11 @@
     <div class="media-container" id="album-container">
         <div class="media-picture">
             <img src="" alt="Album Cover" id="album-image">
+            <div class="bookmark-container" style="text-align: center; margin-top: 20px;">
+                <button id="bookmark-btn" style="background: none; border: none; cursor: pointer;">
+                    <img src="images/bookmarkIcon.webp" alt="Bookmark" id="bookmark-image" style="height: 40px;">
+                </button>
+            </div>
         </div>
         <div class="media-details">
             <h2 class="media-title" id="album-title">Album Title</h2>
@@ -133,9 +140,14 @@
                 </span>
                 <span id="rating-value">0 Stars</span>
             </div>
-            <textarea id="description" rows="4" placeholder="Write your description here..."></textarea>
-            <div class="submit-container" id="submit-container">
-                <button id="submit-btn">Submit</button>
+            <form id="reviewForm">
+                <textarea id="reviewText" rows="4" placeholder="Write your review here..."></textarea>
+                <div class="submit-container" id="submit-container">
+                    <button type="button" id="submit-btn">Submit</button>
+                </div>
+            </form>
+            <div id="success-message" style="display: none; color: green; text-align: center; margin-top: 20px;">
+                Your review has been submitted successfully!
             </div>
         </div>
     </div>
@@ -225,33 +237,123 @@
         const albumId = urlParams.get('albumId');
         if (albumId) fetchAlbumDetails(albumId);
 
-        // Star rating system
-        const stars = document.querySelectorAll('.star');
+       // Star rating system
+       const stars = document.querySelectorAll('.star');
         const ratingValue = document.getElementById('rating-value');
         const submitButton = document.getElementById('submit-btn');
-        const description = document.getElementById('description');
         const submitContainer = document.getElementById('submit-container');
+        const reviewText = document.getElementById('reviewText');
 
         let ratingSelected = false;
+        let selectedRating = 0; // Store the selected rating
+
+        // function toggleSubmitButton() {
+        //     submitButton.disabled = !ratingSelected;
+        // }
+
+        function toggleSubmitButton() {
+            if (ratingSelected || description.value.trim()) {
+                submitContainer.style.display = 'block';
+            } else {
+                submitContainer.style.display = 'none';
+            }
+        }
 
         stars.forEach(star => {
             star.addEventListener('click', () => {
-                const rating = star.getAttribute('data-value');
+                const rating = parseInt(star.getAttribute('data-value'));
                 stars.forEach(s => s.classList.remove('filled'));
+
                 for (let i = 0; i < rating; i++) {
                     stars[i].classList.add('filled');
                 }
+
                 ratingValue.textContent = `${rating} Stars`;
+                selectedRating = rating;
                 ratingSelected = true;
                 toggleSubmitButton();
             });
         });
+        // Toggle submit button visibility based on review text
+        reviewText.addEventListener('input', toggleSubmitButton);
 
-        description.addEventListener('input', toggleSubmitButton);
 
-        function toggleSubmitButton() {
-            submitContainer.style.display = ratingSelected || description.value.trim() ? 'block' : 'none';
-        }
+        // Form submission event handler
+        submitButton.addEventListener('click', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mediaID = urlParams.get('id');  // Fetch 'id' as per query parameter in the URL
+            const reviewTextValue = reviewText.value;
+
+            // Log values to verify data being sent
+            console.log("Submitting review:", { mediaID, reviewTextValue, rating: selectedRating });
+
+            try {
+                const response = await fetch('/submitReview', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mediaID,
+                        reviewText: reviewTextValue,
+                        rating: selectedRating
+                    })
+                });
+
+                if (response.ok) {
+                    console.log("Review submitted successfully");
+                    // Clear the review text and reset the rating
+                    document.getElementById('reviewText').value = '';  // Clear review text
+                    selectedRating = 0;  // Reset rating
+                    document.getElementById('rating-value').textContent = '0 Stars';
+                    // Hide the submit button again
+                    document.getElementById('submit-container').style.display = 'none';
+                    // Show the success message
+                    const successMessage = document.getElementById('success-message');
+                    successMessage.style.display = 'block';
+
+                    // Hide the success message after 3 seconds
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 5000); // 3 seconds
+                } else {
+                    console.error("Failed to submit review", response.statusText);
+                    // Handle errors if submission fails
+                    alert('Something went wrong. Please try again.');
+                }
+            } catch (error) {
+                console.error("Error submitting review:", error);
+            }
+        });
+
+        const bookmarkButton = document.getElementById('bookmark-btn');
+        bookmarkButton.addEventListener('click', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mediaID = urlParams.get('id');  // Fetch 'id' as per query parameter in the URL
+
+            // Log values to verify data being sent
+            console.log("Submitting bookmark:", { mediaID });
+
+            try {
+                const response = await fetch('/submitBookmark', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mediaID
+                    })
+                });
+
+                if (response.ok) {
+                    console.log("Bookmark submitted successfully");
+                    // Optionally, you can show a message or change the button state
+                    alert('Bookmark added successfully!');
+                } else {
+                    console.error("Failed to submit bookmark", response.statusText);
+                    // Handle errors if submission fails
+                    alert('Something went wrong. Please try again.');
+                }
+            } catch (error) {
+                console.error("Error submitting bookmark:", error);
+            }
+        });
     </script>
 
 </body>

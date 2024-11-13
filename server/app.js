@@ -444,7 +444,9 @@ app.post('/login', async (req, res) => {
 
     if (result.rows.length > 0) {
       // User authenticated, create session
-      req.session.user = { username: result.rows[0].username, id: result.rows[0].id };
+      req.session.user = { username: result.rows[0].username, id: result.rows[0].userID };
+      // Log the session user information to the terminal
+    console.log('Session User:', req.session.user);
       res.json({ success: true, message: 'Login successful!' });
     } else {
       res.json({ success: false, message: 'Incorrect username or password.' });
@@ -535,6 +537,80 @@ app.get('/userProfile.html', (req, res) => {
 });
 
 
+// Route to submit a review
+app.post('/submitReview', async (req, res) => {
+  // Ensure the user is logged in
+  if (!req.session.user) {
+      return res.status(401).json({ success: false, message: 'User not logged in' });
+  }
+
+  const { mediaID, reviewText, rating } = req.body;
+  const userID = req.session.user.id; // Retrieve userID from session
+
+  try {
+      const query = `
+          INSERT INTO reviews ("userID", "mediaID", "ratingTxt", "ratingStar")
+          VALUES ($1, $2, $3, $4)
+          RETURNING *;
+      `;
+      const values = [userID, mediaID, reviewText, rating];
+      const result = await pool.query(query, values);
+
+      res.status(200).json({ success: true, review: result.rows[0] });
+  } catch (error) {
+      console.error('Error inserting review:', error);
+      res.status(500).json({ success: false, message: 'Error saving review' });
+  }
+});
+
+// app.get('/getReviews', async (req, res) => {
+//   try {
+//       const query = `
+//           SELECT reviews."ratingTxt", reviews."ratingStar", users.username, media.title
+//           FROM reviews
+//           JOIN users ON reviews."userID" = users."userID"
+//           JOIN media ON reviews."mediaID" = media."mediaId";
+//       `;
+//       const result = await pool.query(query);
+//       res.status(200).json({ success: true, reviews: result.rows });
+//   } catch (error) {
+//       console.error('Error fetching reviews:', error);
+//       res.status(500).json({ success: false, message: 'Error fetching reviews' });
+//   }
+// });
+
+app.get('/getReviews', async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+                reviews.*, 
+                media.title, 
+                users.username,
+                COALESCE(movies.poster_url, albums.cover_url, books.cover_url, "videoGames".poster_url) AS cover_url,
+                CASE
+                    WHEN movies."mediaID" IS NOT NULL THEN 'Movie'
+                    WHEN albums."mediaID" IS NOT NULL THEN 'Album'
+                    WHEN books."mediaID" IS NOT NULL THEN 'Book'
+                    WHEN "videoGames"."mediaID" IS NOT NULL THEN 'Video Game'
+                END AS mediaType
+            FROM reviews
+            JOIN media ON reviews."mediaID" = media."mediaId"
+            JOIN users ON reviews."userID" = users."userID"
+            LEFT JOIN movies ON media."mediaId" = movies."mediaID"
+            LEFT JOIN albums ON media."mediaId" = albums."mediaID"
+            LEFT JOIN books ON media."mediaId" = books."mediaID"
+            LEFT JOIN "videoGames" ON media."mediaId" = "videoGames"."mediaID";
+    `;
+
+    const result = await pool.query(query);
+
+    //res.json(result.rows);
+    res.status(200).json({ success: true, reviews: result.rows });
+  } catch (error) {
+    console.error('Error fetching reviews with cover URLs:', error);
+    res.status(500).json({ error: 'An error occurred while fetching reviews.' });
+  }
+});
 
 
 
@@ -544,4 +620,29 @@ app.get('/userProfile.html', (req, res) => {
 // Server connection
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+app.post('/submitBookmark', async (req, res) => {
+  // Ensure the user is logged in
+  if (!req.session.user) {
+      return res.status(401).json({ success: false, message: 'User not logged in' });
+  }
+
+  const { mediaID } = req.body;
+  const userID = req.session.user.id; // Retrieve userID from session
+
+  try {
+      const query = `
+          INSERT INTO bookmark ("userID", "mediaID")
+          VALUES ($1, $2)
+          RETURNING *;
+      `;
+      const values = [userID, mediaID];
+      const result = await pool.query(query, values);
+
+      res.status(200).json({ success: true, bookmark: result.rows[0] });
+  } catch (error) {
+      console.error('Error inserting bookmark:', error);
+      res.status(500).json({ success: false, message: 'Error saving bookmark' });
+  }
 });
