@@ -564,3 +564,28 @@ app.get('/getReviews', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+app.post('/submitBookmark', async (req, res) => {
+  // Ensure the user is logged in
+  if (!req.session.user) {
+      return res.status(401).json({ success: false, message: 'User not logged in' });
+  }
+
+  const { mediaID } = req.body;
+  const userID = req.session.user.id; // Retrieve userID from session
+
+  try {
+      const query = `
+          INSERT INTO bookmark ("userID", "mediaID")
+          VALUES ($1, $2)
+          RETURNING *;
+      `;
+      const values = [userID, mediaID];
+      const result = await pool.query(query, values);
+
+      res.status(200).json({ success: true, bookmark: result.rows[0] });
+  } catch (error) {
+      console.error('Error inserting bookmark:', error);
+      res.status(500).json({ success: false, message: 'Error saving bookmark' });
+  }
+});
