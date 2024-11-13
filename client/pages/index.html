@@ -205,9 +205,28 @@
                 const response = await fetch('/api/random-movies');
                 const movies = await response.json();
 
-                displayMovies(movies);
+                // Now fetch average rating for each movie
+                const moviesWithRatings = await Promise.all(
+                    movies.map(async (movie) => {
+                        const averageRating = await fetchAverageRating(movie.mediaId);
+                        return { ...movie, averageRating }; // Add the average rating to the movie object
+                    })
+                );
+
+                displayMovies(moviesWithRatings); // Display the movies with average ratings
             } catch (error) {
-                console.error('Error fetching random movies:', error);
+                console.error('Error fetching movies or ratings:', error);
+            }
+        }
+
+        async function fetchAverageRating(mediaID) {
+            try {
+                const response = await fetch(`/getAverageRating/${mediaID}`);
+                const { averageRating } = await response.json(); // Assuming the response contains an averageRating property
+                return averageRating || 0; // Default to 0 if no rating is found
+            } catch (error) {
+                console.error('Error fetching average rating:', error);
+                return 0; // Return 0 in case of an error
             }
         }
 
@@ -218,6 +237,17 @@
             movies.forEach(movie => {
                 const movieCard = document.createElement('div');
                 movieCard.classList.add('media-item');
+
+                const averageRating = movie.averageRating || 0; // Default to 0 if no rating is provided
+                const filledStars = Math.round(averageRating); // Round to the nearest whole number
+                const emptyStars = 5 - filledStars;
+
+                // Create the stars: filled (yellow) and empty (gray) stars
+                const starIcons = `
+            ${'<i class="fa fa-star" style="color: gold;"></i>'.repeat(filledStars)}  
+            ${'<i class="fa fa-star-o" style="color: gray;"></i>'.repeat(emptyStars)} 
+        `;
+
                 movieCard.innerHTML = `
             <img src="${movie.poster_url}" alt="${movie.title}">
             <div class="media-info">
@@ -226,13 +256,12 @@
                 <p>Studio: ${movie.studio}</p>
             </div>
             <div class="star-rating">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
+                ${starIcons}
             </div>
+            
+            
         `;
+
                 // Navigate to internal media page with the movie ID
                 movieCard.addEventListener('click', () => {
                     window.location.href = `mediaMovies.html?id=${movie.mediaId}`;
@@ -241,6 +270,9 @@
                 moviesContainer.appendChild(movieCard);
             });
         }
+
+
+
 
         async function fetchAndDisplayGames() {
             try {
@@ -780,7 +812,21 @@
             }
         }
 
+        function setStarRating(averageRating) {
+            const stars = document.querySelectorAll('.star');
+            const ratingValue = document.getElementById('rating-value');
 
+            // Round the average rating to the nearest whole number
+            const roundedRating = Math.round(averageRating);
+
+            // Highlight the stars based on the rounded rating
+            for (let i = 0; i < roundedRating; i++) {
+                stars[i].classList.add('filled');
+            }
+
+            // Update the displayed rating value
+            ratingValue.textContent = `${roundedRating} Stars`;
+        }
 
 
 

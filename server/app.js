@@ -622,3 +622,36 @@ app.post('/submitBookmark', async (req, res) => {
       res.status(500).json({ success: false, message: 'Error saving bookmark' });
   }
 });
+
+app.get('/getAverageRating/:mediaID', async (req, res) => {
+  const { mediaID } = req.params;  // Extract mediaID from the request parameters
+
+  try {
+    const query = `
+      SELECT 
+        AVG(reviews."ratingStar") AS averageRating,
+        COUNT(reviews."mediaID") AS reviewCount
+      FROM reviews
+      WHERE reviews."mediaID" = $1
+      GROUP BY reviews."mediaID";
+    `;
+
+    const result = await pool.query(query, [mediaID]);
+
+    if (result.rows.length > 0) {
+      res.status(200).json({ 
+        success: true, 
+        mediaID: mediaID, 
+        averageRating: result.rows[0].averagerating, 
+        reviewCount: result.rows[0].reviewcount 
+      });
+    } else {
+      res.status(404).json({ success: false, message: 'No reviews found for this media.' });
+    }
+    
+  } catch (error) {
+    console.error('Error calculating average rating:', error);
+    res.status(500).json({ error: 'An error occurred while calculating average rating.' });
+  }
+});
+
