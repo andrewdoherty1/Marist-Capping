@@ -541,19 +541,41 @@ app.post('/submitReview', async (req, res) => {
   }
 });
 
+// app.get('/getReviews', async (req, res) => {
+//   try {
+//       const query = `
+//           SELECT reviews."ratingTxt", reviews."ratingStar", users.username, media.title
+//           FROM reviews
+//           JOIN users ON reviews."userID" = users."userID"
+//           JOIN media ON reviews."mediaID" = media."mediaId";
+//       `;
+//       const result = await pool.query(query);
+//       res.status(200).json({ success: true, reviews: result.rows });
+//   } catch (error) {
+//       console.error('Error fetching reviews:', error);
+//       res.status(500).json({ success: false, message: 'Error fetching reviews' });
+//   }
+// });
+
 app.get('/getReviews', async (req, res) => {
   try {
-      const query = `
-          SELECT reviews."ratingTxt", reviews."ratingStar", users.username, media.title
-          FROM reviews
-          JOIN users ON reviews."userID" = users."userID"
-          JOIN media ON reviews."mediaID" = media."mediaId";
-      `;
-      const result = await pool.query(query);
-      res.status(200).json({ success: true, reviews: result.rows });
+    const query = `
+      SELECT r."userID", r."mediaID", r."ratingTxt", r."ratingStar", 
+             COALESCE(a.cover_url, m.poster_url, b.cover_url, vg.poster_url) AS cover_url
+      FROM reviews r
+      LEFT JOIN albums a ON r."mediaID" = a."mediaID"
+      LEFT JOIN movies m ON r."mediaID" = m."mediaID"
+      LEFT JOIN books b ON r."mediaID" = b."mediaID"
+      LEFT JOIN "videoGames" vg ON r."mediaID" = vg."mediaID";
+    `;
+
+    const result = await pool.query(query);
+
+    //res.json(result.rows);
+    res.status(200).json({ success: true, reviews: result.rows });
   } catch (error) {
-      console.error('Error fetching reviews:', error);
-      res.status(500).json({ success: false, message: 'Error fetching reviews' });
+    console.error('Error fetching reviews with cover URLs:', error);
+    res.status(500).json({ error: 'An error occurred while fetching reviews.' });
   }
 });
 
