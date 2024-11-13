@@ -743,7 +743,12 @@
         <div class="reviews-media-info">
             <p><strong>${review.username}'s Review on ${review.title}:</strong></p>
             <p>"${review.ratingTxt}"</p>
-            <p>Rating: ${review.ratingStar} / 5</p>
+            <p> Rating:
+            <span style="font-size: 24px; color: gold;">
+            ${'&#9733;'.repeat(review.ratingStar)}  
+            ${'&#9734;'.repeat(5 - review.ratingStar)}  
+            </span>
+            </p>
         </div>
     </div>
 `;
