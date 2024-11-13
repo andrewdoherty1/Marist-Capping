@@ -198,7 +198,7 @@ app.get('/api/random-movies', async (req, res) => {
        FROM media AS m
        JOIN movies AS mv ON m."mediaId" = mv."mediaID"
        ORDER BY RANDOM()
-       LIMIT 20`
+       LIMIT 100`
     );
     client.release();
 
@@ -224,7 +224,7 @@ app.get('/api/random-albums', async (req, res) => {
       FROM albums AS a
       JOIN media AS m ON a."mediaID" = m."mediaId"
       ORDER BY RANDOM()
-      LIMIT 20;  -- Limit to 20 random albums, can adjust as needed
+      LIMIT 100;  -- Limit to 20 random albums, can adjust as needed
     `;
 
     const result = await client.query(albumQuery);
@@ -251,7 +251,7 @@ app.get('/api/random-games', async (req, res) => {
       FROM media m
       JOIN "videoGames" vg ON m."mediaId" = vg."mediaID"
       ORDER BY RANDOM()
-      LIMIT 20;
+      LIMIT 100;
     `;
     const result = await pool.query(query);
     res.json(result.rows);
@@ -277,7 +277,7 @@ app.get('/api/random-books', async (req, res) => {
        FROM media AS m
        JOIN books AS b ON m."mediaId" = b."mediaID"
        ORDER BY RANDOM()
-       LIMIT 20`
+       LIMIT 100`
     );
     client.release();
 
