@@ -238,15 +238,31 @@
                 const movieCard = document.createElement('div');
                 movieCard.classList.add('media-item');
 
-                const averageRating = movie.averageRating || 0; // Default to 0 if no rating is provided
-                const filledStars = Math.round(averageRating); // Round to the nearest whole number
-                const emptyStars = 5 - filledStars;
+                // Get the average rating or set it to 0 if it's missing
+                const averageRating = movie.averageRating || 0;
+                const filledStars = Math.round(averageRating); // Round the average rating to the nearest whole number
+                const emptyStars = 5 - filledStars; // Calculate how many empty stars are needed
 
-                // Create the stars: filled (yellow) and empty (gray) stars
-                const starIcons = `
-            ${'<i class="fa fa-star" style="color: gold;"></i>'.repeat(filledStars)}  
-            ${'<i class="fa fa-star-o" style="color: gray;"></i>'.repeat(emptyStars)} 
-        `;
+                // Create the star icons: If there's no averageRating, display 5 blank stars
+                let starIcons;
+                if (averageRating > 0) {
+                    // If there's a rating, show filled (yellow) and empty (gray) stars
+                    starIcons = `
+                ${'<i class="fa fa-star" style="color: gold;"></i>'.repeat(filledStars)}  
+                ${'<i class="fa fa-star-o" style="color: gray;"></i>'.repeat(emptyStars)}
+            `;
+                } else {
+                    // If no average rating, display 5 blank stars (default)
+                    starIcons = `
+                <div class="star-rating-default">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                </div>
+            `;
+                }
 
                 movieCard.innerHTML = `
             <img src="${movie.poster_url}" alt="${movie.title}">
@@ -258,8 +274,6 @@
             <div class="star-rating">
                 ${starIcons}
             </div>
-            
-            
         `;
 
                 // Navigate to internal media page with the movie ID
@@ -270,6 +284,7 @@
                 moviesContainer.appendChild(movieCard);
             });
         }
+
 
 
 
