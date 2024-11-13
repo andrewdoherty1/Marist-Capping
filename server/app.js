@@ -71,7 +71,52 @@ app.get('/api/games', async (req, res) => {
   }
 });
 
+// -------------------------------------------------------------
+// function to search
+app.get('/api/search', async (req, res) => {
+  const searchTerm = req.query.q;
+  if (!searchTerm) {
+    return res.status(400).json({ error: 'Missing search term' });
+  }
 
+  try {
+    const client = await pool.connect();
+
+    const query = `
+          SELECT m."mediaId", m.title, 'Movie' as "mediaType", mv.poster_url
+          FROM media m
+          JOIN movies mv ON m."mediaId" = mv."mediaID"
+          WHERE LOWER(m.title) LIKE LOWER($1)
+          UNION
+          SELECT m."mediaId", m.title, 'Album' as "mediaType", a.cover_url as poster_url
+          FROM media m
+          JOIN albums a ON m."mediaId" = a."mediaID"
+          WHERE LOWER(m.title) LIKE LOWER($1)
+          UNION
+          SELECT m."mediaId", m.title, 'Book' as "mediaType", b.cover_url as poster_url
+          FROM media m
+          JOIN books b ON m."mediaId" = b."mediaID"
+          WHERE LOWER(m.title) LIKE LOWER($1)
+          UNION
+          SELECT m."mediaId", m.title, 'Video Game' as "mediaType", vg.poster_url
+          FROM media m
+          JOIN "videoGames" vg ON m."mediaId" = vg."mediaID"
+          WHERE LOWER(m.title) LIKE LOWER($1)
+          LIMIT 10;
+      `;
+
+    const values = [`%${searchTerm}%`];
+    const result = await client.query(query, values);
+    client.release();
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error executing search query:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// -------------------------------------------------------------
+// the majority of the code below is to either retrieve or populate the media 
 
 // Function to fetch game details from GiantBomb
 const fetchGameDetails = async (gameId) => {
@@ -215,6 +260,8 @@ app.get('/api/random-games', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch video game data' });
   }
 });
+
+
 // Route to retrieve and display books
 app.get('/api/random-books', async (req, res) => {
   try {
@@ -241,7 +288,6 @@ app.get('/api/random-books', async (req, res) => {
   }
 });
 
-//Books Media page
 
 // Route to fetch videogame details from the database based on the mediaId.
 app.get('/api/games/:id', async (req, res) => {
@@ -278,11 +324,6 @@ app.get('/api/games/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-
-
-
-
 
 // Route to fetch media details from the database based on the mediaId.
 app.get('/api/media/:id', async (req, res) => {
@@ -391,28 +432,8 @@ app.get('/api/books/:id', async (req, res) => {
   }
 });
 
-
-// -------------------------------------------------------
-// LOGIN FUNCTION
-
-// Login function to check user credentials
-/*
-const loginUser = async (username, password) => {
-  try {
-    const query = 'SELECT * FROM users WHERE username = $1 AND password = $2';
-    const res = await pool.query(query, [username, password]);
-    if (res.rows.length > 0) {
-      console.log('User logged in:', res.rows[0]);
-      return { success: true, message: 'Login successful!' };
-    } else {
-      return { success: false, message: 'Incorrect username or password.' };
-    }
-  } catch (err) {
-    console.error('Error logging in user:', err.stack);
-    return { success: false, message: 'Login error. Please try again.' };
-  }
-};
-*/
+// ---------------------------------------------------------------------------------------------------------
+// the coede below pertains to allowing a user to sign-in/log-out and create an account
 
 // Login route
 app.post('/login', async (req, res) => {
@@ -456,6 +477,48 @@ app.post('/logout', (req, res) => {
   });
 });
 
+// Register route to create a new user
+app.post('/register', async (req, res) => {
+  const { username, email, password } = req.body;
+
+  try {
+    // Check if the username already exists
+    const checkQuery = 'SELECT * FROM users WHERE username = $1';
+    const checkResult = await pool.query(checkQuery, [username]);
+
+    if (checkResult.rows.length > 0) {
+      // Username already exists
+      return res.json({ success: false, message: 'Username already exists. Please choose another.' });
+    }
+    else
+    {
+      // Insert new user into the database
+      return res.json({ success: false, message: 'starting insert query.' });
+    }
+   
+  } catch (error) {
+    console.error('Registration error:', error);
+    return res.json({ success: false, message: 'An error occurred during registration. Please try again.' });
+  }
+});
+
+// Route to fetch all users (for admin or debug purposes)
+app.get('/users', async (req, res) => {
+  try {
+    const query = 'SELECT * FROM users';
+    const result = await pool.query(query);
+    res.json({ success: true, users: result.rows });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.json({ success: false, message: 'An error occurred while fetching users.' });
+  }
+});
+
+
+
+
+// ---------------------------------------------------------------------------------------------------------
+// the code below is for displaying user information. this includes items such as username, bio description, profile picture etc.
 // get's user info
 app.get('/user-info', (req, res) => {
   if (req.session.user) {
@@ -473,47 +536,6 @@ app.get('/userProfile.html', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/pages/userProfile.html'));
 });
 
-app.get('/api/search', async (req, res) => {
-  const searchTerm = req.query.q;
-  if (!searchTerm) {
-    return res.status(400).json({ error: 'Missing search term' });
-  }
-
-  try {
-    const client = await pool.connect();
-
-    const query = `
-          SELECT m."mediaId", m.title, 'Movie' as "mediaType", mv.poster_url
-          FROM media m
-          JOIN movies mv ON m."mediaId" = mv."mediaID"
-          WHERE LOWER(m.title) LIKE LOWER($1)
-          UNION
-          SELECT m."mediaId", m.title, 'Album' as "mediaType", a.cover_url as poster_url
-          FROM media m
-          JOIN albums a ON m."mediaId" = a."mediaID"
-          WHERE LOWER(m.title) LIKE LOWER($1)
-          UNION
-          SELECT m."mediaId", m.title, 'Book' as "mediaType", b.cover_url as poster_url
-          FROM media m
-          JOIN books b ON m."mediaId" = b."mediaID"
-          WHERE LOWER(m.title) LIKE LOWER($1)
-          UNION
-          SELECT m."mediaId", m.title, 'Video Game' as "mediaType", vg.poster_url
-          FROM media m
-          JOIN "videoGames" vg ON m."mediaId" = vg."mediaID"
-          WHERE LOWER(m.title) LIKE LOWER($1)
-          LIMIT 10;
-      `;
-
-    const values = [`%${searchTerm}%`];
-    const result = await client.query(query, values);
-    client.release();
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error executing search query:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
 
 // Route to submit a review
 app.post('/submitReview', async (req, res) => {
@@ -593,7 +615,9 @@ app.get('/getReviews', async (req, res) => {
 
 
 
-// connecting to the server
+
+// -------------------------------------------------------------
+// Server connection
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
