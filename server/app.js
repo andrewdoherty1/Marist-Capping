@@ -560,13 +560,24 @@ app.post('/submitReview', async (req, res) => {
 app.get('/getReviews', async (req, res) => {
   try {
     const query = `
-      SELECT r."userID", r."mediaID", r."ratingTxt", r."ratingStar", 
-             COALESCE(a.cover_url, m.poster_url, b.cover_url, vg.poster_url) AS cover_url
-      FROM reviews r
-      LEFT JOIN albums a ON r."mediaID" = a."mediaID"
-      LEFT JOIN movies m ON r."mediaID" = m."mediaID"
-      LEFT JOIN books b ON r."mediaID" = b."mediaID"
-      LEFT JOIN "videoGames" vg ON r."mediaID" = vg."mediaID";
+      SELECT 
+                reviews.*, 
+                media.title, 
+                users.username,
+                COALESCE(movies.poster_url, albums.cover_url, books.cover_url, "videoGames".poster_url) AS cover_url,
+                CASE
+                    WHEN movies."mediaID" IS NOT NULL THEN 'Movie'
+                    WHEN albums."mediaID" IS NOT NULL THEN 'Album'
+                    WHEN books."mediaID" IS NOT NULL THEN 'Book'
+                    WHEN "videoGames"."mediaID" IS NOT NULL THEN 'Video Game'
+                END AS mediaType
+            FROM reviews
+            JOIN media ON reviews."mediaID" = media."mediaId"
+            JOIN users ON reviews."userID" = users."userID"
+            LEFT JOIN movies ON media."mediaId" = movies."mediaID"
+            LEFT JOIN albums ON media."mediaId" = albums."mediaID"
+            LEFT JOIN books ON media."mediaId" = books."mediaID"
+            LEFT JOIN "videoGames" ON media."mediaId" = "videoGames"."mediaID";
     `;
 
     const result = await pool.query(query);
