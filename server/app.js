@@ -490,11 +490,9 @@ app.post('/register', async (req, res) => {
       // Username already exists
       return res.json({ success: false, message: 'Username already exists. Please choose another.' });
     }
-    else
-    {
-      // Insert new user into the database
-      return res.json({ success: false, message: 'starting insert query.' });
-    }
+    
+    // Insert new user into the database
+    return res.json({ success: false, message: 'starting insert query.' });
    
   } catch (error) {
     console.error('Registration error:', error);
