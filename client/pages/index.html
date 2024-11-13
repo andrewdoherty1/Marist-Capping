@@ -368,9 +368,18 @@
             try {
                 const response = await fetch('/api/random-books');
                 const books = await response.json();
-                displayBooks(books);
+
+                // Now fetch average rating for each book
+                const booksWithRatings = await Promise.all(
+                    books.map(async (book) => {
+                        const averageRating = await fetchAverageRating(book.mediaId);
+                        return { ...book, averageRating }; // Add the average rating to the book object
+                    })
+                );
+
+                displayBooks(booksWithRatings); // Display the books with average ratings
             } catch (error) {
-                console.error('Error fetching books', error);
+                console.error('Error fetching books or ratings:', error);
             }
         }
 
@@ -382,19 +391,42 @@
             books.forEach(book => {
                 const bookCard = document.createElement('div');
                 bookCard.classList.add('media-item');
+
+                // Get the average rating or set it to 0 if it's missing
+                const averageRating = book.averageRating || 0;
+                const filledStars = Math.round(averageRating); // Round the average rating to the nearest whole number
+                const emptyStars = 5 - filledStars; // Calculate how many empty stars are needed
+
+                // Create the star icons: If there's no averageRating, display 5 blank stars
+                let starIcons;
+                if (averageRating > 0) {
+                    // If there's a rating, show filled (yellow) and empty (gray) stars
+                    starIcons = `
+                ${'<i class="fa fa-star" style="color: gold;"></i>'.repeat(filledStars)}  
+                ${'<i class="fa fa-star-o" style="color: gray;"></i>'.repeat(emptyStars)}
+            `;
+                } else {
+                    // If no average rating, display 5 blank stars (default)
+                    starIcons = `
+                <div class="star-rating-default">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                </div>
+            `;
+                }
+
                 bookCard.innerHTML = `
             <img src="${book.cover_url}" alt="${book.title}">
             <div class="media-info">
-                <p><strong>${book.title}</strong>
+                <p><strong>${book.title}</strong></p>
                 <p>Author: ${book.author}</p>
                 <p>Date: ${book.year}</p>
             </div>
             <div class="star-rating">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
+                ${starIcons}
             </div>
         `;
 
