@@ -29,7 +29,7 @@
             <a href="createAccount.html" id="auth-link" class="sign-in-link">Sign In</a>
             <div class="profile-icon" id="profile-icon">
                 <a href="userProfile.html">
-                    <img src="https://via.placeholder.com/50" alt="Profile">
+                    <img src="images/defaultProfile.webp" alt="Profile">
                 </a>
             </div>
         </div>
@@ -128,6 +128,11 @@
                     <div class="form-group">
                         <label for="email">Email:</label>
                         <input type="email" id="email" name="email" data-original="">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <input type="text" id="description" name="description" data-original="">
                     </div>
                     
                     <button id="submit-changes" style="display: none;" onclick="submitChanges(event)">Submit Changes</button>

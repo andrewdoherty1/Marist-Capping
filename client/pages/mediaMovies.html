@@ -115,6 +115,11 @@
     <div class="media-container" id="media-container">
         <div class="media-picture">
             <img src="" alt="Media Picture" id="media-image">
+            <div class="bookmark-container" style="text-align: center; margin-top: 20px;">
+                <button id="bookmark-btn" style="background: none; border: none; cursor: pointer;">
+                    <img src="images/bookmarkIcon.webp" alt="Bookmark" id="bookmark-image" style="height: 40px;">
+                </button>
+            </div>
         </div>
         <div class="media-details">
             <h2 class="media-title" id="media-title">Media Title</h2>
@@ -372,6 +377,37 @@
                 }
             } catch (error) {
                 console.error("Error submitting review:", error);
+            }
+        });
+
+        const bookmarkButton = document.getElementById('bookmark-btn');
+        bookmarkButton.addEventListener('click', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mediaID = urlParams.get('id');  // Fetch 'id' as per query parameter in the URL
+
+            // Log values to verify data being sent
+            console.log("Submitting bookmark:", { mediaID });
+
+            try {
+                const response = await fetch('/submitBookmark', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mediaID
+                    })
+                });
+
+                if (response.ok) {
+                    console.log("Bookmark submitted successfully");
+                    // Optionally, you can show a message or change the button state
+                    alert('Bookmark added successfully!');
+                } else {
+                    console.error("Failed to submit bookmark", response.statusText);
+                    // Handle errors if submission fails
+                    alert('Something went wrong. Please try again.');
+                }
+            } catch (error) {
+                console.error("Error submitting bookmark:", error);
             }
         });
     </script>

@@ -591,3 +591,10 @@ button:hover {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
 }
+.feed-horizontal {
+    display: flex;
+    flex-wrap: nowrap; /* Prevents items from wrapping to the next line */
+    overflow-x: auto; /* Allows horizontal scrolling if content exceeds container width */
+    gap: 30px; /* Adds space between items */
+    padding: 20px;
+}
