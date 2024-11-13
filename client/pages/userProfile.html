@@ -12,16 +12,18 @@
 
     <!-- Header -->
     <header>
-        <a onclick="showPage('feed', document.querySelector('nav a:first-child'))" style="cursor: pointer;">
-            <div class="logo-container">
-                <a href="index.html">
-                    <img src="images/logo.png" alt="Logo" class="logo-image">
-                </a>
-                <span class="logo-text">Opinionate</span>
-            </div>
-        </a>
+        <!-- Logo -->
+        <div class="logo-container">
+            <a href="index.html">
+                <img src="images/logo.png" alt="Logo" class="logo-image">
+            </a>
+            <span class="logo-text">Opinionate</span>
+        </div>
+
+        <!-- Centered Search Bar -->
         <div class="search-bar-header">
-            <input type="text" placeholder="Search for media">
+            <input type="text" placeholder="Search for media" id="search-input">
+            <div id="search-suggestions" class="search-suggestions"></div>
         </div>
 
         <!-- Sign-in / Log-out Link and Profile Icon -->
@@ -143,6 +145,45 @@
     </div>
     
     <script>
+
+        // user session details
+        // Check if user is logged in and update auth link
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const response = await fetch('/check-session');
+                const result = await response.json();
+
+                if (result.loggedIn) {
+                    const authLink = document.getElementById("auth-link");
+                    authLink.textContent = "Log Out";
+                    authLink.href = "#";
+                    authLink.addEventListener("click", handleLogout);
+
+                    // Update UI with the user's name
+                    document.getElementById("profile-icon").title = result.user.username;
+                }
+            } catch (error) {
+                console.error("Error checking session status:", error);
+            }
+        });
+
+        // Function to handle logging out
+        async function handleLogout(event) {
+            event.preventDefault();
+            try {
+                const response = await fetch('/logout', { method: 'POST' });
+                const result = await response.json();
+                if (result.success) {
+                    window.location.href = 'index.html'; // Redirect after logging out
+                } else {
+                    console.error("Error logging out:", result.message);
+                }
+            } catch (error) {
+                console.error("Logout request error:", error);
+            }
+        }
+
+        
          // Fetch and display the logged-in user's username
          async function loadUserProfile() {
             const response = await fetch('/user-info');
