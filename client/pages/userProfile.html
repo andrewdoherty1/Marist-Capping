@@ -69,65 +69,66 @@
 
         <!-- Bookmarks Section (Initially Hidden) -->
         <div id="bookmarks" class="section" style="display: none;">
-            <h2>Bookmarks</h2>
-            <p>Your bookmarked media items will appear here.</p>
+            <div id="bookmarks-container"></div>
+            <!-- Bookmarks cards will be dynamically populated -->
         </div>
+    </div>
 
-        <!-- Friends Section (Initially Hidden) -->
-        <div id="friends" class="section" style="display: none;">
-            <h2>Friends List</h2>
-            <p>Your friends list goes here.</p>
+    <!-- Friends Section (Initially Hidden) -->
+    <div id="friends" class="section" style="display: none;">
+        <h2>Friends List</h2>
+        <p>Your friends list goes here.</p>
+    </div>
+
+
+    <!-- Settings -->
+    <div id="settings" class="section" style="display: none;">
+        <div class="form-container" id="sign-in-form">
+            <h2>Update profile settings</h2>
+
+            <form oninput="showSubmitButton()">
+                <div class="form-group">
+                    <label for="profile-picture">Profile Picture:</label>
+                    <div class="profile-picture-placeholder">
+                        <img src="https://via.placeholder.com/100" alt="Profile Picture" class="profile-preview">
+                    </div>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="profile-picture" name="profile-picture" accept="image/*"
+                            onchange="showSubmitButton()">
+                    </div>
+                </div>
+
+                <!-- Fields to Change User Settings -->
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" data-original="">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" data-original="">
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm-password">Confirm Password:</label>
+                    <input type="password" id="confirm-password" name="confirm-password" data-original="">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" data-original="">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <input type="text" id="description" name="description" data-original="">
+                </div>
+
+                <button id="submit-changes" style="display: none;" onclick="submitChanges(event)">Submit
+                    Changes</button>
+            </form>
         </div>
-
-
-        <!-- Settings -->
-        <div id="settings" class="section" style="display: none;">
-            <div class="form-container" id="sign-in-form">
-                <h2>Update profile settings</h2>
-
-                <form oninput="showSubmitButton()">
-                    <div class="form-group">
-                        <label for="profile-picture">Profile Picture:</label>
-                        <div class="profile-picture-placeholder">
-                            <img src="https://via.placeholder.com/100" alt="Profile Picture" class="profile-preview">
-                        </div>
-                        <div class="file-input-wrapper">
-                            <input type="file" id="profile-picture" name="profile-picture" accept="image/*"
-                                onchange="showSubmitButton()">
-                        </div>
-                    </div>
-
-                    <!-- Fields to Change User Settings -->
-                    <div class="form-group">
-                        <label for="username">Username:</label>
-                        <input type="text" id="username" name="username" data-original="">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password">Password:</label>
-                        <input type="password" id="password" name="password" data-original="">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="confirm-password">Confirm Password:</label>
-                        <input type="password" id="confirm-password" name="confirm-password" data-original="">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" name="email" data-original="">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description">Description:</label>
-                        <input type="text" id="description" name="description" data-original="">
-                    </div>
-
-                    <button id="submit-changes" style="display: none;" onclick="submitChanges(event)">Submit
-                        Changes</button>
-                </form>
-            </div>
-        </div>
+    </div>
 
     </div>
 
@@ -264,6 +265,9 @@
             if (sectionId === 'library') {
                 loadLibrary();
             }
+            if (sectionId === 'bookmarks') {
+                loadBookmarks();
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -381,6 +385,68 @@
                 mediaList.style.display = 'none';
             }
         }
+
+        async function loadBookmarks() {
+            try {
+                const response = await fetch('/getUserBookmarks');
+                const data = await response.json();
+
+                if (data.success) {
+                    displayBookmarks(data.bookmarks);
+                }
+            } catch (error) {
+                console.error('Error loading bookmarks:', error);
+            }
+        }
+
+        function displayBookmarks(bookmarks) {
+            const bookmarkList = document.getElementById('bookmarks-container'); // Ensure this container exists in your HTML
+            bookmarkList.innerHTML = ''; // Clear existing content
+
+            if (bookmarks.length > 0) {
+                bookmarks.forEach(bookmark => {
+                    const bookmarkCard = document.createElement('div');
+                    bookmarkCard.classList.add('bookmark-card');
+
+                    // Prepare star rating display based on the bookmark rating (if applicable)
+                    //const starIcons = '★'.repeat(bookmark.ratingStar || 0) + '☆'.repeat(5 - (bookmark.ratingStar || 0));
+
+                    bookmarkCard.innerHTML = `
+        <img src="${bookmark.cover_url || 'https://via.placeholder.com/150'}" alt="${bookmark.title}">
+        <div class="media-info">
+          <p><strong>${bookmark.title}</strong></p>
+          <p>${bookmark.mediatype}</p>
+        </div>
+        
+      `;
+
+                    // Add click event listener to navigate to the appropriate media page
+                    bookmarkCard.addEventListener('click', () => {
+                        let url = '';
+                        if (bookmark.mediatype === 'Movie') {
+                            url = `mediaMovies.html?id=${bookmark.mediaID}`;
+                        } else if (bookmark.mediatype === 'Album') {
+                            url = `mediaMusic.html?albumId=${bookmark.mediaID}`;
+                        } else if (bookmark.mediatype === 'Book') {
+                            url = `mediaBooks.html?id=${bookmark.mediaID}`;
+                        } else if (bookmark.mediatype === 'Video Game') {
+                            url = `mediaVG.html?id=${bookmark.mediaID}`;
+                        }
+                        window.location.href = url;
+                    });
+
+                    bookmarkList.appendChild(bookmarkCard);
+                });
+
+                // Show the bookmarks container
+                bookmarkList.style.display = 'grid';
+            } else {
+                // Hide the container if there are no bookmarks
+                bookmarkList.style.display = 'none';
+            }
+        }
+
+
     </script>
 
 </body>
