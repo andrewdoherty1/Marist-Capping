@@ -2,7 +2,7 @@ import pkg from 'pg';
 import axios from 'axios';
 const { Pool } = pkg;
 
-const mediaID = 301; // dont change after, must change pre-run
+const mediaID = 278; // dont change after, must change pre-run
 //Connect to the Remote Database.
 const pool = new Pool({
   user: 'postgres',
@@ -110,7 +110,7 @@ const fetchAndSaveAlbum = async (albumId) => {
   }
 };
 
-//fetchAndSaveAlbum('2pzOAoHNZiVE6Pxo3PQMhE');
+fetchAndSaveAlbum('6DMUAqxiFfLdqXv0vqcrQA');
 
 // Function to fetch movie data from the TMDB API
 const fetchMovieData = async (movieId) => {
@@ -261,7 +261,7 @@ const getTableNames = async () => {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
-      const mediaID = 325
+      const mediaID = 350
       // Insert into the media table to get a mediaId
       const mediaResult = await client.query(
         `INSERT INTO media ("mediaId", title, description)
@@ -287,15 +287,16 @@ const getTableNames = async () => {
       client.release();
     }
   };
-  
+  /* GET BOOKS DO NOT DELETE
   // Example call with a valid Open Library book ID
   (async () => {
-    const bookId = 'OL3288345M'; // Replace with a valid Open Library book ID
+    const bookId = 'OL15414803W'; // Replace with a valid Open Library book ID
     const book = await fetchBookDetails(bookId);
     if (book) {
       await insertBookData(book);
     }
   })();
+  */
 
  
 
