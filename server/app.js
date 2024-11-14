@@ -679,6 +679,85 @@ app.get('/getAverageRating/:mediaID', async (req, res) => {
   }
 });
 
+// Route to fill the user's library tab in their user profile page.
+app.get('/getUserReviews', async (req, res) => {
+  try {
+    // Retrieve userID from the session
+    const userID = req.session.user.id;
+    if (!userID) {
+      return res.status(401).json({ error: 'User not authenticated.' });
+    }
+
+    const query = `
+      SELECT 
+        reviews.*, 
+        media.title, 
+        users.username,
+        COALESCE(movies.poster_url, albums.cover_url, books.cover_url, "videoGames".poster_url) AS cover_url,
+        CASE
+          WHEN movies."mediaID" IS NOT NULL THEN 'Movie'
+          WHEN albums."mediaID" IS NOT NULL THEN 'Album'
+          WHEN books."mediaID" IS NOT NULL THEN 'Book'
+          WHEN "videoGames"."mediaID" IS NOT NULL THEN 'Video Game'
+        END AS mediaType
+      FROM reviews
+      JOIN media ON reviews."mediaID" = media."mediaId"
+      JOIN users ON reviews."userID" = users."userID"
+      LEFT JOIN movies ON media."mediaId" = movies."mediaID"
+      LEFT JOIN albums ON media."mediaId" = albums."mediaID"
+      LEFT JOIN books ON media."mediaId" = books."mediaID"
+      LEFT JOIN "videoGames" ON media."mediaId" = "videoGames"."mediaID"
+      WHERE reviews."userID" = $1;
+    `;
+
+    const result = await pool.query(query, [userID]);
+
+    res.status(200).json({ success: true, reviews: result.rows });
+  } catch (error) {
+    console.error('Error fetching user reviews with cover URLs:', error);
+    res.status(500).json({ error: 'An error occurred while fetching user reviews.' });
+  }
+});
+
+app.get('/getUserBookmarks', async (req, res) => {
+  // Ensure the user is logged in
+  if (!req.session.user) {
+    return res.status(401).json({ success: false, message: 'User not logged in' });
+  }
+
+  const userID = req.session.user.id;
+
+  try {
+    const query = `
+      SELECT 
+        bookmark.*, 
+        media.title, 
+        COALESCE(movies.poster_url, albums.cover_url, books.cover_url, "videoGames".poster_url) AS cover_url,
+        CASE
+          WHEN movies."mediaID" IS NOT NULL THEN 'Movie'
+          WHEN albums."mediaID" IS NOT NULL THEN 'Album'
+          WHEN books."mediaID" IS NOT NULL THEN 'Book'
+          WHEN "videoGames"."mediaID" IS NOT NULL THEN 'Video Game'
+        END AS mediaType
+      FROM bookmark
+      JOIN media ON bookmark."mediaID" = media."mediaId"
+      LEFT JOIN movies ON media."mediaId" = movies."mediaID"
+      LEFT JOIN albums ON media."mediaId" = albums."mediaID"
+      LEFT JOIN books ON media."mediaId" = books."mediaID"
+      LEFT JOIN "videoGames" ON media."mediaId" = "videoGames"."mediaID"
+      WHERE bookmark."userID" = $1;
+    `;
+    
+    const values = [userID];
+    const result = await pool.query(query, values);
+
+    res.status(200).json({ success: true, bookmarks: result.rows });
+  } catch (error) {
+    console.error('Error fetching bookmarks:', error);
+    res.status(500).json({ success: false, message: 'Error retrieving bookmarks' });
+  }
+});
+
 
 // -------------------------------------------------------------
 // Server connection
