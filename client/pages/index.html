@@ -205,9 +205,28 @@
                 const response = await fetch('/api/random-movies');
                 const movies = await response.json();
 
-                displayMovies(movies);
+                // Now fetch average rating for each movie
+                const moviesWithRatings = await Promise.all(
+                    movies.map(async (movie) => {
+                        const averageRating = await fetchAverageRating(movie.mediaId);
+                        return { ...movie, averageRating }; // Add the average rating to the movie object
+                    })
+                );
+
+                displayMovies(moviesWithRatings); // Display the movies with average ratings
             } catch (error) {
-                console.error('Error fetching random movies:', error);
+                console.error('Error fetching movies or ratings:', error);
+            }
+        }
+
+        async function fetchAverageRating(mediaID) {
+            try {
+                const response = await fetch(`/getAverageRating/${mediaID}`);
+                const { averageRating } = await response.json(); // Assuming the response contains an averageRating property
+                return averageRating || 0; // Default to 0 if no rating is found
+            } catch (error) {
+                console.error('Error fetching average rating:', error);
+                return 0; // Return 0 in case of an error
             }
         }
 
@@ -218,6 +237,33 @@
             movies.forEach(movie => {
                 const movieCard = document.createElement('div');
                 movieCard.classList.add('media-item');
+
+                // Get the average rating or set it to 0 if it's missing
+                const averageRating = movie.averageRating || 0;
+                const filledStars = Math.round(averageRating); // Round the average rating to the nearest whole number
+                const emptyStars = 5 - filledStars; // Calculate how many empty stars are needed
+
+                // Create the star icons: If there's no averageRating, display 5 blank stars
+                let starIcons;
+                if (averageRating > 0) {
+                    // If there's a rating, show filled (yellow) and empty (gray) stars
+                    starIcons = `
+                ${'<i class="fa fa-star" style="color: gold;"></i>'.repeat(filledStars)}  
+                ${'<i class="fa fa-star-o" style="color: gray;"></i>'.repeat(emptyStars)}
+            `;
+                } else {
+                    // If no average rating, display 5 blank stars (default)
+                    starIcons = `
+                <div class="star-rating-default">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                </div>
+            `;
+                }
+
                 movieCard.innerHTML = `
             <img src="${movie.poster_url}" alt="${movie.title}">
             <div class="media-info">
@@ -226,13 +272,10 @@
                 <p>Studio: ${movie.studio}</p>
             </div>
             <div class="star-rating">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
+                ${starIcons}
             </div>
         `;
+
                 // Navigate to internal media page with the movie ID
                 movieCard.addEventListener('click', () => {
                     window.location.href = `mediaMovies.html?id=${movie.mediaId}`;
@@ -242,14 +285,26 @@
             });
         }
 
+
+
+
+
         async function fetchAndDisplayGames() {
             try {
                 const response = await fetch('/api/random-games');
                 const games = await response.json();
 
-                displayGames(games);
+                // Now fetch average rating for each game
+                const gamesWithRatings = await Promise.all(
+                    games.map(async (game) => {
+                        const averageRating = await fetchAverageRating(game.mediaId);
+                        return { ...game, averageRating }; // Add the average rating to the game object
+                    })
+                );
+
+                displayGames(gamesWithRatings); // Display the games with average ratings
             } catch (error) {
-                console.error('Error fetching random games:', error);
+                console.error('Error fetching games or ratings:', error);
             }
         }
 
@@ -260,6 +315,33 @@
             games.forEach(game => {
                 const gameCard = document.createElement('div');
                 gameCard.classList.add('media-item');
+
+                // Get the average rating or set it to 0 if it's missing
+                const averageRating = game.averageRating || 0;
+                const filledStars = Math.round(averageRating); // Round the average rating to the nearest whole number
+                const emptyStars = 5 - filledStars; // Calculate how many empty stars are needed
+
+                // Create the star icons: If there's no averageRating, display 5 blank stars
+                let starIcons;
+                if (averageRating > 0) {
+                    // If there's a rating, show filled (yellow) and empty (gray) stars
+                    starIcons = `
+                ${'<i class="fa fa-star" style="color: gold;"></i>'.repeat(filledStars)}  
+                ${'<i class="fa fa-star-o" style="color: gray;"></i>'.repeat(emptyStars)}
+            `;
+                } else {
+                    // If no average rating, display 5 blank stars (default)
+                    starIcons = `
+                <div class="star-rating-default">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                </div>
+            `;
+                }
+
                 gameCard.innerHTML = `
             <img src="${game.poster_url}" alt="${game.title}">
             <div class="media-info">
@@ -268,11 +350,7 @@
                 <p>Publisher: ${game.publisher}</p>
             </div>
             <div class="star-rating">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
+                ${starIcons}
             </div>
         `;
 
@@ -284,14 +362,24 @@
                 gamesContainer.appendChild(gameCard);
             });
         }
+
         // Display Books from the database
         async function fetchAndDisplayBooks() {
             try {
                 const response = await fetch('/api/random-books');
                 const books = await response.json();
-                displayBooks(books);
+
+                // Now fetch average rating for each book
+                const booksWithRatings = await Promise.all(
+                    books.map(async (book) => {
+                        const averageRating = await fetchAverageRating(book.mediaId);
+                        return { ...book, averageRating }; // Add the average rating to the book object
+                    })
+                );
+
+                displayBooks(booksWithRatings); // Display the books with average ratings
             } catch (error) {
-                console.error('Error fetching books', error);
+                console.error('Error fetching books or ratings:', error);
             }
         }
 
@@ -303,19 +391,42 @@
             books.forEach(book => {
                 const bookCard = document.createElement('div');
                 bookCard.classList.add('media-item');
+
+                // Get the average rating or set it to 0 if it's missing
+                const averageRating = book.averageRating || 0;
+                const filledStars = Math.round(averageRating); // Round the average rating to the nearest whole number
+                const emptyStars = 5 - filledStars; // Calculate how many empty stars are needed
+
+                // Create the star icons: If there's no averageRating, display 5 blank stars
+                let starIcons;
+                if (averageRating > 0) {
+                    // If there's a rating, show filled (yellow) and empty (gray) stars
+                    starIcons = `
+                ${'<i class="fa fa-star" style="color: gold;"></i>'.repeat(filledStars)}  
+                ${'<i class="fa fa-star-o" style="color: gray;"></i>'.repeat(emptyStars)}
+            `;
+                } else {
+                    // If no average rating, display 5 blank stars (default)
+                    starIcons = `
+                <div class="star-rating-default">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                </div>
+            `;
+                }
+
                 bookCard.innerHTML = `
             <img src="${book.cover_url}" alt="${book.title}">
             <div class="media-info">
-                <p><strong>${book.title}</strong>
+                <p><strong>${book.title}</strong></p>
                 <p>Author: ${book.author}</p>
                 <p>Date: ${book.year}</p>
             </div>
             <div class="star-rating">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
+                ${starIcons}
             </div>
         `;
 
@@ -371,12 +482,31 @@
                 const response = await fetch('/api/random-albums');
                 const albums = await response.json();
 
-                displayMusic(albums);
+                // Now fetch average rating for each album
+                const albumsWithRatings = await Promise.all(
+                    albums.map(async (album) => {
+                        const averageRating = await fetchAverageRating(album.mediaID);
+                        return { ...album, averageRating }; // Add the average rating to the album object
+                    })
+                );
+
+                displayMusic(albumsWithRatings); // Display the albums with ratings
             } catch (error) {
-                console.error('Error fetching random albums:', error);
+                console.error('Error fetching albums or ratings:', error);
             }
         }
 
+
+        async function fetchAverageRating(mediaID) {
+            try {
+                const response = await fetch(`/getAverageRating/${mediaID}`);
+                const { averageRating } = await response.json(); // Assuming the response contains an averageRating property
+                return averageRating || 0; // Default to 0 if no rating is found
+            } catch (error) {
+                console.error('Error fetching average rating:', error);
+                return 0; // Return 0 in case of an error
+            }
+        }
 
         function displayMusic(albums) {
             const albumsContainer = document.getElementById('albums-container');
@@ -386,18 +516,39 @@
                 const albumCard = document.createElement('div');
                 albumCard.classList.add('media-item');
 
-                // Updated based on database fields: artist, title, cover_url
+                // Get the average rating or set it to 0 if it's missing
+                const averageRating = album.averageRating || 0;
+                const filledStars = Math.round(averageRating); // Round the average rating to the nearest whole number
+                const emptyStars = 5 - filledStars; // Calculate how many empty stars are needed
+
+                // Create the star icons: If there's no averageRating, display 5 blank stars
+                let starIcons;
+                if (averageRating > 0) {
+                    // If there's a rating, show filled (yellow) and empty (gray) stars
+                    starIcons = `
+                ${'<i class="fa fa-star" style="color: gold;"></i>'.repeat(filledStars)}  
+                ${'<i class="fa fa-star-o" style="color: gray;"></i>'.repeat(emptyStars)}
+            `;
+                } else {
+                    // If no average rating, display 5 blank stars (default)
+                    starIcons = `
+                <div class="star-rating-default">
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                    <i class="fa fa-star"></i>
+                </div>
+            `;
+                }
+
                 albumCard.innerHTML = `
             <img src="${album.cover_url}" alt="${album.title}">
             <div class="media-info">
                 <p><strong>${album.title}</strong> by ${album.artist}</p>
             </div>
             <div class="star-rating">
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
-                <i class="fa fa-star"></i>
+                ${starIcons}
             </div>
         `;
 
@@ -780,7 +931,21 @@
             }
         }
 
+        function setStarRating(averageRating) {
+            const stars = document.querySelectorAll('.star');
+            const ratingValue = document.getElementById('rating-value');
 
+            // Round the average rating to the nearest whole number
+            const roundedRating = Math.round(averageRating);
+
+            // Highlight the stars based on the rounded rating
+            for (let i = 0; i < roundedRating; i++) {
+                stars[i].classList.add('filled');
+            }
+
+            // Update the displayed rating value
+            ratingValue.textContent = `${roundedRating} Stars`;
+        }
 
 
 
