@@ -71,7 +71,52 @@ app.get('/api/games', async (req, res) => {
   }
 });
 
+// -------------------------------------------------------------
+// function to search
+app.get('/api/search', async (req, res) => {
+  const searchTerm = req.query.q;
+  if (!searchTerm) {
+    return res.status(400).json({ error: 'Missing search term' });
+  }
 
+  try {
+    const client = await pool.connect();
+
+    const query = `
+          SELECT m."mediaId", m.title, 'Movie' as "mediaType", mv.poster_url
+          FROM media m
+          JOIN movies mv ON m."mediaId" = mv."mediaID"
+          WHERE LOWER(m.title) LIKE LOWER($1)
+          UNION
+          SELECT m."mediaId", m.title, 'Album' as "mediaType", a.cover_url as poster_url
+          FROM media m
+          JOIN albums a ON m."mediaId" = a."mediaID"
+          WHERE LOWER(m.title) LIKE LOWER($1)
+          UNION
+          SELECT m."mediaId", m.title, 'Book' as "mediaType", b.cover_url as poster_url
+          FROM media m
+          JOIN books b ON m."mediaId" = b."mediaID"
+          WHERE LOWER(m.title) LIKE LOWER($1)
+          UNION
+          SELECT m."mediaId", m.title, 'Video Game' as "mediaType", vg.poster_url
+          FROM media m
+          JOIN "videoGames" vg ON m."mediaId" = vg."mediaID"
+          WHERE LOWER(m.title) LIKE LOWER($1)
+          LIMIT 10;
+      `;
+
+    const values = [`%${searchTerm}%`];
+    const result = await client.query(query, values);
+    client.release();
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error executing search query:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// -------------------------------------------------------------
+// the majority of the code below is to either retrieve or populate the media 
 
 // Function to fetch game details from GiantBomb
 const fetchGameDetails = async (gameId) => {
@@ -153,7 +198,7 @@ app.get('/api/random-movies', async (req, res) => {
        FROM media AS m
        JOIN movies AS mv ON m."mediaId" = mv."mediaID"
        ORDER BY RANDOM()
-       LIMIT 20`
+       LIMIT 100`
     );
     client.release();
 
@@ -179,7 +224,7 @@ app.get('/api/random-albums', async (req, res) => {
       FROM albums AS a
       JOIN media AS m ON a."mediaID" = m."mediaId"
       ORDER BY RANDOM()
-      LIMIT 20;  -- Limit to 20 random albums, can adjust as needed
+      LIMIT 100;  -- Limit to 20 random albums, can adjust as needed
     `;
 
     const result = await client.query(albumQuery);
@@ -206,7 +251,7 @@ app.get('/api/random-games', async (req, res) => {
       FROM media m
       JOIN "videoGames" vg ON m."mediaId" = vg."mediaID"
       ORDER BY RANDOM()
-      LIMIT 20;
+      LIMIT 100;
     `;
     const result = await pool.query(query);
     res.json(result.rows);
@@ -215,6 +260,8 @@ app.get('/api/random-games', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch video game data' });
   }
 });
+
+
 // Route to retrieve and display books
 app.get('/api/random-books', async (req, res) => {
   try {
@@ -230,7 +277,7 @@ app.get('/api/random-books', async (req, res) => {
        FROM media AS m
        JOIN books AS b ON m."mediaId" = b."mediaID"
        ORDER BY RANDOM()
-       LIMIT 20`
+       LIMIT 100`
     );
     client.release();
 
@@ -241,7 +288,6 @@ app.get('/api/random-books', async (req, res) => {
   }
 });
 
-//Books Media page
 
 // Route to fetch videogame details from the database based on the mediaId.
 app.get('/api/games/:id', async (req, res) => {
@@ -278,11 +324,6 @@ app.get('/api/games/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-
-
-
-
 
 // Route to fetch media details from the database based on the mediaId.
 app.get('/api/media/:id', async (req, res) => {
@@ -391,28 +432,8 @@ app.get('/api/books/:id', async (req, res) => {
   }
 });
 
-
-// -------------------------------------------------------
-// LOGIN FUNCTION
-
-// Login function to check user credentials
-/*
-const loginUser = async (username, password) => {
-  try {
-    const query = 'SELECT * FROM users WHERE username = $1 AND password = $2';
-    const res = await pool.query(query, [username, password]);
-    if (res.rows.length > 0) {
-      console.log('User logged in:', res.rows[0]);
-      return { success: true, message: 'Login successful!' };
-    } else {
-      return { success: false, message: 'Incorrect username or password.' };
-    }
-  } catch (err) {
-    console.error('Error logging in user:', err.stack);
-    return { success: false, message: 'Login error. Please try again.' };
-  }
-};
-*/
+// ---------------------------------------------------------------------------------------------------------
+// the coede below pertains to allowing a user to sign-in/log-out and create an account
 
 // Login route
 app.post('/login', async (req, res) => {
@@ -456,6 +477,56 @@ app.post('/logout', (req, res) => {
   });
 });
 
+// Register route to create a new user
+app.post('/register', async (req, res) => {
+  const { username, email, password } = req.body;
+
+  try {
+    // Check if the username already exists
+    const checkQuery = 'SELECT * FROM users WHERE username = $1';
+    const checkResult = await pool.query(checkQuery, [username]);
+
+    if (checkResult.rows.length > 0) {
+      // Username already exists
+      return res.json({ success: false, message: 'Username already exists. Please choose another.' });
+    }
+
+    // Insert new user into the database
+    const insertQuery = 'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *';
+    const insertResult = await pool.query(insertQuery, [username, email, password]);
+
+    if (insertResult.rows.length > 0) {
+      // User registered, create session
+      req.session.user = { username: insertResult.rows[0].username, id: insertResult.rows[0].id };
+      console.log('User registered and session created:', req.session.user);
+      return res.json({ success: true, message: 'Account created successfully!' });
+    } else {
+      // Insertion failed
+      return res.json({ success: false, message: 'Failed to create account. Please try again.' });
+    }
+  } catch (error) {
+    console.error('Registration error:', error);
+    return res.json({ success: false, message: 'An error occurred during registration. Please try again.' });
+  }
+});
+
+// Route to fetch all users (for admin or debug purposes)
+app.get('/users', async (req, res) => {
+  try {
+    const query = 'SELECT * FROM users';
+    const result = await pool.query(query);
+    res.json({ success: true, users: result.rows });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.json({ success: false, message: 'An error occurred while fetching users.' });
+  }
+});
+
+
+
+
+// ---------------------------------------------------------------------------------------------------------
+// the code below is for displaying user information. this includes items such as username, bio description, profile picture etc.
 // get's user info
 app.get('/user-info', (req, res) => {
   if (req.session.user) {
@@ -473,47 +544,6 @@ app.get('/userProfile.html', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/pages/userProfile.html'));
 });
 
-app.get('/api/search', async (req, res) => {
-  const searchTerm = req.query.q;
-  if (!searchTerm) {
-    return res.status(400).json({ error: 'Missing search term' });
-  }
-
-  try {
-    const client = await pool.connect();
-
-    const query = `
-          SELECT m."mediaId", m.title, 'Movie' as "mediaType", mv.poster_url
-          FROM media m
-          JOIN movies mv ON m."mediaId" = mv."mediaID"
-          WHERE LOWER(m.title) LIKE LOWER($1)
-          UNION
-          SELECT m."mediaId", m.title, 'Album' as "mediaType", a.cover_url as poster_url
-          FROM media m
-          JOIN albums a ON m."mediaId" = a."mediaID"
-          WHERE LOWER(m.title) LIKE LOWER($1)
-          UNION
-          SELECT m."mediaId", m.title, 'Book' as "mediaType", b.cover_url as poster_url
-          FROM media m
-          JOIN books b ON m."mediaId" = b."mediaID"
-          WHERE LOWER(m.title) LIKE LOWER($1)
-          UNION
-          SELECT m."mediaId", m.title, 'Video Game' as "mediaType", vg.poster_url
-          FROM media m
-          JOIN "videoGames" vg ON m."mediaId" = vg."mediaID"
-          WHERE LOWER(m.title) LIKE LOWER($1)
-          LIMIT 10;
-      `;
-
-    const values = [`%${searchTerm}%`];
-    const result = await client.query(query, values);
-    client.release();
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error executing search query:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
 
 // Route to submit a review
 app.post('/submitReview', async (req, res) => {
@@ -592,12 +622,6 @@ app.get('/getReviews', async (req, res) => {
 
 
 
-
-// connecting to the server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
-
 app.post('/submitBookmark', async (req, res) => {
   // Ensure the user is logged in
   if (!req.session.user) {
@@ -621,4 +645,122 @@ app.post('/submitBookmark', async (req, res) => {
       console.error('Error inserting bookmark:', error);
       res.status(500).json({ success: false, message: 'Error saving bookmark' });
   }
+});
+
+app.get('/getAverageRating/:mediaID', async (req, res) => {
+  const { mediaID } = req.params;  // Extract mediaID from the request parameters
+
+  try {
+    const query = `
+      SELECT 
+        AVG(reviews."ratingStar") AS averageRating,
+        COUNT(reviews."mediaID") AS reviewCount
+      FROM reviews
+      WHERE reviews."mediaID" = $1
+      GROUP BY reviews."mediaID";
+    `;
+
+    const result = await pool.query(query, [mediaID]);
+
+    if (result.rows.length > 0) {
+      res.status(200).json({ 
+        success: true, 
+        mediaID: mediaID, 
+        averageRating: result.rows[0].averagerating, 
+        reviewCount: result.rows[0].reviewcount 
+      });
+    } else {
+      res.status(404).json({ success: false, message: 'No reviews found for this media.' });
+    }
+    
+  } catch (error) {
+    console.error('Error calculating average rating:', error);
+    res.status(500).json({ error: 'An error occurred while calculating average rating.' });
+  }
+});
+
+// Route to fill the user's library tab in their user profile page.
+app.get('/getUserReviews', async (req, res) => {
+  try {
+    // Retrieve userID from the session
+    const userID = req.session.user.id;
+    if (!userID) {
+      return res.status(401).json({ error: 'User not authenticated.' });
+    }
+
+    const query = `
+      SELECT 
+        reviews.*, 
+        media.title, 
+        users.username,
+        COALESCE(movies.poster_url, albums.cover_url, books.cover_url, "videoGames".poster_url) AS cover_url,
+        CASE
+          WHEN movies."mediaID" IS NOT NULL THEN 'Movie'
+          WHEN albums."mediaID" IS NOT NULL THEN 'Album'
+          WHEN books."mediaID" IS NOT NULL THEN 'Book'
+          WHEN "videoGames"."mediaID" IS NOT NULL THEN 'Video Game'
+        END AS mediaType
+      FROM reviews
+      JOIN media ON reviews."mediaID" = media."mediaId"
+      JOIN users ON reviews."userID" = users."userID"
+      LEFT JOIN movies ON media."mediaId" = movies."mediaID"
+      LEFT JOIN albums ON media."mediaId" = albums."mediaID"
+      LEFT JOIN books ON media."mediaId" = books."mediaID"
+      LEFT JOIN "videoGames" ON media."mediaId" = "videoGames"."mediaID"
+      WHERE reviews."userID" = $1;
+    `;
+
+    const result = await pool.query(query, [userID]);
+
+    res.status(200).json({ success: true, reviews: result.rows });
+  } catch (error) {
+    console.error('Error fetching user reviews with cover URLs:', error);
+    res.status(500).json({ error: 'An error occurred while fetching user reviews.' });
+  }
+});
+
+app.get('/getUserBookmarks', async (req, res) => {
+  // Ensure the user is logged in
+  if (!req.session.user) {
+    return res.status(401).json({ success: false, message: 'User not logged in' });
+  }
+
+  const userID = req.session.user.id;
+
+  try {
+    const query = `
+      SELECT 
+        bookmark.*, 
+        media.title, 
+        COALESCE(movies.poster_url, albums.cover_url, books.cover_url, "videoGames".poster_url) AS cover_url,
+        CASE
+          WHEN movies."mediaID" IS NOT NULL THEN 'Movie'
+          WHEN albums."mediaID" IS NOT NULL THEN 'Album'
+          WHEN books."mediaID" IS NOT NULL THEN 'Book'
+          WHEN "videoGames"."mediaID" IS NOT NULL THEN 'Video Game'
+        END AS mediaType
+      FROM bookmark
+      JOIN media ON bookmark."mediaID" = media."mediaId"
+      LEFT JOIN movies ON media."mediaId" = movies."mediaID"
+      LEFT JOIN albums ON media."mediaId" = albums."mediaID"
+      LEFT JOIN books ON media."mediaId" = books."mediaID"
+      LEFT JOIN "videoGames" ON media."mediaId" = "videoGames"."mediaID"
+      WHERE bookmark."userID" = $1;
+    `;
+    
+    const values = [userID];
+    const result = await pool.query(query, values);
+
+    res.status(200).json({ success: true, bookmarks: result.rows });
+  } catch (error) {
+    console.error('Error fetching bookmarks:', error);
+    res.status(500).json({ success: false, message: 'Error retrieving bookmarks' });
+  }
+});
+
+
+// -------------------------------------------------------------
+// Server connection
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });

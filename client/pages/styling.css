@@ -211,13 +211,13 @@ nav a {
 /* Hover effect */
 nav a:hover {
     color: #fff;
-    background: #fde047;
+    background: #433f3f;
 }
 
 /* Active link styling */
 nav a.active {
     color: #fff;
-    background: #fde047;
+    background: #433f3f;
 }
 .content {
     padding: 30px;
@@ -652,4 +652,39 @@ button:hover {
     font-size: 14px;
     margin-top: 10px;
  }
- 
+
+ #bookmarks-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Cards will be at least 250px wide, and the number of columns adjusts based on available width */
+    gap: 20px; /* Space between cards */
+    padding: 20px;
+    max-width: 1200px; /* Optional: Limit the max width */
+    margin: 0 auto; /* Center the container */
+}
+
+.bookmark-card {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+    max-width: 300px; /* Restrict max width for cards */
+}
+
+.bookmark-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.bookmark-card img {
+    width: 100%;
+    max-width: 150px; /* Restrict image size */
+    height: auto;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
