@@ -443,8 +443,15 @@ app.post('/login', async (req, res) => {
     const result = await pool.query(query, [username, password]);
 
     if (result.rows.length > 0) {
+
       // User authenticated, create session
-      req.session.user = { username: result.rows[0].username, id: result.rows[0].userID };
+      req.session.user = 
+      { 
+          username: result.rows[0].username, 
+          id: result.rows[0].userID, 
+          description: result.rows[0].description 
+      };
+
       // Log the session user information to the terminal
     console.log('Session User:', req.session.user);
       res.json({ success: true, message: 'Login successful!' });
@@ -528,9 +535,16 @@ app.get('/users', async (req, res) => {
 // ---------------------------------------------------------------------------------------------------------
 // the code below is for displaying user information. this includes items such as username, bio description, profile picture etc.
 // get's user info
+
+
 app.get('/user-info', (req, res) => {
   if (req.session.user) {
-    res.json({ success: true, username: req.session.user.username });
+    res.json({ 
+      success: true, 
+      username: req.session.user.username,
+      description: req.session.user.description
+      // need to add the profile photo
+    });
   } else {
     res.json({ success: false, message: 'User not logged in' });
   }

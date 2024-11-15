@@ -52,7 +52,7 @@
             <img src="https://via.placeholder.com/150" alt="User Profile Picture">
         </div>
         <div class="user-description">
-            <h2 id="username-display">User Name</h2>
+            <h2 id="username-display"></h2>
             <p id="user-description-text">
                 This is your description. You can edit this in your settings.
             </p>
@@ -173,6 +173,8 @@
 
 
         // Fetch and display the logged-in user's username
+
+        
         async function loadUserProfile() {
             const response = await fetch('/user-info');
             const data = await response.json();
@@ -180,6 +182,7 @@
             if (data.success) {
                 // Display the username in the profile section
                 document.getElementById('username-display').textContent = data.username;
+                document.getElementById('user-description-text').textContent = data.description;
             } else {
                 // Optionally handle case where user is not logged in
                 console.error(data.message);
@@ -315,7 +318,7 @@
             document.getElementById('submit-changes').style.display = 'none';
 
             // Optional: Provide feedback
-            alert("Changes have been saved!");
+            alert("Changes have been saved!"); // this sould only pop up once we connect it with database
         }
 
         // Load reviews on page load if the Library is the default section
