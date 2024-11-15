@@ -443,8 +443,15 @@ app.post('/login', async (req, res) => {
     const result = await pool.query(query, [username, password]);
 
     if (result.rows.length > 0) {
+
       // User authenticated, create session
-      req.session.user = { username: result.rows[0].username, id: result.rows[0].userID };
+      req.session.user = 
+      { 
+          username: result.rows[0].username, 
+          id: result.rows[0].userID, 
+          description: result.rows[0].description 
+      };
+
       // Log the session user information to the terminal
     console.log('Session User:', req.session.user);
       res.json({ success: true, message: 'Login successful!' });
@@ -528,9 +535,16 @@ app.get('/users', async (req, res) => {
 // ---------------------------------------------------------------------------------------------------------
 // the code below is for displaying user information. this includes items such as username, bio description, profile picture etc.
 // get's user info
+
+
 app.get('/user-info', (req, res) => {
   if (req.session.user) {
-    res.json({ success: true, username: req.session.user.username });
+    res.json({ 
+      success: true, 
+      username: req.session.user.username,
+      description: req.session.user.description
+      // need to add the profile photo
+    });
   } else {
     res.json({ success: false, message: 'User not logged in' });
   }
@@ -543,6 +557,47 @@ app.get('/userProfile.html', (req, res) => {
   }
   res.sendFile(path.join(__dirname, '../client/pages/userProfile.html'));
 });
+
+
+// ---------------------------------------------------------------------------------------------------------
+// the code below has to do with user's ability to make updates to their profile
+
+// updates the user description
+app.post('/update-description', async (req, res) => {
+  if (!req.session.user) {
+    return res.json({ success: false, message: 'User not logged in' });
+  }
+
+  const { description } = req.body;
+  const userId = req.session.user.id;
+
+  console.log('Updating description for user ID:', userId); // Log user ID
+  console.log('New description:', description); // Log new description
+
+  try {
+    const query = 'UPDATE users SET description = $1 WHERE "userID" = $2 RETURNING description';
+    const result = await pool.query(query, [description, userId]);
+
+    if (result.rows.length > 0) {
+      req.session.user.description = description; // updatessession data
+      res.json({ success: true, message: 'Description updated successfully', description: result.rows[0].description });
+    } else {
+      res.json({ success: false, message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error updating description:', error);
+    res.json({ success: false, message: 'Error updating description. Please try again.' });
+  }
+});
+
+
+
+
+
+// ---------------------------------------------------------------------------------------------------------
+
+
+
 
 
 // Route to submit a review
