@@ -620,6 +620,40 @@ app.get('/getReviews', async (req, res) => {
   }
 });
 
+app.get('/getReviewsForMedia/:id', async (req, res) => {
+  const mediaID = req.params.id; // Get mediaID from the query parameters
+
+  try {
+    const query = `
+      SELECT 
+                reviews.*, 
+                media.title, 
+                users.username,
+                COALESCE(movies.poster_url, albums.cover_url, books.cover_url, "videoGames".poster_url) AS cover_url,
+                CASE
+                    WHEN movies."mediaID" IS NOT NULL THEN 'Movie'
+                    WHEN albums."mediaID" IS NOT NULL THEN 'Album'
+                    WHEN books."mediaID" IS NOT NULL THEN 'Book'
+                    WHEN "videoGames"."mediaID" IS NOT NULL THEN 'Video Game'
+                END AS mediaType
+            FROM reviews
+            JOIN media ON reviews."mediaID" = media."mediaId"
+            JOIN users ON reviews."userID" = users."userID"
+            LEFT JOIN movies ON media."mediaId" = movies."mediaID"
+            LEFT JOIN albums ON media."mediaId" = albums."mediaID"
+            LEFT JOIN books ON media."mediaId" = books."mediaID"
+            LEFT JOIN "videoGames" ON media."mediaId" = "videoGames"."mediaID"
+            WHERE media."mediaId" = $1;
+    `;
+
+    const result = await pool.query(query, [mediaID]); // Use mediaID in the query
+
+    res.status(200).json({ success: true, reviews: result.rows });
+  } catch (error) {
+    console.error('Error fetching reviews with cover URLs for specific mediaID:', error);
+    res.status(500).json({ error: 'An error occurred while fetching reviews.' });
+  }
+});
 
 
 app.post('/submitBookmark', async (req, res) => {
