@@ -177,15 +177,15 @@
             const data = await response.json();
 
             if (data.success) {
-                // Display the username in the profile section
+                // Display the username and description in the profile section
                 document.getElementById('username-display').textContent = data.username;
                 document.getElementById('user-description-text').textContent = data.description;
             } else {
-                // Optionally handle case where user is not logged in
                 console.error(data.message);
                 document.getElementById('username-display').textContent = "Guest";
             }
         }
+
         // Load user profile on page load
         document.addEventListener('DOMContentLoaded', loadUserProfile);
 
@@ -284,42 +284,72 @@
             event.preventDefault(); // Prevent page reload on form submission
 
             const description = document.getElementById('description').value;
+            const username = document.getElementById('username').value;
             const submitButton = document.getElementById('submit-changes');
-            const originalDescription = submitButton.getAttribute('data-original-description');
 
-            if (description !== originalDescription) {
+            const originalDescription = submitButton.getAttribute('data-original-description');
+            const originalUsername = submitButton.getAttribute('data-original-username');
+
+            const hasDescriptionChanged = description !== originalDescription;
+            const hasUsernameChanged = username !== originalUsername;
+
+            // Update description if it has changed
+            if (hasDescriptionChanged) {
                 try {
                     const response = await fetch('/update-description', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ description })
                     });
-                    
                     const result = await response.json();
-                    
                     if (result.success) {
-                        loadUserProfile(); // updates the profile based on any new changes
-                        alert(result.message);
-                        // Update the stored original description
+                        loadUserProfile();
                         submitButton.setAttribute('data-original-description', description);
-                        // Hide submit button
-                        submitButton.style.display = 'none';
                     } else {
                         alert(result.message || 'An error occurred while updating the description.');
                     }
                 } catch (error) {
-                    console.error('Update request error:', error);
+                    console.error('Update description error:', error);
                     alert('An error occurred while updating the description. Please try again.');
                 }
+            }
+
+            // Update username if it has changed
+            if (hasUsernameChanged) {
+                try {
+                    const response = await fetch('/update-username', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        loadUserProfile();
+                        submitButton.setAttribute('data-original-username', username);
+                    } else {
+                        alert(result.message || 'An error occurred while updating the username.');
+                    }
+                } catch (error) {
+                    console.error('Update username error:', error);
+                    alert('An error occurred while updating the username. Please try again.');
+                }
+            }
+
+            // Hide the submit button if there are no changes
+            if (!hasDescriptionChanged && !hasUsernameChanged) {
+                submitButton.style.display = 'none';
             }
         }
 
         function showSubmitButton() {
             const descriptionInput = document.getElementById('description');
+            const usernameInput = document.getElementById('username');
             const submitButton = document.getElementById('submit-changes');
-            const originalDescription = submitButton.getAttribute('data-original-description');
 
-            if (descriptionInput.value !== originalDescription) {
+            const originalDescription = submitButton.getAttribute('data-original-description');
+            const originalUsername = submitButton.getAttribute('data-original-username');
+
+            if (descriptionInput.value !== originalDescription || usernameInput.value !== originalUsername) {
                 submitButton.style.display = 'block';
             } else {
                 submitButton.style.display = 'none';
@@ -327,13 +357,16 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Fetch user data to set initial description and submit button's data-original-description attribute
+            // Fetch user data to set initial values and submit button's data attributes
             const response = await fetch('/user-info');
             const data = await response.json();
 
             if (data.success) {
                 document.getElementById('description').value = data.description || "";
+                document.getElementById('username').value = data.username || "";
+                
                 document.getElementById('submit-changes').setAttribute('data-original-description', data.description || "");
+                document.getElementById('submit-changes').setAttribute('data-original-username', data.username || "");
             }
         });
         
