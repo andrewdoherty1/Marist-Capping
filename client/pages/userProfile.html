@@ -121,15 +121,12 @@
 
                 <div class="form-group">
                     <label for="description">Description:</label>
-                    <input type="text" id="description" name="description" data-original="">
+                    <input type="text" id="description" name="description" data-original="" oninput="showSubmitButton()">
                 </div>
-
-                <button id="submit-changes" style="display: none;" onclick="submitChanges(event)">Submit
-                    Changes</button>
+                
+                <button id="submit-changes" style="display: none;" onclick="submitChanges(event)">Submit Changes</button>
             </form>
         </div>
-    </div>
-
     </div>
 
     <script>
@@ -174,7 +171,7 @@
 
         // Fetch and display the logged-in user's username
 
-        
+        // loads the user profile
         async function loadUserProfile() {
             const response = await fetch('/user-info');
             const data = await response.json();
@@ -273,6 +270,7 @@
             }
         }
 
+        // sign in stuff
         document.addEventListener('DOMContentLoaded', () => {
             // Initialize original values
             const fields = document.querySelectorAll('#sign-in-form input[data-original]');
@@ -281,45 +279,67 @@
             });
         });
 
-        function showSubmitButton() {
+        // this allows us to update the description. it may have to change once we go to add the others in
+        async function submitChanges(event) {
+            event.preventDefault(); // Prevent page reload on form submission
+
+            const description = document.getElementById('description').value;
             const submitButton = document.getElementById('submit-changes');
-            let hasChanges = false;
+            const originalDescription = submitButton.getAttribute('data-original-description');
 
-            // Check if any input's value has changed compared to its data-original attribute
-            document.querySelectorAll('#sign-in-form input[data-original]').forEach(field => {
-                if (field.value !== field.getAttribute('data-original')) {
-                    hasChanges = true;
+            if (description !== originalDescription) {
+                try {
+                    const response = await fetch('/update-description', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ description })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        loadUserProfile(); // updates the profile based on any new changes
+                        alert(result.message);
+                        // Update the stored original description
+                        submitButton.setAttribute('data-original-description', description);
+                        // Hide submit button
+                        submitButton.style.display = 'none';
+                    } else {
+                        alert(result.message || 'An error occurred while updating the description.');
+                    }
+                } catch (error) {
+                    console.error('Update request error:', error);
+                    alert('An error occurred while updating the description. Please try again.');
                 }
-            });
-
-            // Also check for file input changes
-            const fileInput = document.getElementById('profile-picture');
-            if (fileInput.files.length > 0) {
-                hasChanges = true;
             }
-
-            // Show or hide the submit button based on detected changes
-            submitButton.style.display = hasChanges ? 'block' : 'none';
         }
 
-        function submitChanges(event) {
-            event.preventDefault(); // Prevent form submission for demonstration purposes
+        function showSubmitButton() {
+            const descriptionInput = document.getElementById('description');
+            const submitButton = document.getElementById('submit-changes');
+            const originalDescription = submitButton.getAttribute('data-original-description');
 
-            // Reset original values after submission
-            const fields = document.querySelectorAll('#sign-in-form input[data-original]');
-            fields.forEach(field => {
-                field.setAttribute('data-original', field.value);
-            });
-
-            // Clear the file input change
-            document.getElementById('profile-picture').value = "";
-
-            // Hide the submit button after saving changes
-            document.getElementById('submit-changes').style.display = 'none';
-
-            // Optional: Provide feedback
-            alert("Changes have been saved!"); // this sould only pop up once we connect it with database
+            if (descriptionInput.value !== originalDescription) {
+                submitButton.style.display = 'block';
+            } else {
+                submitButton.style.display = 'none';
+            }
         }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Fetch user data to set initial description and submit button's data-original-description attribute
+            const response = await fetch('/user-info');
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('description').value = data.description || "";
+                document.getElementById('submit-changes').setAttribute('data-original-description', data.description || "");
+            }
+        });
+        
+
+
+
 
         // Load reviews on page load if the Library is the default section
         document.addEventListener('DOMContentLoaded', () => {

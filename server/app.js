@@ -559,6 +559,47 @@ app.get('/userProfile.html', (req, res) => {
 });
 
 
+// ---------------------------------------------------------------------------------------------------------
+// the code below has to do with user's ability to make updates to their profile
+
+// updates the user description
+app.post('/update-description', async (req, res) => {
+  if (!req.session.user) {
+    return res.json({ success: false, message: 'User not logged in' });
+  }
+
+  const { description } = req.body;
+  const userId = req.session.user.id;
+
+  console.log('Updating description for user ID:', userId); // Log user ID
+  console.log('New description:', description); // Log new description
+
+  try {
+    const query = 'UPDATE users SET description = $1 WHERE "userID" = $2 RETURNING description';
+    const result = await pool.query(query, [description, userId]);
+
+    if (result.rows.length > 0) {
+      req.session.user.description = description; // updatessession data
+      res.json({ success: true, message: 'Description updated successfully', description: result.rows[0].description });
+    } else {
+      res.json({ success: false, message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error updating description:', error);
+    res.json({ success: false, message: 'Error updating description. Please try again.' });
+  }
+});
+
+
+
+
+
+// ---------------------------------------------------------------------------------------------------------
+
+
+
+
+
 // Route to submit a review
 app.post('/submitReview', async (req, res) => {
   // Ensure the user is logged in
