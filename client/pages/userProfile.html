@@ -52,7 +52,7 @@
             <img src="https://via.placeholder.com/150" alt="User Profile Picture">
         </div>
         <div class="user-description">
-            <h2 id="username-display">User Name</h2>
+            <h2 id="username-display"></h2>
             <p id="user-description-text">
                 This is your description. You can edit this in your settings.
             </p>
@@ -121,15 +121,12 @@
 
                 <div class="form-group">
                     <label for="description">Description:</label>
-                    <input type="text" id="description" name="description" data-original="">
+                    <input type="text" id="description" name="description" data-original="" oninput="showSubmitButton()">
                 </div>
-
-                <button id="submit-changes" style="display: none;" onclick="submitChanges(event)">Submit
-                    Changes</button>
+                
+                <button id="submit-changes" style="display: none;" onclick="submitChanges(event)">Submit Changes</button>
             </form>
         </div>
-    </div>
-
     </div>
 
     <script>
@@ -173,19 +170,22 @@
 
 
         // Fetch and display the logged-in user's username
+
+        // loads the user profile
         async function loadUserProfile() {
             const response = await fetch('/user-info');
             const data = await response.json();
 
             if (data.success) {
-                // Display the username in the profile section
+                // Display the username and description in the profile section
                 document.getElementById('username-display').textContent = data.username;
+                document.getElementById('user-description-text').textContent = data.description;
             } else {
-                // Optionally handle case where user is not logged in
                 console.error(data.message);
                 document.getElementById('username-display').textContent = "Guest";
             }
         }
+
         // Load user profile on page load
         document.addEventListener('DOMContentLoaded', loadUserProfile);
 
@@ -270,6 +270,7 @@
             }
         }
 
+        // sign in stuff
         document.addEventListener('DOMContentLoaded', () => {
             // Initialize original values
             const fields = document.querySelectorAll('#sign-in-form input[data-original]');
@@ -278,45 +279,100 @@
             });
         });
 
-        function showSubmitButton() {
+        // this allows us to update the description. it may have to change once we go to add the others in
+        async function submitChanges(event) {
+            event.preventDefault(); // Prevent page reload on form submission
+
+            const description = document.getElementById('description').value;
+            const username = document.getElementById('username').value;
             const submitButton = document.getElementById('submit-changes');
-            let hasChanges = false;
 
-            // Check if any input's value has changed compared to its data-original attribute
-            document.querySelectorAll('#sign-in-form input[data-original]').forEach(field => {
-                if (field.value !== field.getAttribute('data-original')) {
-                    hasChanges = true;
+            const originalDescription = submitButton.getAttribute('data-original-description');
+            const originalUsername = submitButton.getAttribute('data-original-username');
+
+            const hasDescriptionChanged = description !== originalDescription;
+            const hasUsernameChanged = username !== originalUsername;
+
+            // Update description if it has changed
+            if (hasDescriptionChanged) {
+                try {
+                    const response = await fetch('/update-description', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ description })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        loadUserProfile();
+                        submitButton.setAttribute('data-original-description', description);
+                    } else {
+                        alert(result.message || 'An error occurred while updating the description.');
+                    }
+                } catch (error) {
+                    console.error('Update description error:', error);
+                    alert('An error occurred while updating the description. Please try again.');
                 }
-            });
-
-            // Also check for file input changes
-            const fileInput = document.getElementById('profile-picture');
-            if (fileInput.files.length > 0) {
-                hasChanges = true;
             }
 
-            // Show or hide the submit button based on detected changes
-            submitButton.style.display = hasChanges ? 'block' : 'none';
+            // Update username if it has changed
+            if (hasUsernameChanged) {
+                try {
+                    const response = await fetch('/update-username', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        loadUserProfile();
+                        submitButton.setAttribute('data-original-username', username);
+                    } else {
+                        alert(result.message || 'An error occurred while updating the username.');
+                    }
+                } catch (error) {
+                    console.error('Update username error:', error);
+                    alert('An error occurred while updating the username. Please try again.');
+                }
+            }
+
+            // Hide the submit button if there are no changes
+            if (!hasDescriptionChanged && !hasUsernameChanged) {
+                submitButton.style.display = 'none';
+            }
         }
 
-        function submitChanges(event) {
-            event.preventDefault(); // Prevent form submission for demonstration purposes
+        function showSubmitButton() {
+            const descriptionInput = document.getElementById('description');
+            const usernameInput = document.getElementById('username');
+            const submitButton = document.getElementById('submit-changes');
 
-            // Reset original values after submission
-            const fields = document.querySelectorAll('#sign-in-form input[data-original]');
-            fields.forEach(field => {
-                field.setAttribute('data-original', field.value);
-            });
+            const originalDescription = submitButton.getAttribute('data-original-description');
+            const originalUsername = submitButton.getAttribute('data-original-username');
 
-            // Clear the file input change
-            document.getElementById('profile-picture').value = "";
-
-            // Hide the submit button after saving changes
-            document.getElementById('submit-changes').style.display = 'none';
-
-            // Optional: Provide feedback
-            alert("Changes have been saved!");
+            if (descriptionInput.value !== originalDescription || usernameInput.value !== originalUsername) {
+                submitButton.style.display = 'block';
+            } else {
+                submitButton.style.display = 'none';
+            }
         }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Fetch user data to set initial values and submit button's data attributes
+            const response = await fetch('/user-info');
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('description').value = data.description || "";
+                document.getElementById('username').value = data.username || "";
+                
+                document.getElementById('submit-changes').setAttribute('data-original-description', data.description || "");
+                document.getElementById('submit-changes').setAttribute('data-original-username', data.username || "");
+            }
+        });
+        
+
+
+
 
         // Load reviews on page load if the Library is the default section
         document.addEventListener('DOMContentLoaded', () => {
