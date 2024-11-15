@@ -592,6 +592,36 @@ app.post('/update-description', async (req, res) => {
 
 
 
+// updates the user's username
+app.post('/update-username', async (req, res) => {
+  if (!req.session.user) {
+    return res.json({ success: false, message: 'User not logged in' });
+  }
+
+  const { username } = req.body;
+  const userId = req.session.user.id;
+
+  console.log('Updating username for user ID:', userId); // Log user ID
+  console.log('New username:', username); // Log new username
+
+  try {
+    const query = 'UPDATE users SET username = $1 WHERE "userID" = $2 RETURNING username';
+    const result = await pool.query(query, [username, userId]);
+
+    if (result.rows.length > 0) {
+      req.session.user.username = username; // Update session data
+      res.json({ success: true, message: 'Username updated successfully', username: result.rows[0].username });
+    } else {
+      res.json({ success: false, message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error updating username:', error);
+    res.json({ success: false, message: 'Error updating username. Please try again.' });
+  }
+});
+
+
+
 
 
 // ---------------------------------------------------------------------------------------------------------
