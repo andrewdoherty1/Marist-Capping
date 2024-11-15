@@ -591,7 +591,6 @@ app.post('/update-description', async (req, res) => {
 });
 
 
-
 // updates the user's username
 app.post('/update-username', async (req, res) => {
   if (!req.session.user) {
@@ -621,14 +620,45 @@ app.post('/update-username', async (req, res) => {
 });
 
 
+// updates the user's password
+app.post('/update-password', async (req, res) => {
+  if (!req.session.user) {
+      return res.json({ success: false, message: 'User not logged in' });
+  }
+
+  const { currentPassword, newPassword } = req.body;
+  const userId = req.session.user.id;
+
+  try {
+      // Verify current password
+      const query = 'SELECT password FROM users WHERE "userID" = $1';
+      const result = await pool.query(query, [userId]);
+
+      if (result.rows.length === 0) {
+          return res.json({ success: false, message: 'User not found' });
+      }
+
+      const storedPassword = result.rows[0].password;
+      if (storedPassword !== currentPassword) {
+          return res.json({ success: false, message: 'Current password is incorrect' });
+      }
+
+      // Update to new password
+      const updateQuery = 'UPDATE users SET password = $1 WHERE "userID" = $2';
+      await pool.query(updateQuery, [newPassword, userId]);
+
+      res.json({ success: true, message: 'Password updated successfully' });
+  } catch (error) {
+      console.error('Error updating password:', error);
+      res.json({ success: false, message: 'Error updating password. Please try again.' });
+  }
+});
+
+
 
 
 
 // ---------------------------------------------------------------------------------------------------------
-
-
-
-
 
 // Route to submit a review
 app.post('/submitReview', async (req, res) => {
