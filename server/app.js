@@ -485,10 +485,8 @@ app.post('/logout', (req, res) => {
 });
 
 // Register route to create a new user
-// Register route
-/*
 app.post('/register', async (req, res) => {
-  const { username, password, email } = req.body;
+  const { username, email, password } = req.body;
 
   try {
     // Check if the username already exists
@@ -496,33 +494,28 @@ app.post('/register', async (req, res) => {
     const checkResult = await pool.query(checkQuery, [username]);
 
     if (checkResult.rows.length > 0) {
-      return res.json({ success: false, message: 'Username already exists.' });
+      // Username already exists
+      return res.json({ success: false, message: 'Username already exists. Please choose another.' });
     }
 
-    // Insert the new user and return the userID
-    const insertQuery = `
-      INSERT INTO users (username, password, email)
-      VALUES ($1, $2, $3)
-      RETURNING userID, username;
-    `;
-    const insertResult = await pool.query(insertQuery, [username, password, email]);
-    const newUser = insertResult.rows[0];
-    console.log('New user inserted: ', newUser);
+    // Insert new user into the database
+    const insertQuery = 'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *';
+    const insertResult = await pool.query(insertQuery, [username, email, password]);
 
-    // Store the user in the session with both username and userID
-    req.session.user = { username: newUser.username, id: newUser.userID};
-    
-
-    res.json({ success: true, message: 'Account created successfully!', user: req.session.user });
-    console.log('User registered and session created:', req.session.user, req.session.userID);
-    
-
+    if (insertResult.rows.length > 0) {
+      // User registered, create session
+      req.session.user = { username: insertResult.rows[0].username, id: insertResult.rows[0].id };
+      console.log('User registered and session created:', req.session.user);
+      return res.json({ success: true, message: 'Account created successfully!' });
+    } else {
+      // Insertion failed
+      return res.json({ success: false, message: 'Failed to create account. Please try again.' });
+    }
   } catch (error) {
     console.error('Registration error:', error);
-    res.json({ success: false, message: 'An error occurred during registration. Please try again.' });
+    return res.json({ success: false, message: 'An error occurred during registration. Please try again.' });
   }
 });
-*/
 
 // Route to fetch all users (for admin or debug purposes)
 app.get('/users', async (req, res) => {
