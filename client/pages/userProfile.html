@@ -104,16 +104,23 @@
                     <input type="text" id="username" name="username" data-original="">
                 </div>
 
+                <!-- user password fields-->
                 <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" data-original="">
+                    <label for="current-password">Current Password:</label>
+                    <input type="password" id="current-password" name="current-password" data-original="">
+                </div>
+                
+                <div class="form-group">
+                    <label for="new-password">New Password:</label>
+                    <input type="password" id="new-password" name="new-password">
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm-new-password">Confirm New Password:</label>
+                    <input type="password" id="confirm-new-password" name="confirm-new-password">
                 </div>
 
-                <div class="form-group">
-                    <label for="confirm-password">Confirm Password:</label>
-                    <input type="password" id="confirm-password" name="confirm-password" data-original="">
-                </div>
-
+                <!-- Email field -->
                 <div class="form-group">
                     <label for="email">Email:</label>
                     <input type="email" id="email" name="email" data-original="">
@@ -121,9 +128,11 @@
 
                 <div class="form-group">
                     <label for="description">Description:</label>
-                    <input type="text" id="description" name="description" data-original="" oninput="showSubmitButton()">
+                    <input type="text" id="description" name="description" data-original=""
+                        oninput="showSubmitButton()">
                 </div>
-                
+
+                <p id="update-success-message" style="color: green; display: none;">User profile has been updated.</p>
                 <button id="submit-changes" style="display: none;" onclick="submitChanges(event)">Submit Changes</button>
             </form>
         </div>
@@ -281,19 +290,27 @@
 
         // this allows us to update the description. it may have to change once we go to add the others in
         async function submitChanges(event) {
-            event.preventDefault(); // Prevent page reload on form submission
+            event.preventDefault();
 
             const description = document.getElementById('description').value;
             const username = document.getElementById('username').value;
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmNewPassword = document.getElementById('confirm-new-password').value;
+            
             const submitButton = document.getElementById('submit-changes');
-
+            const successMessage = document.getElementById('update-success-message');
+            
             const originalDescription = submitButton.getAttribute('data-original-description');
             const originalUsername = submitButton.getAttribute('data-original-username');
-
+            
             const hasDescriptionChanged = description !== originalDescription;
             const hasUsernameChanged = username !== originalUsername;
+            const hasPasswordChanged = currentPassword && newPassword && (newPassword === confirmNewPassword);
 
-            // Update description if it has changed
+            let updateSuccessful = false;
+
+            // Update description
             if (hasDescriptionChanged) {
                 try {
                     const response = await fetch('/update-description', {
@@ -305,6 +322,7 @@
                     if (result.success) {
                         loadUserProfile();
                         submitButton.setAttribute('data-original-description', description);
+                        updateSuccessful = true;
                     } else {
                         alert(result.message || 'An error occurred while updating the description.');
                     }
@@ -314,7 +332,7 @@
                 }
             }
 
-            // Update username if it has changed
+            // Update username
             if (hasUsernameChanged) {
                 try {
                     const response = await fetch('/update-username', {
@@ -326,6 +344,7 @@
                     if (result.success) {
                         loadUserProfile();
                         submitButton.setAttribute('data-original-username', username);
+                        updateSuccessful = true;
                     } else {
                         alert(result.message || 'An error occurred while updating the username.');
                     }
@@ -335,21 +354,60 @@
                 }
             }
 
-            // Hide the submit button if there are no changes
-            if (!hasDescriptionChanged && !hasUsernameChanged) {
+            // Update password
+            if (hasPasswordChanged) {
+                try {
+                    const response = await fetch('/update-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ currentPassword, newPassword })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        updateSuccessful = true;
+                    } else {
+                        alert(result.message || 'An error occurred while updating the password.');
+                    }
+                } catch (error) {
+                    console.error('Update password error:', error);
+                    alert('An error occurred while updating the password. Please try again.');
+                }
+            } else if (currentPassword || newPassword || confirmNewPassword) {
+                alert('Please ensure current password is correct and new passwords match.');
+            }
+
+            // Show success message
+            if (updateSuccessful) {
+                successMessage.style.display = 'block';
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 3000); // Hide message after 3 seconds
+            }
+
+            // Hide submit button if no changes
+            if (!hasDescriptionChanged && !hasUsernameChanged && !hasPasswordChanged) {
                 submitButton.style.display = 'none';
             }
         }
 
+        // submit button is displayed once changes are made
         function showSubmitButton() {
             const descriptionInput = document.getElementById('description');
             const usernameInput = document.getElementById('username');
+            const currentPasswordInput = document.getElementById('current-password');
+            const newPasswordInput = document.getElementById('new-password');
+            const confirmNewPasswordInput = document.getElementById('confirm-new-password');
+
             const submitButton = document.getElementById('submit-changes');
 
             const originalDescription = submitButton.getAttribute('data-original-description');
             const originalUsername = submitButton.getAttribute('data-original-username');
 
-            if (descriptionInput.value !== originalDescription || usernameInput.value !== originalUsername) {
+            if (
+                descriptionInput.value !== originalDescription ||
+                usernameInput.value !== originalUsername ||
+                currentPasswordInput.value || newPasswordInput.value || confirmNewPasswordInput.value
+            ) {
                 submitButton.style.display = 'block';
             } else {
                 submitButton.style.display = 'none';
@@ -357,19 +415,18 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Fetch user data to set initial values and submit button's data attributes
             const response = await fetch('/user-info');
             const data = await response.json();
 
             if (data.success) {
                 document.getElementById('description').value = data.description || "";
                 document.getElementById('username').value = data.username || "";
-                
+
                 document.getElementById('submit-changes').setAttribute('data-original-description', data.description || "");
                 document.getElementById('submit-changes').setAttribute('data-original-username', data.username || "");
             }
         });
-        
+
 
 
 
@@ -502,7 +559,87 @@
             }
         }
 
+        document.addEventListener('DOMContentLoaded', () => {
+            // ... existing code ...
 
+            // Search functionality
+            const searchInput = document.getElementById('search-input');
+            const suggestionsContainer = document.getElementById('search-suggestions');
+
+            let searchTimeout;
+
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+
+                if (query.length > 0) {
+                    searchTimeout = setTimeout(() => {
+                        fetchSearchSuggestions(query);
+                    }, 300); // Delay to reduce the number of requests
+                } else {
+                    suggestionsContainer.innerHTML = '';
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+
+            function fetchSearchSuggestions(query) {
+                fetch(`/api/search?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        displaySearchSuggestions(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching search suggestions:', error);
+                    });
+            }
+
+            function displaySearchSuggestions(suggestions) {
+                suggestionsContainer.innerHTML = '';
+
+                if (suggestions.length > 0) {
+                    suggestions.forEach(item => {
+                        const suggestionItem = document.createElement('div');
+                        suggestionItem.classList.add('suggestion-item');
+
+                        suggestionItem.innerHTML = `
+                    <img src="${item.poster_url || 'https://via.placeholder.com/50'}" alt="${item.title}">
+                    <div>
+                        <p><strong>${item.title}</strong></p>
+                        <p>${item.mediaType}</p>
+                    </div>
+                `;
+
+                        suggestionItem.addEventListener('click', () => {
+                            let url = '';
+                            if (item.mediaType === 'Movie') {
+                                url = `mediaMovies.html?id=${item.mediaId}`;
+                            } else if (item.mediaType === 'Album') {
+                                url = `mediaMusic.html?albumId=${item.mediaId}`;
+                            } else if (item.mediaType === 'Book') {
+                                url = `mediaBooks.html?id=${item.mediaId}`;
+                            } else if (item.mediaType === 'Video Game') {
+                                url = `mediaVG.html?id=${item.mediaId}`;
+                            }
+                            window.location.href = url;
+                        });
+
+                        suggestionsContainer.appendChild(suggestionItem);
+                    });
+
+                    suggestionsContainer.style.display = 'block';
+                } else {
+                    suggestionsContainer.style.display = 'none';
+                }
+            }
+
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function (event) {
+                if (!suggestionsContainer.contains(event.target) && event.target !== searchInput) {
+                    suggestionsContainer.innerHTML = '';
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+        });
     </script>
 
 </body>
