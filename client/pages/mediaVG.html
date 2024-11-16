@@ -137,6 +137,9 @@
             <div class="media-description">
                 <p id="media-description"><strong>Description:</strong> Loading description...</p>
             </div>
+            <div class="average-rating" style="font-size: 0.9em;">
+                <h2>Average Rating: <span id="average-rating-value">Loading...</span></h2>
+            </div>
             <div class="rating-container">
                 <span class="star-rating" id="star-rating">
                     <span class="star" data-value="1">&#9733;</span>
@@ -199,6 +202,7 @@
             const mediaId = urlParams.get('id') || '550';
             fetchGameDetails(mediaId);
             loadFeed(mediaId);
+            fetchAndDisplayAverageRating(mediaId);
         });
 
         // Star rating system
@@ -464,6 +468,28 @@
                 }
             });
         });
+
+        async function fetchAndDisplayAverageRating(mediaId) {
+            try {
+                const response = await fetch(`/getAverageRating/${mediaId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    // Display the average rating in the span
+                    document.getElementById('average-rating-value').textContent =
+                        `${Number(data.averageRating).toFixed(1)} stars (${Number(data.reviewCount)} review${Number(data.reviewCount) !== 1 ? 's' : ''})`;
+
+
+
+                } else {
+                    document.getElementById('average-rating-value').textContent = 'No reviews yet';
+                }
+            } catch (error) {
+                console.error('Error fetching average rating:', error);
+                document.getElementById('average-rating-value').textContent = 'Error fetching rating';
+            }
+        }
+
     </script>
 
 </body>
