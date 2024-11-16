@@ -198,9 +198,9 @@
 
 
 
-        async function fetchAlbumDetails(albumId) {
+        async function fetchAlbumDetails(mediaId) {
             try {
-                const albumResponse = await fetch(`/api/albums/${albumId}`);
+                const albumResponse = await fetch(`/api/albums/${mediaId}`);
 
                 if (!albumResponse.ok) {
                     throw new Error('Failed to fetch album details');
@@ -248,9 +248,9 @@
         //     document.getElementById('track-list').innerHTML = `<strong>Tracks:</strong><ul>${album.tracks.items.map(track => `<li>${track.name}</li>`).join('')}</ul>`;
         // }
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const albumId = urlParams.get('albumId');
-        if (albumId) fetchAlbumDetails(albumId);
+        // const urlParams = new URLSearchParams(window.location.search);
+        // const albumId = urlParams.get('albumId');
+        // if (albumId) fetchAlbumDetails(albumId);
 
         // Star rating system
         const stars = document.querySelectorAll('.star');
@@ -415,7 +415,7 @@
                         if (review.mediatype === 'Movie') {
                             url = `mediaMovies.html?id=${review.mediaID}`;
                         } else if (review.mediatype === 'Album') {
-                            url = `mediaMusic.html?albumId=${review.mediaID}`;
+                            url = `mediaMusic.html?id=${review.mediaID}`;
                         } else if (review.mediatype === 'Book') {
                             url = `mediaBooks.html?id=${review.mediaID}`;
                         } else if (review.mediatype === 'Video Game') {
@@ -489,7 +489,7 @@
                             if (item.mediaType === 'Movie') {
                                 url = `mediaMovies.html?id=${item.mediaId}`;
                             } else if (item.mediaType === 'Album') {
-                                url = `mediaMusic.html?albumId=${item.mediaId}`;
+                                url = `mediaMusic.html?id=${item.mediaId}`;
                             } else if (item.mediaType === 'Book') {
                                 url = `mediaBooks.html?id=${item.mediaId}`;
                             } else if (item.mediaType === 'Video Game') {
