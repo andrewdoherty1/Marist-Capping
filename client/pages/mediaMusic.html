@@ -133,6 +133,9 @@
             <div class="media-description">
                 <p id="track-list"><strong>Tracks:</strong> Loading...</p>
             </div>
+            <div class="average-rating" style="font-size: 0.9em;">
+                <h2>Average Rating: <span id="average-rating-value">Loading...</span></h2>
+            </div>
             <div class="rating-container">
                 <span class="star-rating" id="star-rating">
                     <span class="star" data-value="1">&#9733;</span>
@@ -195,9 +198,9 @@
 
 
 
-        async function fetchAlbumDetails(albumId) {
+        async function fetchAlbumDetails(mediaId) {
             try {
-                const albumResponse = await fetch(`/api/albums/${albumId}`);
+                const albumResponse = await fetch(`/api/albums/${mediaId}`);
 
                 if (!albumResponse.ok) {
                     throw new Error('Failed to fetch album details');
@@ -233,6 +236,7 @@
             const mediaId = urlParams.get('id') || '550';
             fetchAlbumDetails(mediaId);
             loadFeed(mediaId);
+            fetchAndDisplayAverageRating(mediaId);
         })
 
 
@@ -244,9 +248,9 @@
         //     document.getElementById('track-list').innerHTML = `<strong>Tracks:</strong><ul>${album.tracks.items.map(track => `<li>${track.name}</li>`).join('')}</ul>`;
         // }
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const albumId = urlParams.get('albumId');
-        if (albumId) fetchAlbumDetails(albumId);
+        // const urlParams = new URLSearchParams(window.location.search);
+        // const albumId = urlParams.get('albumId');
+        // if (albumId) fetchAlbumDetails(albumId);
 
         // Star rating system
         const stars = document.querySelectorAll('.star');
@@ -411,7 +415,7 @@
                         if (review.mediatype === 'Movie') {
                             url = `mediaMovies.html?id=${review.mediaID}`;
                         } else if (review.mediatype === 'Album') {
-                            url = `mediaMusic.html?albumId=${review.mediaID}`;
+                            url = `mediaMusic.html?id=${review.mediaID}`;
                         } else if (review.mediatype === 'Book') {
                             url = `mediaBooks.html?id=${review.mediaID}`;
                         } else if (review.mediatype === 'Video Game') {
@@ -485,7 +489,7 @@
                             if (item.mediaType === 'Movie') {
                                 url = `mediaMovies.html?id=${item.mediaId}`;
                             } else if (item.mediaType === 'Album') {
-                                url = `mediaMusic.html?albumId=${item.mediaId}`;
+                                url = `mediaMusic.html?id=${item.mediaId}`;
                             } else if (item.mediaType === 'Book') {
                                 url = `mediaBooks.html?id=${item.mediaId}`;
                             } else if (item.mediaType === 'Video Game') {
@@ -511,6 +515,29 @@
                 }
             });
         });
+
+        async function fetchAndDisplayAverageRating(mediaId) {
+            try {
+                const response = await fetch(`/getAverageRating/${mediaId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    // Display the average rating in the span
+                    document.getElementById('average-rating-value').textContent =
+                        `${Number(data.averageRating).toFixed(1)} stars (${Number(data.reviewCount)} review${Number(data.reviewCount) !== 1 ? 's' : ''})`;
+
+
+
+                } else {
+                    document.getElementById('average-rating-value').textContent = 'No reviews yet';
+                }
+            } catch (error) {
+                console.error('Error fetching average rating:', error);
+                document.getElementById('average-rating-value').textContent = 'Error fetching rating';
+            }
+        }
+
+
     </script>
 
 </body>
