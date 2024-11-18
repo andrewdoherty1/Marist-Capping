@@ -129,7 +129,7 @@
         }
 
 
-        // I assume this is for spotify api key
+        // Spotify API Key
         const CLIENT_ID = 'caff6515bb5c4394a35ad9b11ee09f31';
         const CLIENT_SECRET = 'aa0145b7bc214e2fae5c02bc3ff2933b';
         let spotifyAccessToken;
@@ -480,7 +480,7 @@
         });
 
         document.addEventListener('DOMContentLoaded', () => {
-            // ... existing code ...
+            
 
             // Search functionality
             const searchInput = document.getElementById('search-input');
@@ -634,11 +634,11 @@
             }
         }
 
-        // we had this twice that is why i deleted the previouse. I also moved it here as that is where similar scripts are located
+        // Function to fetch average rating for a piece of media.
         async function fetchAverageRating(mediaID) {
             try {
                 const response = await fetch(`/getAverageRating/${mediaID}`);
-                const { averageRating } = await response.json(); // Assuming the response contains an averageRating property
+                const { averageRating } = await response.json(); 
                 return averageRating || 0; // Default to 0 if no rating is found
             } catch (error) {
                 console.error('Error fetching average rating:', error);
