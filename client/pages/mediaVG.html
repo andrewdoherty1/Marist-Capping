@@ -186,6 +186,17 @@
 
     <script>
 
+        fetch('/check-session')
+            .then(response => response.json())
+            .then(data => {
+                if (data.loggedIn) {
+                    // Show user info or a "Logout" button
+                } else {
+                    // Redirect to login if needed
+                    window.location.href = '/createAccount.html';
+                }
+        });
+
         // Function to fetch and display game details from the database
         async function fetchGameDetails(mediaId) {
             try {

@@ -142,7 +142,7 @@
             const result = await response.json();
 
             if (result.success) {
-                window.location.href = 'index.html';
+                window.location.href = 'userProfile.html';
             } else {
                 loginError.textContent = result.message;
                 loginError.style.display = 'block';

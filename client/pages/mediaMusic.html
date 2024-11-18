@@ -186,6 +186,18 @@
     
 
     <script>
+
+        fetch('/check-session')
+            .then(response => response.json())
+            .then(data => {
+                if (data.loggedIn) {
+                    // Show user info or a "Logout" button
+                } else {
+                    // Redirect to login if needed
+                    window.location.href = '/createAccount.html';
+                }
+        });
+
         async function fetchSpotifyAccessToken() {
             const CLIENT_ID = 'caff6515bb5c4394a35ad9b11ee09f31';
             const CLIENT_SECRET = 'aa0145b7bc214e2fae5c02bc3ff2933b';
