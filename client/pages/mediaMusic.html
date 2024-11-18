@@ -99,21 +99,42 @@
     </style>
 </head>
 
-<body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Rating Platform</title>
+    <link rel="stylesheet" href="styling.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
 
+<body>
+    <!-- Header -->
     <header>
-        <a href="index.html">
-            <img src="images/logo.png" alt="Logo" class="logo" style="height: 50px;">
-        </a>
-        <div class="search-bar-header">
-            <input type="text" placeholder="Search for media">
-        </div>
-        <div class="profile-icon">
-            <a href="#">
-                <img src="https://via.placeholder.com/50" alt="Profile">
+        <!-- Logo -->
+        <div class="logo-container">
+            <a href="index.html">
+                <img src="images/logo.png" alt="Logo" class="logo-image" style="height: 50px;">
             </a>
+            <span class="logo-text">Opinionate</span>
+        </div>
+
+        <!-- Centered Search Bar -->
+        <div class="search-bar-header">
+            <input type="text" placeholder="Search for media" id="search-input">
+            <div id="search-suggestions" class="search-suggestions"></div>
+        </div>
+
+        <!-- Sign-in / Log-out Link and Profile Icon -->
+        <div class="header-right">
+            <a href="createAccount.html" id="auth-link" class="sign-in-link">Sign In</a>
+            <div class="profile-icon" id="profile-icon">
+                <a href="userProfile.html">
+                    <img src="images/defaultProfile.webp" alt="Profile" style="height: 50px;">
+                </a>
+            </div>
         </div>
     </header>
+</body>
 
     <!-- Album Page Content -->
     <div class="media-container" id="album-container">
@@ -131,6 +152,9 @@
             <p id="album-release-date"><strong>Release Date:</strong> Loading...</p>
             <div class="media-description">
                 <p id="track-list"><strong>Tracks:</strong> Loading...</p>
+            </div>
+            <div class="average-rating" style="font-size: 0.9em;">
+                <h2>Average Rating: <span id="average-rating-value">Loading...</span></h2>
             </div>
             <div class="rating-container">
                 <span class="star-rating" id="star-rating">
@@ -194,9 +218,9 @@
 
 
 
-        async function fetchAlbumDetails(albumId) {
+        async function fetchAlbumDetails(mediaId) {
             try {
-                const albumResponse = await fetch(`/api/albums/${albumId}`);
+                const albumResponse = await fetch(`/api/albums/${mediaId}`);
 
                 if (!albumResponse.ok) {
                     throw new Error('Failed to fetch album details');
@@ -232,6 +256,7 @@
             const mediaId = urlParams.get('id') || '550';
             fetchAlbumDetails(mediaId);
             loadFeed(mediaId);
+            fetchAndDisplayAverageRating(mediaId);
         })
 
 
@@ -243,9 +268,9 @@
         //     document.getElementById('track-list').innerHTML = `<strong>Tracks:</strong><ul>${album.tracks.items.map(track => `<li>${track.name}</li>`).join('')}</ul>`;
         // }
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const albumId = urlParams.get('albumId');
-        if (albumId) fetchAlbumDetails(albumId);
+        // const urlParams = new URLSearchParams(window.location.search);
+        // const albumId = urlParams.get('albumId');
+        // if (albumId) fetchAlbumDetails(albumId);
 
         // Star rating system
         const stars = document.querySelectorAll('.star');
@@ -410,7 +435,7 @@
                         if (review.mediatype === 'Movie') {
                             url = `mediaMovies.html?id=${review.mediaID}`;
                         } else if (review.mediatype === 'Album') {
-                            url = `mediaMusic.html?albumId=${review.mediaID}`;
+                            url = `mediaMusic.html?id=${review.mediaID}`;
                         } else if (review.mediatype === 'Book') {
                             url = `mediaBooks.html?id=${review.mediaID}`;
                         } else if (review.mediatype === 'Video Game') {
@@ -429,6 +454,110 @@
                 mediaList.style.display = 'none';
             }
         }
+        document.addEventListener('DOMContentLoaded', () => {
+            // ... existing code ...
+
+            // Search functionality
+            const searchInput = document.getElementById('search-input');
+            const suggestionsContainer = document.getElementById('search-suggestions');
+
+            let searchTimeout;
+
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+
+                if (query.length > 0) {
+                    searchTimeout = setTimeout(() => {
+                        fetchSearchSuggestions(query);
+                    }, 300); // Delay to reduce the number of requests
+                } else {
+                    suggestionsContainer.innerHTML = '';
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+
+            function fetchSearchSuggestions(query) {
+                fetch(`/api/search?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        displaySearchSuggestions(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching search suggestions:', error);
+                    });
+            }
+
+            function displaySearchSuggestions(suggestions) {
+                suggestionsContainer.innerHTML = '';
+
+                if (suggestions.length > 0) {
+                    suggestions.forEach(item => {
+                        const suggestionItem = document.createElement('div');
+                        suggestionItem.classList.add('suggestion-item');
+
+                        suggestionItem.innerHTML = `
+                    <img src="${item.poster_url || 'https://via.placeholder.com/50'}" alt="${item.title}">
+                    <div>
+                        <p><strong>${item.title}</strong></p>
+                        <p>${item.mediaType}</p>
+                    </div>
+                `;
+
+                        suggestionItem.addEventListener('click', () => {
+                            let url = '';
+                            if (item.mediaType === 'Movie') {
+                                url = `mediaMovies.html?id=${item.mediaId}`;
+                            } else if (item.mediaType === 'Album') {
+                                url = `mediaMusic.html?id=${item.mediaId}`;
+                            } else if (item.mediaType === 'Book') {
+                                url = `mediaBooks.html?id=${item.mediaId}`;
+                            } else if (item.mediaType === 'Video Game') {
+                                url = `mediaVG.html?id=${item.mediaId}`;
+                            }
+                            window.location.href = url;
+                        });
+
+                        suggestionsContainer.appendChild(suggestionItem);
+                    });
+
+                    suggestionsContainer.style.display = 'block';
+                } else {
+                    suggestionsContainer.style.display = 'none';
+                }
+            }
+
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', function (event) {
+                if (!suggestionsContainer.contains(event.target) && event.target !== searchInput) {
+                    suggestionsContainer.innerHTML = '';
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+        });
+
+        async function fetchAndDisplayAverageRating(mediaId) {
+            try {
+                const response = await fetch(`/getAverageRating/${mediaId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    // Display the average rating in the span
+                    document.getElementById('average-rating-value').textContent =
+                        `${Number(data.averageRating).toFixed(1)} stars (${Number(data.reviewCount)} review${Number(data.reviewCount) !== 1 ? 's' : ''})`;
+
+
+
+                } else {
+                    document.getElementById('average-rating-value').textContent = 'No reviews yet';
+                }
+            } catch (error) {
+                console.error('Error fetching average rating:', error);
+                document.getElementById('average-rating-value').textContent = 'Error fetching rating';
+            }
+        }
+
+
     </script>
 
 </body>

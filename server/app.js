@@ -445,15 +445,15 @@ app.post('/login', async (req, res) => {
     if (result.rows.length > 0) {
 
       // User authenticated, create session
-      req.session.user = 
-      { 
-          username: result.rows[0].username, 
-          id: result.rows[0].userID, 
-          description: result.rows[0].description 
+      req.session.user =
+      {
+        username: result.rows[0].username,
+        id: result.rows[0].userID,
+        description: result.rows[0].description
       };
 
       // Log the session user information to the terminal
-    console.log('Session User:', req.session.user);
+      console.log('Session User:', req.session.user);
       res.json({ success: true, message: 'Login successful!' });
     } else {
       res.json({ success: false, message: 'Incorrect username or password.' });
@@ -630,34 +630,34 @@ app.post('/update-username', async (req, res) => {
 // updates the user's password
 app.post('/update-password', async (req, res) => {
   if (!req.session.user) {
-      return res.json({ success: false, message: 'User not logged in' });
+    return res.json({ success: false, message: 'User not logged in' });
   }
 
   const { currentPassword, newPassword } = req.body;
   const userId = req.session.user.id;
 
   try {
-      // Verify current password
-      const query = 'SELECT password FROM users WHERE "userID" = $1';
-      const result = await pool.query(query, [userId]);
+    // Verify current password
+    const query = 'SELECT password FROM users WHERE "userID" = $1';
+    const result = await pool.query(query, [userId]);
 
-      if (result.rows.length === 0) {
-          return res.json({ success: false, message: 'User not found' });
-      }
+    if (result.rows.length === 0) {
+      return res.json({ success: false, message: 'User not found' });
+    }
 
-      const storedPassword = result.rows[0].password;
-      if (storedPassword !== currentPassword) {
-          return res.json({ success: false, message: 'Current password is incorrect' });
-      }
+    const storedPassword = result.rows[0].password;
+    if (storedPassword !== currentPassword) {
+      return res.json({ success: false, message: 'Current password is incorrect' });
+    }
 
-      // Update to new password
-      const updateQuery = 'UPDATE users SET password = $1 WHERE "userID" = $2';
-      await pool.query(updateQuery, [newPassword, userId]);
+    // Update to new password
+    const updateQuery = 'UPDATE users SET password = $1 WHERE "userID" = $2';
+    await pool.query(updateQuery, [newPassword, userId]);
 
-      res.json({ success: true, message: 'Password updated successfully' });
+    res.json({ success: true, message: 'Password updated successfully' });
   } catch (error) {
-      console.error('Error updating password:', error);
-      res.json({ success: false, message: 'Error updating password. Please try again.' });
+    console.error('Error updating password:', error);
+    res.json({ success: false, message: 'Error updating password. Please try again.' });
   }
 });
 
@@ -696,25 +696,25 @@ app.post('/update-email', async (req, res) => {
 app.post('/submitReview', async (req, res) => {
   // Ensure the user is logged in
   if (!req.session.user) {
-      return res.status(401).json({ success: false, message: 'User not logged in' });
+    return res.status(401).json({ success: false, message: 'User not logged in' });
   }
 
   const { mediaID, reviewText, rating } = req.body;
   const userID = req.session.user.id; // Retrieve userID from session
 
   try {
-      const query = `
+    const query = `
           INSERT INTO reviews ("userID", "mediaID", "ratingTxt", "ratingStar")
           VALUES ($1, $2, $3, $4)
           RETURNING *;
       `;
-      const values = [userID, mediaID, reviewText, rating];
-      const result = await pool.query(query, values);
+    const values = [userID, mediaID, reviewText, rating];
+    const result = await pool.query(query, values);
 
-      res.status(200).json({ success: true, review: result.rows[0] });
+    res.status(200).json({ success: true, review: result.rows[0] });
   } catch (error) {
-      console.error('Error inserting review:', error);
-      res.status(500).json({ success: false, message: 'Error saving review' });
+    console.error('Error inserting review:', error);
+    res.status(500).json({ success: false, message: 'Error saving review' });
   }
 });
 
@@ -754,7 +754,8 @@ app.get('/getReviews', async (req, res) => {
             LEFT JOIN movies ON media."mediaId" = movies."mediaID"
             LEFT JOIN albums ON media."mediaId" = albums."mediaID"
             LEFT JOIN books ON media."mediaId" = books."mediaID"
-            LEFT JOIN "videoGames" ON media."mediaId" = "videoGames"."mediaID";
+            LEFT JOIN "videoGames" ON media."mediaId" = "videoGames"."mediaID"
+            ORDER BY reviews.review_id DESC;
     `;
 
     const result = await pool.query(query);
@@ -806,25 +807,25 @@ app.get('/getReviewsForMedia/:id', async (req, res) => {
 app.post('/submitBookmark', async (req, res) => {
   // Ensure the user is logged in
   if (!req.session.user) {
-      return res.status(401).json({ success: false, message: 'User not logged in' });
+    return res.status(401).json({ success: false, message: 'User not logged in' });
   }
 
   const { mediaID } = req.body;
   const userID = req.session.user.id; // Retrieve userID from session
 
   try {
-      const query = `
+    const query = `
           INSERT INTO bookmark ("userID", "mediaID")
           VALUES ($1, $2)
           RETURNING *;
       `;
-      const values = [userID, mediaID];
-      const result = await pool.query(query, values);
+    const values = [userID, mediaID];
+    const result = await pool.query(query, values);
 
-      res.status(200).json({ success: true, bookmark: result.rows[0] });
+    res.status(200).json({ success: true, bookmark: result.rows[0] });
   } catch (error) {
-      console.error('Error inserting bookmark:', error);
-      res.status(500).json({ success: false, message: 'Error saving bookmark' });
+    console.error('Error inserting bookmark:', error);
+    res.status(500).json({ success: false, message: 'Error saving bookmark' });
   }
 });
 
@@ -844,16 +845,16 @@ app.get('/getAverageRating/:mediaID', async (req, res) => {
     const result = await pool.query(query, [mediaID]);
 
     if (result.rows.length > 0) {
-      res.status(200).json({ 
-        success: true, 
-        mediaID: mediaID, 
-        averageRating: result.rows[0].averagerating, 
-        reviewCount: result.rows[0].reviewcount 
+      res.status(200).json({
+        success: true,
+        mediaID: mediaID,
+        averageRating: result.rows[0].averagerating,
+        reviewCount: result.rows[0].reviewcount
       });
     } else {
       res.status(404).json({ success: false, message: 'No reviews found for this media.' });
     }
-    
+
   } catch (error) {
     console.error('Error calculating average rating:', error);
     res.status(500).json({ error: 'An error occurred while calculating average rating.' });
@@ -928,7 +929,7 @@ app.get('/getUserBookmarks', async (req, res) => {
       LEFT JOIN "videoGames" ON media."mediaId" = "videoGames"."mediaID"
       WHERE bookmark."userID" = $1;
     `;
-    
+
     const values = [userID];
     const result = await pool.query(query, values);
 
