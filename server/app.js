@@ -537,16 +537,23 @@ app.get('/users', async (req, res) => {
 // get's user info
 
 
-app.get('/user-info', (req, res) => {
+app.get('/user-info', async (req, res) => {
   if (req.session.user) {
-    res.json({ 
-      success: true, 
-      username: req.session.user.username,
-      description: req.session.user.description
-      // need to add the profile photo
-    });
+      const query = 'SELECT username, description, email FROM users WHERE "userID" = $1';
+      try {
+          const result = await pool.query(query, [req.session.user.id]);
+          if (result.rows.length > 0) {
+              const user = result.rows[0];
+              res.json({ success: true, username: user.username, description: user.description, email: user.email });
+          } else {
+              res.json({ success: false, message: 'User not found' });
+          }
+      } catch (error) {
+          console.error('Error fetching user info:', error);
+          res.json({ success: false, message: 'Error fetching user info' });
+      }
   } else {
-    res.json({ success: false, message: 'User not logged in' });
+      res.json({ success: false, message: 'User not logged in' });
   }
 });
 
@@ -651,6 +658,31 @@ app.post('/update-password', async (req, res) => {
   } catch (error) {
       console.error('Error updating password:', error);
       res.json({ success: false, message: 'Error updating password. Please try again.' });
+  }
+});
+
+// updates the user's email
+app.post('/update-email', async (req, res) => {
+  if (!req.session.user) {
+    return res.json({ success: false, message: 'User not logged in' });
+  }
+
+  const { email } = req.body;
+  const userId = req.session.user.id;
+
+  try {
+    const query = 'UPDATE users SET email = $1 WHERE "userID" = $2 RETURNING email';
+    const result = await pool.query(query, [email, userId]);
+
+    if (result.rows.length > 0) {
+      req.session.user.email = email; // Update session data
+      res.json({ success: true, message: 'Email updated successfully', email: result.rows[0].email });
+    } else {
+      res.json({ success: false, message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error updating email:', error);
+    res.json({ success: false, message: 'Error updating email. Please try again.' });
   }
 });
 

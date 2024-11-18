@@ -188,6 +188,7 @@
                 // Display the username and description in the profile section
                 document.getElementById('username-display').textContent = data.username;
                 document.getElementById('user-description-text').textContent = data.description;
+                document.getElementById('email').textContent = data.description;
             } else {
                 console.error(data.message);
                 document.getElementById('username-display').textContent = "Guest";
@@ -293,6 +294,7 @@
 
             const description = document.getElementById('description').value;
             const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
             const currentPassword = document.getElementById('current-password').value;
             const newPassword = document.getElementById('new-password').value;
             const confirmNewPassword = document.getElementById('confirm-new-password').value;
@@ -302,9 +304,11 @@
             
             const originalDescription = submitButton.getAttribute('data-original-description');
             const originalUsername = submitButton.getAttribute('data-original-username');
+            const originalEmail = submitButton.getAttribute('data-original-email');
             
             const hasDescriptionChanged = description !== originalDescription;
             const hasUsernameChanged = username !== originalUsername;
+            const hasEmailChanged = email !== originalEmail;
             const hasPasswordChanged = currentPassword && newPassword && (newPassword === confirmNewPassword);
 
             let updateSuccessful = false;
@@ -353,6 +357,28 @@
                 }
             }
 
+            // Update email
+            if (hasEmailChanged) {
+                try {
+                    const response = await fetch('/update-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        loadUserProfile();
+                        submitButton.setAttribute('data-original-email', email);
+                        updateSuccessful = true;
+                    } else {
+                        alert(result.message || 'An error occurred while updating the email.');
+                    }
+                } catch (error) {
+                    console.error('Update email error:', error);
+                    alert('An error occurred while updating the email. Please try again.');
+                }
+            }
+
             // Update password
             if (hasPasswordChanged) {
                 try {
@@ -363,6 +389,7 @@
                     });
                     const result = await response.json();
                     if (result.success) {
+                        alert(result.message);
                         updateSuccessful = true;
                     } else {
                         alert(result.message || 'An error occurred while updating the password.');
@@ -384,7 +411,7 @@
             }
 
             // Hide submit button if no changes
-            if (!hasDescriptionChanged && !hasUsernameChanged && !hasPasswordChanged) {
+            if (!hasDescriptionChanged && !hasUsernameChanged && !hasEmailChanged && !hasPasswordChanged) {
                 submitButton.style.display = 'none';
             }
         }
@@ -393,6 +420,7 @@
         function showSubmitButton() {
             const descriptionInput = document.getElementById('description');
             const usernameInput = document.getElementById('username');
+            const emailInput = document.getElementById('email');
             const currentPasswordInput = document.getElementById('current-password');
             const newPasswordInput = document.getElementById('new-password');
             const confirmNewPasswordInput = document.getElementById('confirm-new-password');
@@ -401,10 +429,12 @@
 
             const originalDescription = submitButton.getAttribute('data-original-description');
             const originalUsername = submitButton.getAttribute('data-original-username');
+            const originalEmail = submitButton.getAttribute('data-original-email');
 
             if (
                 descriptionInput.value !== originalDescription ||
                 usernameInput.value !== originalUsername ||
+                emailInput.value !== originalEmail ||
                 currentPasswordInput.value || newPasswordInput.value || confirmNewPasswordInput.value
             ) {
                 submitButton.style.display = 'block';
@@ -413,6 +443,7 @@
             }
         }
 
+        // Load reviews on page load if the Library is the default section
         document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch('/user-info');
             const data = await response.json();
@@ -420,33 +451,13 @@
             if (data.success) {
                 document.getElementById('description').value = data.description || "";
                 document.getElementById('username').value = data.username || "";
-                
+                document.getElementById('email').value = data.email || ""; 
+
                 document.getElementById('submit-changes').setAttribute('data-original-description', data.description || "");
                 document.getElementById('submit-changes').setAttribute('data-original-username', data.username || "");
+                document.getElementById('submit-changes').setAttribute('data-original-email', data.email || ""); // Set original email
             }
         });
-        
-
-
-
-
-        // Load reviews on page load if the Library is the default section
-        document.addEventListener('DOMContentLoaded', () => {
-            loadLibrary(); // Fetch reviews for Library section initially
-        });
-
-        async function loadLibrary() {
-            try {
-                const response = await fetch('/getUserReviews');
-                const data = await response.json();
-
-                if (data.success) {
-                    displayReviews(data.reviews);
-                }
-            } catch (error) {
-                console.error('Error loading feed:', error);
-            }
-        }
 
         function displayReviews(reviews) {
             const mediaList = document.querySelector('#library .reviews-media-list');
