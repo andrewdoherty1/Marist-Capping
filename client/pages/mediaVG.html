@@ -186,7 +186,7 @@
 
     <script>
 
-        // Function to fetch and display media details from the database
+        // Function to fetch and display game details from the database
         async function fetchGameDetails(mediaId) {
             try {
                 // Fetch the game details from the Remote Database based on the mediaId.
@@ -231,9 +231,7 @@
         let ratingSelected = false;
         let selectedRating = 0; // Store the selected rating
 
-        // function toggleSubmitButton() {
-        //     submitButton.disabled = !ratingSelected;
-        // }
+        
 
         function toggleSubmitButton() {
             if (ratingSelected || description.value.trim()) {
@@ -293,10 +291,10 @@
                     const successMessage = document.getElementById('success-message');
                     successMessage.style.display = 'block';
 
-                    // Hide the success message after 3 seconds
+                    // Hide the success message after 5 seconds
                     setTimeout(() => {
                         successMessage.style.display = 'none';
-                    }, 5000); // 3 seconds
+                    }, 5000); // 5 seconds
                 } else {
                     console.error("Failed to submit review", response.statusText);
                     // Handle errors if submission fails
@@ -326,7 +324,7 @@
 
                 if (response.ok) {
                     console.log("Bookmark submitted successfully");
-                    // Optionally, you can show a message or change the button state
+                    
                     alert('Bookmark added successfully!');
                 } else {
                     console.error("Failed to submit bookmark", response.statusText);
@@ -404,7 +402,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // ... existing code ...
+            
 
             // Search functionality
             const searchInput = document.getElementById('search-input');
@@ -491,7 +489,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Display the average rating in the span
+                    // Display the average rating
                     document.getElementById('average-rating-value').textContent =
                         `${Number(data.averageRating).toFixed(1)} stars (${Number(data.reviewCount)} review${Number(data.reviewCount) !== 1 ? 's' : ''})`;
 

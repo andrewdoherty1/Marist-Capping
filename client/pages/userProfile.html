@@ -513,7 +513,7 @@
         }
 
         function displayBookmarks(bookmarks) {
-            const bookmarkList = document.getElementById('bookmarks-container'); // Ensure this container exists in your HTML
+            const bookmarkList = document.getElementById('bookmarks-container'); 
             bookmarkList.innerHTML = ''; // Clear existing content
 
             if (bookmarks.length > 0) {
@@ -521,8 +521,7 @@
                     const bookmarkCard = document.createElement('div');
                     bookmarkCard.classList.add('bookmark-card');
 
-                    // Prepare star rating display based on the bookmark rating (if applicable)
-                    //const starIcons = '★'.repeat(bookmark.ratingStar || 0) + '☆'.repeat(5 - (bookmark.ratingStar || 0));
+                    
 
                     bookmarkCard.innerHTML = `
         <img src="${bookmark.cover_url || 'https://via.placeholder.com/150'}" alt="${bookmark.title}">
@@ -560,7 +559,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // ... existing code ...
+            
 
             // Search functionality
             const searchInput = document.getElementById('search-input');
