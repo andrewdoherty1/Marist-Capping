@@ -128,8 +128,7 @@
 
                 <div class="form-group">
                     <label for="description">Description:</label>
-                    <input type="text" id="description" name="description" data-original=""
-                        oninput="showSubmitButton()">
+                    <input type="text" id="description" name="description" data-original="" oninput="showSubmitButton()">
                 </div>
 
                 <p id="update-success-message" style="color: green; display: none;">User profile has been updated.</p>
@@ -162,6 +161,7 @@
         });
 
         // Function to handle logging out
+        /*
         async function handleLogout(event) {
             event.preventDefault();
             try {
@@ -176,6 +176,7 @@
                 console.error("Logout request error:", error);
             }
         }
+            */
 
 
         // Fetch and display the logged-in user's username
@@ -189,6 +190,7 @@
                 // Display the username and description in the profile section
                 document.getElementById('username-display').textContent = data.username;
                 document.getElementById('user-description-text').textContent = data.description;
+                document.getElementById('email').textContent = data.description;
             } else {
                 console.error(data.message);
                 document.getElementById('username-display').textContent = "Guest";
@@ -294,6 +296,7 @@
 
             const description = document.getElementById('description').value;
             const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
             const currentPassword = document.getElementById('current-password').value;
             const newPassword = document.getElementById('new-password').value;
             const confirmNewPassword = document.getElementById('confirm-new-password').value;
@@ -303,9 +306,11 @@
             
             const originalDescription = submitButton.getAttribute('data-original-description');
             const originalUsername = submitButton.getAttribute('data-original-username');
+            const originalEmail = submitButton.getAttribute('data-original-email');
             
             const hasDescriptionChanged = description !== originalDescription;
             const hasUsernameChanged = username !== originalUsername;
+            const hasEmailChanged = email !== originalEmail;
             const hasPasswordChanged = currentPassword && newPassword && (newPassword === confirmNewPassword);
 
             let updateSuccessful = false;
@@ -354,6 +359,28 @@
                 }
             }
 
+            // Update email
+            if (hasEmailChanged) {
+                try {
+                    const response = await fetch('/update-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        loadUserProfile();
+                        submitButton.setAttribute('data-original-email', email);
+                        updateSuccessful = true;
+                    } else {
+                        alert(result.message || 'An error occurred while updating the email.');
+                    }
+                } catch (error) {
+                    console.error('Update email error:', error);
+                    alert('An error occurred while updating the email. Please try again.');
+                }
+            }
+
             // Update password
             if (hasPasswordChanged) {
                 try {
@@ -364,6 +391,7 @@
                     });
                     const result = await response.json();
                     if (result.success) {
+                        alert(result.message);
                         updateSuccessful = true;
                     } else {
                         alert(result.message || 'An error occurred while updating the password.');
@@ -385,7 +413,7 @@
             }
 
             // Hide submit button if no changes
-            if (!hasDescriptionChanged && !hasUsernameChanged && !hasPasswordChanged) {
+            if (!hasDescriptionChanged && !hasUsernameChanged && !hasEmailChanged && !hasPasswordChanged) {
                 submitButton.style.display = 'none';
             }
         }
@@ -394,6 +422,7 @@
         function showSubmitButton() {
             const descriptionInput = document.getElementById('description');
             const usernameInput = document.getElementById('username');
+            const emailInput = document.getElementById('email');
             const currentPasswordInput = document.getElementById('current-password');
             const newPasswordInput = document.getElementById('new-password');
             const confirmNewPasswordInput = document.getElementById('confirm-new-password');
@@ -402,10 +431,12 @@
 
             const originalDescription = submitButton.getAttribute('data-original-description');
             const originalUsername = submitButton.getAttribute('data-original-username');
+            const originalEmail = submitButton.getAttribute('data-original-email');
 
             if (
                 descriptionInput.value !== originalDescription ||
                 usernameInput.value !== originalUsername ||
+                emailInput.value !== originalEmail ||
                 currentPasswordInput.value || newPasswordInput.value || confirmNewPasswordInput.value
             ) {
                 submitButton.style.display = 'block';
@@ -414,6 +445,7 @@
             }
         }
 
+        // Load reviews on page load if the Library is the default section
         document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch('/user-info');
             const data = await response.json();
@@ -421,18 +453,16 @@
             if (data.success) {
                 document.getElementById('description').value = data.description || "";
                 document.getElementById('username').value = data.username || "";
+                document.getElementById('email').value = data.email || ""; 
 
                 document.getElementById('submit-changes').setAttribute('data-original-description', data.description || "");
                 document.getElementById('submit-changes').setAttribute('data-original-username', data.username || "");
+                document.getElementById('submit-changes').setAttribute('data-original-email', data.email || ""); // Set original email
             }
         });
 
-
-
-
-
-        // Load reviews on page load if the Library is the default section
-        document.addEventListener('DOMContentLoaded', () => {
+         // Load reviews on page load if the Library is the default section
+         document.addEventListener('DOMContentLoaded', () => {
             loadLibrary(); // Fetch reviews for Library section initially
         });
 
@@ -479,7 +509,7 @@
                         if (review.mediatype === 'Movie') {
                             url = `mediaMovies.html?id=${review.mediaID}`;
                         } else if (review.mediatype === 'Album') {
-                            url = `mediaMusic.html?id=${review.mediaID}`;
+                            url = `mediaMusic.html?albumId=${review.mediaID}`;
                         } else if (review.mediatype === 'Book') {
                             url = `mediaBooks.html?id=${review.mediaID}`;
                         } else if (review.mediatype === 'Video Game') {
@@ -538,7 +568,7 @@
                         if (bookmark.mediatype === 'Movie') {
                             url = `mediaMovies.html?id=${bookmark.mediaID}`;
                         } else if (bookmark.mediatype === 'Album') {
-                            url = `mediaMusic.html?id=${bookmark.mediaID}`;
+                            url = `mediaMusic.html?albumId=${bookmark.mediaID}`;
                         } else if (bookmark.mediatype === 'Book') {
                             url = `mediaBooks.html?id=${bookmark.mediaID}`;
                         } else if (bookmark.mediatype === 'Video Game') {
@@ -558,87 +588,7 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            
 
-            // Search functionality
-            const searchInput = document.getElementById('search-input');
-            const suggestionsContainer = document.getElementById('search-suggestions');
-
-            let searchTimeout;
-
-            searchInput.addEventListener('input', function () {
-                clearTimeout(searchTimeout);
-                const query = this.value.trim();
-
-                if (query.length > 0) {
-                    searchTimeout = setTimeout(() => {
-                        fetchSearchSuggestions(query);
-                    }, 300); // Delay to reduce the number of requests
-                } else {
-                    suggestionsContainer.innerHTML = '';
-                    suggestionsContainer.style.display = 'none';
-                }
-            });
-
-            function fetchSearchSuggestions(query) {
-                fetch(`/api/search?q=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        displaySearchSuggestions(data);
-                    })
-                    .catch(error => {
-                        console.error('Error fetching search suggestions:', error);
-                    });
-            }
-
-            function displaySearchSuggestions(suggestions) {
-                suggestionsContainer.innerHTML = '';
-
-                if (suggestions.length > 0) {
-                    suggestions.forEach(item => {
-                        const suggestionItem = document.createElement('div');
-                        suggestionItem.classList.add('suggestion-item');
-
-                        suggestionItem.innerHTML = `
-                    <img src="${item.poster_url || 'https://via.placeholder.com/50'}" alt="${item.title}">
-                    <div>
-                        <p><strong>${item.title}</strong></p>
-                        <p>${item.mediaType}</p>
-                    </div>
-                `;
-
-                        suggestionItem.addEventListener('click', () => {
-                            let url = '';
-                            if (item.mediaType === 'Movie') {
-                                url = `mediaMovies.html?id=${item.mediaId}`;
-                            } else if (item.mediaType === 'Album') {
-                                url = `mediaMusic.html?id=${item.mediaId}`;
-                            } else if (item.mediaType === 'Book') {
-                                url = `mediaBooks.html?id=${item.mediaId}`;
-                            } else if (item.mediaType === 'Video Game') {
-                                url = `mediaVG.html?id=${item.mediaId}`;
-                            }
-                            window.location.href = url;
-                        });
-
-                        suggestionsContainer.appendChild(suggestionItem);
-                    });
-
-                    suggestionsContainer.style.display = 'block';
-                } else {
-                    suggestionsContainer.style.display = 'none';
-                }
-            }
-
-            // Hide suggestions when clicking outside
-            document.addEventListener('click', function (event) {
-                if (!suggestionsContainer.contains(event.target) && event.target !== searchInput) {
-                    suggestionsContainer.innerHTML = '';
-                    suggestionsContainer.style.display = 'none';
-                }
-            });
-        });
     </script>
 
 </body>
