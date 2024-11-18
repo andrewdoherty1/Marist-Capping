@@ -686,6 +686,33 @@ app.post('/update-email', async (req, res) => {
   }
 });
 
+/*
+// updates the user's profile picture
+app.post('/update-profile-picture', async (req, res) => {
+  if (!req.session.user) {
+      return res.json({ success: false, message: 'User not logged in' });
+  }
+
+  const { profilePicture } = req.body;
+  const userId = req.session.user.id;
+
+  try {
+      const query = 'UPDATE users SET "profilePicture" = $1 WHERE "userID" = $2 RETURNING "profilePicture"';
+      const result = await pool.query(query, [profilePicture, userId]);
+
+      if (result.rows.length > 0) {
+          req.session.user.profilePicture = profilePicture; // Update session data
+          res.json({ success: true, message: 'Profile picture updated successfully', profilePicture: result.rows[0].profilePicture });
+      } else {
+          res.json({ success: false, message: 'User not found' });
+      }
+  } catch (error) {
+      console.error('Error updating profile picture:', error);
+      res.json({ success: false, message: 'Error updating profile picture. Please try again.' });
+  }
+});
+*/
+
 
 
 

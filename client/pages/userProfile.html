@@ -161,6 +161,7 @@
         });
 
         // Function to handle logging out
+        /*
         async function handleLogout(event) {
             event.preventDefault();
             try {
@@ -175,6 +176,7 @@
                 console.error("Logout request error:", error);
             }
         }
+            */
 
 
         // Fetch and display the logged-in user's username
@@ -458,6 +460,24 @@
                 document.getElementById('submit-changes').setAttribute('data-original-email', data.email || ""); // Set original email
             }
         });
+
+         // Load reviews on page load if the Library is the default section
+         document.addEventListener('DOMContentLoaded', () => {
+            loadLibrary(); // Fetch reviews for Library section initially
+        });
+
+        async function loadLibrary() {
+            try {
+                const response = await fetch('/getUserReviews');
+                const data = await response.json();
+
+                if (data.success) {
+                    displayReviews(data.reviews);
+                }
+            } catch (error) {
+                console.error('Error loading feed:', error);
+            }
+        }
 
         function displayReviews(reviews) {
             const mediaList = document.querySelector('#library .reviews-media-list');
