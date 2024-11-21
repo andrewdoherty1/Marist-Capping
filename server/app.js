@@ -502,7 +502,7 @@ app.post('/register', async (req, res) => {
 
     if (insertResult.rows.length > 0) {
       // User registered, create session
-      req.session.user = { username: insertResult.rows[0].username, id: insertResult.rows[0].id };
+      req.session.user = { username: insertResult.rows[0].username, id: insertResult.rows[0].userID };
       console.log('User registered and session created:', req.session.user);
       return res.json({ success: true, message: 'Account created successfully!' });
     } else {
