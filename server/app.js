@@ -1,4 +1,4 @@
-//const express = require('express');
+
 import fetch from 'node-fetch';
 import cors from 'cors';
 import path from 'path';
@@ -10,7 +10,7 @@ import express from 'express';
 import session from 'express-session';
 
 
-//const moviesRoutes = require('./routes/moviesRoutes');
+
 const app = express();
 const PORT = 3000;
 
@@ -27,7 +27,7 @@ const pool = new Pool({
 app.use(cors());
 app.use(express.json());
 
-//app.use('/api/movies', moviesRoutes);
+
 
 // Get the directory name of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -38,16 +38,14 @@ app.use(express.static(path.join(__dirname, '../client/pages')));
 // Configure session middleware
 app.use(
   session({
-    secret: 'your-secret-key', // Replace with a secure secret key
+    secret: 'your-secret-key', 
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false } // Set to true in production with HTTPS
+    cookie: { secure: false } 
   })
 );
 
-// app.get('/', function (req, res) {
-//   res.sendFile('index.html', { root: '../client/pages' })
-// })
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/pages/index.html'));
 });
@@ -433,7 +431,7 @@ app.get('/api/books/:id', async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------------------------------------
-// the coede below pertains to allowing a user to sign-in/log-out and create an account
+// the code below pertains to allowing a user to sign-in/log-out and create an account
 
 // Login route
 app.post('/login', async (req, res) => {
@@ -537,16 +535,23 @@ app.get('/users', async (req, res) => {
 // get's user info
 
 
-app.get('/user-info', (req, res) => {
+app.get('/user-info', async (req, res) => {
   if (req.session.user) {
-    res.json({
-      success: true,
-      username: req.session.user.username,
-      description: req.session.user.description
-      // need to add the profile photo
-    });
+      const query = 'SELECT username, description, email FROM users WHERE "userID" = $1';
+      try {
+          const result = await pool.query(query, [req.session.user.id]);
+          if (result.rows.length > 0) {
+              const user = result.rows[0];
+              res.json({ success: true, username: user.username, description: user.description, email: user.email });
+          } else {
+              res.json({ success: false, message: 'User not found' });
+          }
+      } catch (error) {
+          console.error('Error fetching user info:', error);
+          res.json({ success: false, message: 'Error fetching user info' });
+      }
   } else {
-    res.json({ success: false, message: 'User not logged in' });
+      res.json({ success: false, message: 'User not logged in' });
   }
 });
 
@@ -579,7 +584,7 @@ app.post('/update-description', async (req, res) => {
     const result = await pool.query(query, [description, userId]);
 
     if (result.rows.length > 0) {
-      req.session.user.description = description; // updatessession data
+      req.session.user.description = description; // updates session data
       res.json({ success: true, message: 'Description updated successfully', description: result.rows[0].description });
     } else {
       res.json({ success: false, message: 'User not found' });
@@ -654,6 +659,32 @@ app.post('/update-password', async (req, res) => {
   }
 });
 
+// updates the user's email
+app.post('/update-email', async (req, res) => {
+  if (!req.session.user) {
+    return res.json({ success: false, message: 'User not logged in' });
+  }
+
+  const { email } = req.body;
+  const userId = req.session.user.id;
+
+  try {
+    const query = 'UPDATE users SET email = $1 WHERE "userID" = $2 RETURNING email';
+    const result = await pool.query(query, [email, userId]);
+
+    if (result.rows.length > 0) {
+      req.session.user.email = email; // Update session data
+      res.json({ success: true, message: 'Email updated successfully', email: result.rows[0].email });
+    } else {
+      res.json({ success: false, message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error updating email:', error);
+    res.json({ success: false, message: 'Error updating email. Please try again.' });
+  }
+});
+
+
 
 
 
@@ -686,21 +717,7 @@ app.post('/submitReview', async (req, res) => {
   }
 });
 
-// app.get('/getReviews', async (req, res) => {
-//   try {
-//       const query = `
-//           SELECT reviews."ratingTxt", reviews."ratingStar", users.username, media.title
-//           FROM reviews
-//           JOIN users ON reviews."userID" = users."userID"
-//           JOIN media ON reviews."mediaID" = media."mediaId";
-//       `;
-//       const result = await pool.query(query);
-//       res.status(200).json({ success: true, reviews: result.rows });
-//   } catch (error) {
-//       console.error('Error fetching reviews:', error);
-//       res.status(500).json({ success: false, message: 'Error fetching reviews' });
-//   }
-// });
+
 
 app.get('/getReviews', async (req, res) => {
   try {
@@ -728,7 +745,7 @@ app.get('/getReviews', async (req, res) => {
 
     const result = await pool.query(query);
 
-    //res.json(result.rows);
+    
     res.status(200).json({ success: true, reviews: result.rows });
   } catch (error) {
     console.error('Error fetching reviews with cover URLs:', error);

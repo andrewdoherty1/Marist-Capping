@@ -288,9 +288,9 @@ const getTableNames = async () => {
     }
   };
   /* GET BOOKS DO NOT DELETE
-  // Example call with a valid Open Library book ID
+  // Make sure to use a valid Open Library book ID
   (async () => {
-    const bookId = 'OL15414803W'; // Replace with a valid Open Library book ID
+    const bookId = 'OL15414803W'; // Use a valid Open Library book ID
     const book = await fetchBookDetails(bookId);
     if (book) {
       await insertBookData(book);

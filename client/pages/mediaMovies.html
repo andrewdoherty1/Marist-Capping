@@ -189,54 +189,9 @@
 
 
     <script>
-        // // Function to fetch and display media details from the API
-        // async function fetchMediaDetails(mediaId) {
-        //     try {
-        //         // Fetch the movie details
-        //         const movieResponse = await fetch(`https://api.themoviedb.org/3/movie/${mediaId}`, {
-        //             headers: {
-        //                 accept: 'application/json',
-        //                 Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E'
-        //             }
-        //         });
-        //         const media = await movieResponse.json();
+   
 
-        //         // Fetch the movie credits to get the director
-        //         const creditsResponse = await fetch(`https://api.themoviedb.org/3/movie/${mediaId}/credits`, {
-        //             headers: {
-        //                 accept: 'application/json',
-        //                 Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI2NWFkOGE0Y2NiNDgyNWNhOGMxNGYyNzIxYjNkYTA1MiIsIm5iZiI6MTcyOTYzMzA4NS45NTY3NTEsInN1YiI6IjY1Y2U3NmY5MWM2YWE3MDFhYTkxNzk3NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.frQynqEqWI9w7Tt0nGLqyh7geVkOcuXh_qzNQyGdF1E'
-        //             }
-        //         });
-        //         const credits = await creditsResponse.json();
-
-        //         // Find the director from the crew list
-        //         const director = credits.crew.find(member => member.job === 'Director');
-
-        //         // Populate media details in the HTML
-        //         document.getElementById('media-title').textContent = media.title;
-        //         document.getElementById('media-description').textContent = media.overview;
-        //         document.getElementById('media-image').src = `https://image.tmdb.org/t/p/w500${media.poster_path}`;
-        //         document.getElementById('media-release-date').innerHTML = `<strong>Release Date:</strong> ${media.release_date}`;
-
-        //         // Display the director's name if available
-        //         if (director) {
-        //             document.getElementById('media-director').innerHTML = `<strong>Director:</strong> ${director.name}`;
-        //         }
-
-        //     } catch (error) {
-        //         console.error('Failed to fetch media details:', error);
-        //     }
-        // }
-
-        // // Call fetchMediaDetails with an example movie ID to display data on page load
-        // document.addEventListener('DOMContentLoaded', () => {
-        //     const urlParams = new URLSearchParams(window.location.search);
-        //     const mediaId = urlParams.get('id') || '550'; // Replace '550' with a fallback movie ID
-        //     fetchMediaDetails(mediaId);
-        // });
-
-        // Function to fetch and display media details from the database
+        // Function to fetch and display movie details from the database
         async function fetchMediaDetails(mediaId) {
             try {
                 // Fetch the movie details from the Remote Database based on the mediaId.
@@ -283,38 +238,7 @@
             fetchAndDisplayAverageRating(mediaId)
         });
 
-        // // Star rating system
-        // const stars = document.querySelectorAll('.star');
-        // const ratingValue = document.getElementById('rating-value');
-        // const submitButton = document.getElementById('submit-btn');
-        // const description = document.getElementById('description');
-        // const submitContainer = document.getElementById('submit-container');
-
-        // let ratingSelected = false;
-
-        // stars.forEach(star => {
-        //     star.addEventListener('click', () => {
-        //         const rating = star.getAttribute('data-value');
-
-        //         // Reset all stars
-        //         stars.forEach(s => {
-        //             s.classList.remove('filled');
-        //         });
-
-        //         // Highlight the selected rating
-        //         for (let i = 0; i < rating; i++) {
-        //             stars[i].classList.add('filled');
-        //         }
-
-        //         // Update the rating value text
-        //         ratingValue.textContent = `${rating} Stars`;
-        //         ratingSelected = true;
-
-        //         toggleSubmitButton();
-        //     });
-        // });
-
-        //reviewText.addEventListener('input', toggleSubmitButton);
+      
 
 
 
@@ -328,9 +252,7 @@
         let ratingSelected = false;
         let selectedRating = 0; // Store the selected rating
 
-        // function toggleSubmitButton() {
-        //     submitButton.disabled = !ratingSelected;
-        // }
+        
 
         function toggleSubmitButton() {
             if (ratingSelected || description.value.trim()) {
@@ -358,20 +280,8 @@
         // Toggle submit button visibility based on review text
         reviewText.addEventListener('input', toggleSubmitButton);
 
-        // // Handle form submission
-        // document.getElementById('reviewForm').addEventListener('submit', async (event) => {
-        //     event.preventDefault();
-
-        //     const urlParams = new URLSearchParams(window.location.search);
-        //     const mediaID = urlParams.get('mediaID');
-        //     const reviewText = document.getElementById('reviewText').value;
-
-        //     await fetch('/submitReview', {
-        //         method: 'POST',
-        //         headers: { 'Content-Type': 'application/json' },
-        //         body: JSON.stringify({ mediaID, reviewText, rating: selectedRating })
-        //     });
-        // });
+        
+        
 
         // Form submission event handler
         submitButton.addEventListener('click', async () => {
@@ -405,10 +315,10 @@
                     const successMessage = document.getElementById('success-message');
                     successMessage.style.display = 'block';
 
-                    // Hide the success message after 3 seconds
+                    // Hide the success message after 5 seconds
                     setTimeout(() => {
                         successMessage.style.display = 'none';
-                    }, 5000); // 3 seconds
+                    }, 5000); // 5 seconds
                 } else {
                     console.error("Failed to submit review", response.statusText);
                     // Handle errors if submission fails
@@ -438,7 +348,7 @@
 
                 if (response.ok) {
                     console.log("Bookmark submitted successfully");
-                    // Optionally, you can show a message or change the button state
+                    
                     alert('Bookmark added successfully!');
                 } else {
                     console.error("Failed to submit bookmark", response.statusText);
@@ -516,7 +426,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // ... existing code ...
+            
 
             // Search functionality
             const searchInput = document.getElementById('search-input');
@@ -603,7 +513,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Display the average rating in the span
+                    // Display the average rating
                     document.getElementById('average-rating-value').textContent =
                         `${Number(data.averageRating).toFixed(1)} stars (${Number(data.reviewCount)} review${Number(data.reviewCount) !== 1 ? 's' : ''})`;
 
