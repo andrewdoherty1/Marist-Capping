@@ -32,7 +32,7 @@
             <a href="createAccount.html" id="auth-link" class="sign-in-link">Sign In</a>
             <div class="profile-icon" id="profile-icon">
                 <a href="userProfile.html">
-                    <img src="images/defaultProfile.webp" alt="Profile">
+                    <img id="top-right-profile-picture" src="images/defaultProfile.webp" alt="Profile">
                 </a>
             </div>
         </div>
@@ -111,6 +111,27 @@
                 console.error("Error checking session status:", error);
             }
         });
+
+        async function loadUserProfile() {
+            console.log("loading user profile");
+            try {
+                const response = await fetch('/user-info');
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update top-right profile icon
+                    if (data.profilePicture) {
+                        document.getElementById('top-right-profile-picture').src = `data:image/jpeg;base64,${data.profilePicture}`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+            }
+        }
+        // Load user profile on page load
+        document.addEventListener('DOMContentLoaded', loadUserProfile);
+
+
 
         // Function to handle logging out
         async function handleLogout(event) {
