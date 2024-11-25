@@ -111,7 +111,7 @@
         <!-- Logo -->
         <div class="logo-container">
             <a href="index.html">
-                <img src="images/logo.png" alt="Logo" class="logo-image" style="height: 50px;">
+                <img src="images/logo.png" alt="Logo" class="logo-image">
             </a>
             <span class="logo-text">Opinionate</span>
         </div>
@@ -127,7 +127,7 @@
             <a href="createAccount.html" id="auth-link" class="sign-in-link">Sign In</a>
             <div class="profile-icon" id="profile-icon">
                 <a href="userProfile.html">
-                    <img src="images/defaultProfile.webp" alt="Profile" style="height: 50px;">
+                    <img id="top-right-profile-picture" alt="Profile">
                 </a>
             </div>
         </div>
@@ -183,6 +183,25 @@
         
 
         <script>
+
+async function loadUserPic() {
+            console.log("loading user profile picture");
+            try {
+                const response = await fetch('/user-info');
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update top-right profile icon
+                    if (data.profilePicture) {
+                        document.getElementById('top-right-profile-picture').src = `data:image/jpeg;base64,${data.profilePicture}`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+            }
+        }
+        // Load user profile on page load
+        document.addEventListener('DOMContentLoaded', loadUserPic);
 
             fetch('/check-session')
                 .then(response => response.json())
