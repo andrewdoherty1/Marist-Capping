@@ -794,6 +794,33 @@ app.post('/update-profile-picture', upload.single('profilePicture'), async (req,
   }
 });
 
+// lets a user delete their account
+app.delete('/delete-account', async (req, res) => {
+  if (!req.session.user) {
+      return res.status(401).json({ success: false, message: 'User not logged in' });
+  }
+
+  const userId = req.session.user.id;
+
+  try {
+      // Delete the user from the database
+      const deleteQuery = 'DELETE FROM users WHERE "userID" = $1';
+      await pool.query(deleteQuery, [userId]);
+
+      // Destroy the session after account deletion
+      req.session.destroy((err) => {
+          if (err) {
+              console.error('Error destroying session:', err);
+              return res.status(500).json({ success: false, message: 'Error deleting account. Please try again.' });
+          }
+          res.json({ success: true, message: 'Account deleted successfully' });
+      });
+  } catch (error) {
+      console.error('Error deleting account:', error);
+      res.status(500).json({ success: false, message: 'Error deleting account. Please try again.' });
+  }
+});
+
 
 
 
