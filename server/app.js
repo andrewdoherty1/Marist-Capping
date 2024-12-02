@@ -21,11 +21,12 @@ const PORT = 3000;
 //Connect to the Remote Database.
 const pool = new Pool({
   user: 'postgres',       // Database user
-  host: '10.11.29.119',  // Remote VM IP address
-  database: 'Opinionate',   // Database name
-  password: 'capping2024', // Database password
-  port: 5432,                 // PostgreSQL default port
+  host: '127.0.0.1',
+  database: 'opinionate', // Database name
+  port: 5433,             // Port for PostgreSQL 17
 });
+
+
 
 // Enable CORS for all routes
 app.use(cors());
