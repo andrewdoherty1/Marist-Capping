@@ -565,13 +565,13 @@ app.get('/user-info', async (req, res) => {
   }
 });
 
-// ensures the user must be logged in before accessing the user profile page
-app.get('/userProfile.html', (req, res) => {
-  if (!req.session.user) {
-    return res.redirect('/index.html'); // Redirect to the index page if not logged in
-  }
-  res.sendFile(path.join(__dirname, '../client/pages/userProfile.html'));
-});
+// // ensures the user must be logged in before accessing the user profile page
+// app.get('/userProfile.html', (req, res) => {
+//   if (!req.session.user) {
+//     return res.redirect('/index.html'); // Redirect to the index page if not logged in
+//   }
+//   res.sendFile(path.join(__dirname, '../client/pages/userProfile.html'));
+// });
 
 // Route to get the user's profile picture
 app.get('/profile-picture', async (req, res) => {
@@ -607,25 +607,25 @@ app.get('/profile-picture', async (req, res) => {
 // get's user info
 
 
-app.get('/user-info', async (req, res) => {
-  if (req.session.user) {
-      const query = 'SELECT username, description, email FROM users WHERE "userID" = $1';
-      try {
-          const result = await pool.query(query, [req.session.user.id]);
-          if (result.rows.length > 0) {
-              const user = result.rows[0];
-              res.json({ success: true, username: user.username, description: user.description, email: user.email });
-          } else {
-              res.json({ success: false, message: 'User not found' });
-          }
-      } catch (error) {
-          console.error('Error fetching user info:', error);
-          res.json({ success: false, message: 'Error fetching user info' });
-      }
-  } else {
-      res.json({ success: false, message: 'User not logged in' });
-  }
-});
+// app.get('/user-info', async (req, res) => {
+//   if (req.session.user) {
+//       const query = 'SELECT username, description, email FROM users WHERE "userID" = $1';
+//       try {
+//           const result = await pool.query(query, [req.session.user.id]);
+//           if (result.rows.length > 0) {
+//               const user = result.rows[0];
+//               res.json({ success: true, username: user.username, description: user.description, email: user.email });
+//           } else {
+//               res.json({ success: false, message: 'User not found' });
+//           }
+//       } catch (error) {
+//           console.error('Error fetching user info:', error);
+//           res.json({ success: false, message: 'Error fetching user info' });
+//       }
+//   } else {
+//       res.json({ success: false, message: 'User not logged in' });
+//   }
+// });
 
 // ensures the user must be logged in before accessing the user profile page
 app.get('/userProfile.html', (req, res) => {
