@@ -5,12 +5,12 @@ const { Pool } = pkg;
 const mediaID = 299; // dont change after, must change pre-run
 //Connect to the Remote Database.
 const pool = new Pool({
-  user: 'postgres',
-  host: '10.11.29.119',
-  database: 'Opinionate',
-  password: 'capping2024',
-  port: 5432,
+  user: 'postgres',         // Database user
+  host: 'localhost',        // The AWS database is on the same instance
+  database: 'opinionate',   // Ensure this matches the actual database name
+  port: 5433,               // Correct port for PostgreSQL 17
 });
+
 
 // Refresh Spotify Token every 55 minutes
 setInterval(fetchSpotifyAccessToken, 55 * 60 * 1000);
