@@ -6,7 +6,7 @@ const mediaID = 299; // dont change after, must change pre-run
 //Connect to the Remote Database.
 const pool = new Pool({
   user: 'postgres',         // Database user
-  host: 'localhost',        // The AWS database is on the same instance
+  host: '127.0.0.1',       // The AWS database is on the same instance
   database: 'opinionate',   // Ensure this matches the actual database name
   port: 5433,               // Correct port for PostgreSQL 17
 });
