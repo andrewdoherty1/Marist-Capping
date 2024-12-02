@@ -112,7 +112,7 @@
         <!-- Logo -->
         <div class="logo-container">
             <a href="index.html">
-                <img src="images/logo.png" alt="Logo" class="logo-image" style="height: 50px;">
+                <img src="images/logo.png" alt="Logo" class="logo-image">
             </a>
             <span class="logo-text">Opinionate</span>
         </div>
@@ -128,7 +128,7 @@
             <a href="createAccount.html" id="auth-link" class="sign-in-link">Sign In</a>
             <div class="profile-icon" id="profile-icon">
                 <a href="userProfile.html">
-                    <img src="images/defaultProfile.webp" alt="Profile" style="height: 50px;">
+                    <img id="top-right-profile-picture" alt="Profile">
                 </a>
             </div>
         </div>
@@ -189,6 +189,62 @@
 
 
     <script>
+
+        // Check if user is logged in and update auth link (sign-in in header)
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const response = await fetch('/check-session');
+                const result = await response.json();
+
+                if (result.loggedIn) {
+                    const authLink = document.getElementById("auth-link");
+                    authLink.textContent = "Log Out";
+                    authLink.href = "#";
+                    authLink.addEventListener("click", handleLogout);
+
+                    // Update UI with the user's name
+                    document.getElementById("profile-icon").title = result.user.username;
+                }
+            } catch (error) {
+                console.error("Error checking session status:", error);
+            }
+        });
+
+         // Function to handle logging out
+         async function handleLogout(event) {
+            event.preventDefault();
+            try {
+                const response = await fetch('/logout', { method: 'POST' });
+                const result = await response.json();
+                if (result.success) {
+                    window.location.href = 'index.html'; // Redirect after logging out
+                } else {
+                    console.error("Error logging out:", result.message);
+                }
+            } catch (error) {
+                console.error("Logout request error:", error);
+            }
+        }
+
+
+        async function loadUserPic() {
+            console.log("loading user profile picture");
+            try {
+                const response = await fetch('/user-info');
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update top-right profile icon
+                    if (data.profilePicture) {
+                        document.getElementById('top-right-profile-picture').src = `data:image/jpeg;base64,${data.profilePicture}`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+            }
+        }
+        // Load user profile on page load
+        document.addEventListener('DOMContentLoaded', loadUserPic);
    
 
         // Function to fetch and display movie details from the database

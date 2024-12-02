@@ -9,6 +9,10 @@ const { Pool } = pkg;
 import express from 'express';
 import session from 'express-session';
 
+// for file uploads
+import multer from 'multer';
+import sharp from 'sharp';
+
 
 
 const app = express();
@@ -502,7 +506,7 @@ app.post('/register', async (req, res) => {
 
     if (insertResult.rows.length > 0) {
       // User registered, create session
-      req.session.user = { username: insertResult.rows[0].username, id: insertResult.rows[0].id };
+      req.session.user = { username: insertResult.rows[0].username, id: insertResult.rows[0].userID };
       console.log('User registered and session created:', req.session.user);
       return res.json({ success: true, message: 'Account created successfully!' });
     } else {
@@ -524,6 +528,74 @@ app.get('/users', async (req, res) => {
   } catch (error) {
     console.error('Error fetching users:', error);
     res.json({ success: false, message: 'An error occurred while fetching users.' });
+  }
+});
+
+
+
+app.get('/user-info', async (req, res) => {
+  if (req.session.user) {
+    const query = 'SELECT username, description, email, "profilePicture" FROM users WHERE "userID" = $1';
+    try {
+      const result = await pool.query(query, [req.session.user.id]);
+      if (result.rows.length > 0) {
+        const user = result.rows[0];
+        
+        // Return profile picture as a base64 string if it exists
+        const profilePicture = user.profilePicture
+          ? Buffer.from(user.profilePicture).toString('base64')
+          : null;
+
+        res.json({
+          success: true,
+          username: user.username,
+          description: user.description,
+          email: user.email,
+          profilePicture,
+        });
+      } else {
+        res.json({ success: false, message: 'User not found' });
+      }
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+      res.json({ success: false, message: 'Error fetching user info' });
+    }
+  } else {
+    res.json({ success: false, message: 'User not logged in' });
+  }
+});
+
+// ensures the user must be logged in before accessing the user profile page
+app.get('/userProfile.html', (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/index.html'); // Redirect to the index page if not logged in
+  }
+  res.sendFile(path.join(__dirname, '../client/pages/userProfile.html'));
+});
+
+// Route to get the user's profile picture
+app.get('/profile-picture', async (req, res) => {
+  if (!req.session.user) {
+    return res.json({ success: false, message: 'User not logged in' });
+  }
+
+  const userId = req.session.user.id;
+
+  try {
+    const query = 'SELECT "profilePicture" FROM users WHERE "userID" = $1';
+    const result = await pool.query(query, [userId]);
+
+    if (result.rows.length > 0 && result.rows[0].profilePicture) {
+      const profilePicture = result.rows[0].profilePicture;
+      res.setHeader('Content-Type', 'image/png'); // Set appropriate MIME type
+      res.end(profilePicture); // Send binary image data as response
+    } else {
+      // Send a placeholder image if no profile picture is set
+      res.redirect('/images/defaultProfile.webp');
+    }
+  } catch (error) {
+    console.error('Error fetching profile picture:', error);
+    res.status(500).json({ success: false, message: 'Error fetching profile picture.' });
   }
 });
 
@@ -681,6 +753,44 @@ app.post('/update-email', async (req, res) => {
   } catch (error) {
     console.error('Error updating email:', error);
     res.json({ success: false, message: 'Error updating email. Please try again.' });
+  }
+});
+
+
+// Multer configuration
+// Configure multer for file upload
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+app.post('/update-profile-picture', upload.single('profilePicture'), async (req, res) => {
+  if (!req.session.user) {
+    return res.json({ success: false, message: 'User not logged in' });
+  }
+
+  const userId = req.session.user.id;
+  const file = req.file;
+
+  if (!file) {
+    return res.json({ success: false, message: 'No file uploaded.' });
+  }
+
+  try {
+    // Resize/compress the image using Sharp
+    const optimizedImage = await sharp(file.buffer).resize(150, 150).jpeg({ quality: 80 }).toBuffer();
+
+    // Update the profile picture in the database
+    const query = `UPDATE users SET "profilePicture" = $1 WHERE "userID" = $2 RETURNING "profilePicture"`;
+    const result = await pool.query(query, [optimizedImage, userId]);
+
+    if (result.rows.length > 0) {
+      res.json({ success: true, message: 'Profile picture updated successfully.' });
+    } else {
+      res.json({ success: false, message: 'User not found.' });
+    }
+  } catch (error) {
+    console.error('Error updating profile picture:', error);
+    res.json({ success: false, message: 'Error updating profile picture. Please try again.' });
   }
 });
 

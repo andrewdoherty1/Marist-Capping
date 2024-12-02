@@ -31,14 +31,14 @@
             <a href="createAccount.html" id="auth-link" class="sign-in-link">Sign In</a>
             <div class="profile-icon" id="profile-icon">
                 <a href="userProfile.html">
-                    <img src="images/defaultProfile.webp" alt="Profile">
+                    <img id="top-right-profile-picture" src="images/defaultProfile.webp" alt="Profile">
                 </a>
             </div>
         </div>
     </header>
 
 
-
+    <!-- nav bar to go through each section-->
     <nav>
         <a onclick="showSection('library', this)" class="active">Library</a>
         <a onclick="showSection('bookmarks', this)">Bookmarks</a>
@@ -46,16 +46,16 @@
         <a onclick="showSection('settings', this)">Settings</a>
     </nav>
 
-    <!-- User Profile Section -->
+    <!-- displays the user's profile section 
+        This includes things such as profile picture, suername, and bio
+    -->
     <div class="profile-container">
         <div class="profile-picture">
-            <img src="https://via.placeholder.com/150" alt="User Profile Picture">
+            <img id="profile-picture-display" alt="User Profile Picture">
         </div>
         <div class="user-description">
-            <h2 id="username-display"></h2>
-            <p id="user-description-text">
-                This is your description. You can edit this in your settings.
-            </p>
+            <h2 id="username-display">Guest</h2>
+            <p id="user-description-text">This is your description. You can edit this in your settings.</p>
         </div>
     </div>
 
@@ -80,21 +80,22 @@
         <p>Your friends list goes here.</p>
     </div>
 
-
+    <!-- src="images/defaultProfile.webp" -->
     <!-- Settings -->
     <div id="settings" class="section" style="display: none;">
         <div class="form-container" id="sign-in-form">
             <h2>Update profile settings</h2>
 
             <form oninput="showSubmitButton()">
+
+                <!-- displas the profile picture in settings along with the ability to add a new picture-->
                 <div class="form-group">
                     <label for="profile-picture">Profile Picture:</label>
                     <div class="profile-picture-placeholder">
-                        <img src="https://via.placeholder.com/100" alt="Profile Picture" class="profile-preview">
+                        <img id="settings-profile-picture-display" alt="User Profile Picture" class="profile-preview">
                     </div>
                     <div class="file-input-wrapper">
-                        <input type="file" id="profile-picture" name="profile-picture" accept="image/*"
-                            onchange="showSubmitButton()">
+                        <input type="file" id="profile-picture" name="profile-picture" accept="image/*" onchange="showSubmitButton()">
                     </div>
                 </div>
 
@@ -161,7 +162,7 @@
         });
 
         // Function to handle logging out
-        /*
+
         async function handleLogout(event) {
             event.preventDefault();
             try {
@@ -176,24 +177,40 @@
                 console.error("Logout request error:", error);
             }
         }
-            */
+
 
 
         // Fetch and display the logged-in user's username
 
         // loads the user profile
         async function loadUserProfile() {
-            const response = await fetch('/user-info');
-            const data = await response.json();
+            console.log("loading user profile");
+            try {
+                const response = await fetch('/user-info');
+                const data = await response.json();
 
-            if (data.success) {
-                // Display the username and description in the profile section
-                document.getElementById('username-display').textContent = data.username;
-                document.getElementById('user-description-text').textContent = data.description;
-                document.getElementById('email').textContent = data.description;
-            } else {
-                console.error(data.message);
-                document.getElementById('username-display').textContent = "Guest";
+                if (data.success) {
+                    // Update bio section
+                    document.getElementById('username-display').textContent = data.username;
+                    document.getElementById('user-description-text').textContent = data.description || "No description provided.";
+                    document.getElementById('email').textContent = data.email || "No email provided.";
+                    
+                    // Update bio profile picture
+                    if (data.profilePicture) {
+                        document.getElementById('profile-picture-display').src = `data:image/jpeg;base64,${data.profilePicture}`;
+                    }
+
+                    // Update settings section profile picture
+                    if (data.profilePicture) {
+                        document.getElementById('settings-profile-picture-display').src = `data:image/jpeg;base64,${data.profilePicture}`;
+                    }
+                    // Update top-right profile icon
+                    if (data.profilePicture) {
+                        document.getElementById('top-right-profile-picture').src = `data:image/jpeg;base64,${data.profilePicture}`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user profile:', error);
             }
         }
 
@@ -297,21 +314,23 @@
             const description = document.getElementById('description').value;
             const username = document.getElementById('username').value;
             const email = document.getElementById('email').value;
+            const profilePictureInput = document.getElementById('profile-picture');
             const currentPassword = document.getElementById('current-password').value;
             const newPassword = document.getElementById('new-password').value;
             const confirmNewPassword = document.getElementById('confirm-new-password').value;
-            
+
             const submitButton = document.getElementById('submit-changes');
             const successMessage = document.getElementById('update-success-message');
-            
+
             const originalDescription = submitButton.getAttribute('data-original-description');
             const originalUsername = submitButton.getAttribute('data-original-username');
             const originalEmail = submitButton.getAttribute('data-original-email');
-            
+
             const hasDescriptionChanged = description !== originalDescription;
             const hasUsernameChanged = username !== originalUsername;
             const hasEmailChanged = email !== originalEmail;
             const hasPasswordChanged = currentPassword && newPassword && (newPassword === confirmNewPassword);
+            const hasProfilePictureChanged = profilePictureInput.files.length > 0;
 
             let updateSuccessful = false;
 
@@ -404,6 +423,29 @@
                 alert('Please ensure current password is correct and new passwords match.');
             }
 
+            // Update profile picture
+            if (hasProfilePictureChanged) {
+                const formData = new FormData();
+                formData.append('profilePicture', profilePictureInput.files[0]);
+
+                try {
+                    const response = await fetch('/update-profile-picture', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        loadUserProfile(); // Reload profile with updated picture
+                        updateSuccessful = true;
+                    } else {
+                        alert(result.message || 'An error occurred while updating the profile picture.');
+                    }
+                } catch (error) {
+                    console.error('Update profile picture error:', error);
+                    alert('An error occurred while updating the profile picture. Please try again.');
+                }
+            }
+
             // Show success message
             if (updateSuccessful) {
                 successMessage.style.display = 'block';
@@ -413,7 +455,7 @@
             }
 
             // Hide submit button if no changes
-            if (!hasDescriptionChanged && !hasUsernameChanged && !hasEmailChanged && !hasPasswordChanged) {
+            if (!hasDescriptionChanged && !hasUsernameChanged && !hasEmailChanged && !hasPasswordChanged && !hasProfilePictureChanged) {
                 submitButton.style.display = 'none';
             }
         }
@@ -423,6 +465,7 @@
             const descriptionInput = document.getElementById('description');
             const usernameInput = document.getElementById('username');
             const emailInput = document.getElementById('email');
+            const profilePictureInput = document.getElementById('profile-picture');
             const currentPasswordInput = document.getElementById('current-password');
             const newPasswordInput = document.getElementById('new-password');
             const confirmNewPasswordInput = document.getElementById('confirm-new-password');
@@ -432,12 +475,21 @@
             const originalDescription = submitButton.getAttribute('data-original-description');
             const originalUsername = submitButton.getAttribute('data-original-username');
             const originalEmail = submitButton.getAttribute('data-original-email');
+            const originalProfilePicture = submitButton.getAttribute('data-original-profile-picture');
+
+            const hasDescriptionChanged = descriptionInput.value !== originalDescription;
+            const hasUsernameChanged = usernameInput.value !== originalUsername;
+            const hasEmailChanged = emailInput.value !== originalEmail;
+            const hasProfilePictureChanged = profilePictureInput.files.length > 0;
 
             if (
-                descriptionInput.value !== originalDescription ||
-                usernameInput.value !== originalUsername ||
-                emailInput.value !== originalEmail ||
-                currentPasswordInput.value || newPasswordInput.value || confirmNewPasswordInput.value
+                hasDescriptionChanged ||
+                hasUsernameChanged ||
+                hasEmailChanged ||
+                hasProfilePictureChanged ||
+                currentPasswordInput.value ||
+                newPasswordInput.value ||
+                confirmNewPasswordInput.value
             ) {
                 submitButton.style.display = 'block';
             } else {
@@ -453,11 +505,19 @@
             if (data.success) {
                 document.getElementById('description').value = data.description || "";
                 document.getElementById('username').value = data.username || "";
-                document.getElementById('email').value = data.email || ""; 
+                document.getElementById('email').value = data.email || "";
+
+                const profilePictureDisplay = document.getElementById('settings-profile-picture-display');
+                if (data.profilePicture) {
+                    profilePictureDisplay.src = `data:image/jpeg;base64,${data.profilePicture}`;
+                } else {
+                    profilePictureDisplay.src = "images/defaultProfile.webp"; // Fallback image
+                }
 
                 document.getElementById('submit-changes').setAttribute('data-original-description', data.description || "");
                 document.getElementById('submit-changes').setAttribute('data-original-username', data.username || "");
-                document.getElementById('submit-changes').setAttribute('data-original-email', data.email || ""); // Set original email
+                document.getElementById('submit-changes').setAttribute('data-original-email', data.email || "");
+                document.getElementById('submit-changes').setAttribute('data-original-profile-picture', profilePictureDisplay.src);
             }
         });
 

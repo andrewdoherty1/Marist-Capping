@@ -297,6 +297,30 @@ const getTableNames = async () => {
     }
   })();
   */
+ 
+
+  import fs from 'fs';
+  const uploadProfilePicture = async (userID, imagePath) => {
+    try {
+      // Read the image file as binary data
+      const imageData = fs.readFileSync(imagePath);
+  
+      // Update the profile picture in the database
+      const query = `
+        UPDATE users
+        SET "profilePicture" = $1
+        WHERE "userID" = $2;
+      `;
+      await pool.query(query, [imageData, userID]);
+  
+      console.log('Profile picture uploaded successfully for user ID:', userID);
+    } catch (err) {
+      console.error('Error executing query:', err.stack);
+    }
+  };
+  
+  // Example usage
+  uploadProfilePicture(41, 'Marist-Capping/client/pages/images/logo1.png');
 
  
 
