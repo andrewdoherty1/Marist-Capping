@@ -51,7 +51,7 @@
     -->
     <div class="profile-container">
         <div class="profile-picture">
-            <img id="profile-picture-display" alt="User Profile Picture">
+            <img id="profile-picture-display" src="images/defaultProfile.webp" alt="User Profile Picture">
         </div>
         <div class="user-description">
             <h2 id="username-display">Guest</h2>
@@ -80,7 +80,6 @@
         <p>Your friends list goes here.</p>
     </div>
 
-    <!-- src="images/defaultProfile.webp" -->
     <!-- Settings -->
     <div id="settings" class="section" style="display: none;">
         <div class="form-container" id="sign-in-form">
@@ -92,7 +91,7 @@
                 <div class="form-group">
                     <label for="profile-picture">Profile Picture:</label>
                     <div class="profile-picture-placeholder">
-                        <img id="settings-profile-picture-display" alt="User Profile Picture" class="profile-preview">
+                        <img id="settings-profile-picture-display"  alt="User Profile Picture" class="profile-preview">
                     </div>
                     <div class="file-input-wrapper">
                         <input type="file" id="profile-picture" name="profile-picture" accept="image/*" onchange="showSubmitButton()">
@@ -130,6 +129,10 @@
                 <div class="form-group">
                     <label for="description">Description:</label>
                     <input type="text" id="description" name="description" data-original="" oninput="showSubmitButton()">
+                </div>
+
+                <div class="form-group">
+                    <button id="delete-account-btn" class="delete-button">Delete Account</button>
                 </div>
 
                 <p id="update-success-message" style="color: green; display: none;">User profile has been updated.</p>
@@ -647,6 +650,46 @@
                 bookmarkList.style.display = 'none';
             }
         }
+
+        document.getElementById('delete-account-btn').addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent default form behavior
+
+            // Create the confirmation modal
+            const modal = document.createElement('div');
+            modal.classList.add('modal');
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <p>Are you sure you want to permanently delete your account?</p>
+                    <button id="confirm-delete" class="confirm-btn">Yes</button>
+                    <button id="cancel-delete" class="cancel-btn">No</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Add event listeners for confirmation buttons
+            document.getElementById('confirm-delete').addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/delete-account', {
+                        method: 'DELETE',
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('Account successfully deleted.');
+                        window.location.href = 'index.html'; // Redirect to home page
+                    } else {
+                        alert(result.message || 'An error occurred. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Error deleting account:', error);
+                    alert('An error occurred. Please try again.');
+                }
+                document.body.removeChild(modal); // Remove modal
+            });
+
+            document.getElementById('cancel-delete').addEventListener('click', () => {
+                document.body.removeChild(modal); // Remove modal if "No" is clicked
+            });
+        });
 
 
     </script>
