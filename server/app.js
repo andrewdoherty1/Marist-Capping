@@ -21,7 +21,7 @@ const PORT = 3000;
 //Connect to the Remote Database.
 const pool = new Pool({
   user: 'postgres',       // Database user
-  host: 'localhost',      // Localhost for AWS server
+  host: '127.0.0.1',
   database: 'opinionate', // Database name
   port: 5433,             // Port for PostgreSQL 17
 });
