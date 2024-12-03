@@ -129,36 +129,33 @@
         }
     }
 
-    //login 
+    // sign in 
     document.getElementById('login-form').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const username = document.getElementById('sign-in-username').value;
-    const password = document.getElementById('sign-in-password').value;
-    const loginError = document.getElementById('login-error');
+        event.preventDefault();
+        const username = document.getElementById('sign-in-username').value;
+        const password = document.getElementById('sign-in-password').value;
+        const loginError = document.getElementById('login-error');
 
-    try {
-        const response = await fetch('http://localhost:3000/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password }),
-            credentials: 'include', // Add this line to persist the session
-        });
+        try {
+            const response = await fetch('http://52.207.242.19:3000/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const result = await response.json();
 
-        const result = await response.json();
-
-        if (result.success) {
-            window.location.href = 'userProfile.html';
-        } else {
-            loginError.textContent = result.message;
+            if (result.success) {
+                window.location.href = 'userProfile.html';
+            } else {
+                loginError.textContent = result.message;
+                loginError.style.display = 'block';
+            }
+        } catch (error) {
+            loginError.textContent = 'An error occurred during login. Please try again.';
             loginError.style.display = 'block';
+            console.error('Login request error:', error); // Log client-side errors for debugging
         }
-    } catch (error) {
-        loginError.textContent = 'An error occurred during login. Please try again.';
-        loginError.style.display = 'block';
-        console.error('Login request error:', error);
-    }
-});
-
+    });
 
      // Handle Account Creation Form Submission
     document.getElementById('register-form').addEventListener('submit', async (event) => {
@@ -179,7 +176,7 @@
 
         try {
             // Send request to server to create a new account
-            const response = await fetch('http://localhost:3000/register', {
+            const response = await fetch('http://52.207.242.19:3000/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password, email })
