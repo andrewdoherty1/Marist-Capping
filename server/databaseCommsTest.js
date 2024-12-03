@@ -8,7 +8,6 @@ const pool = new Pool({
   user: 'postgres',         // Database user
   host: '127.0.0.1',       // The AWS database is on the same instance
   database: 'opinionate',   // Ensure this matches the actual database name
-  password: '',
   port: 5433,               // Correct port for PostgreSQL 17
 });
 
