@@ -16,14 +16,15 @@ import sharp from 'sharp';
 
 
 const app = express();
-const PORT = 3000;
+const PORT = 80;
 
 //Connect to the Remote Database.
 const pool = new Pool({
-  user: 'postgres',       // Database user
-  host: '127.0.0.1',
-  database: 'opinionate', // Database name
-  port: 5433,             // Port for PostgreSQL 17
+  user: 'postgres',
+  host: '127.0.0.1',  // Connect to the local machine
+  database: 'Opinionate',
+  password: 'capping2024',
+  port: 5432
 });
 
 
@@ -1066,6 +1067,6 @@ app.get('/getUserBookmarks', async (req, res) => {
 
 // -------------------------------------------------------------
 // Server connection
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
 });
