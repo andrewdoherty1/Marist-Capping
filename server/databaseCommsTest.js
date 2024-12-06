@@ -2,7 +2,7 @@ import pkg from 'pg';
 import axios from 'axios';
 const { Pool } = pkg;
 
-const mediaID = 299; // dont change after, must change pre-run
+const mediaID = 523; // dont change after, must change pre-run
 //Connect to the Remote Database.
 const pool = new Pool({
   user: 'postgres',
@@ -52,7 +52,6 @@ const fetchMusicData = async (albumId) => {
     }
 
     const album = await albumResponse.json();
-
     // Check if album and tracks are available
     if (!album || !album.tracks || !album.tracks.items) {
       throw new Error("Album or tracks data is missing in the API response");
@@ -67,8 +66,8 @@ const fetchMusicData = async (albumId) => {
       artist: album.artists[0]?.name || null,
       tracks: album.tracks.items.map(track => track.name), // Track names in a single string
     };
-
     return albumData;
+    
   } catch (error) {
     console.error('Failed to fetch album data:', error);
   }
@@ -100,6 +99,8 @@ const insertMusicData = async (album) => {
   } finally {
     client.release();
   }
+}
+/*
 };
 
 // Fetch and store a specific album
@@ -109,8 +110,8 @@ const fetchAndSaveAlbum = async (albumId) => {
     await insertMusicData(album);
   }
 };
-
-fetchAndSaveAlbum('5iBvQWRRazoyt7CrEPFBsW');
+*/
+//fetchAndSaveAlbum('5EaEOUs3O1MZRicDMUIuqo');
 
 // Function to fetch movie data from the TMDB API
 const fetchMovieData = async (movieId) => {
@@ -163,7 +164,7 @@ const insertMovieData = async (movie) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const mediaID = 103;
+    const mediaID = 700;
     const mediaResult = await client.query(
       `INSERT INTO media ("mediaId", title, "releaseDate", description)
        VALUES ($1, $2, $3, $4) RETURNING "mediaId"`,
@@ -177,6 +178,7 @@ const insertMovieData = async (movie) => {
     );
     await client.query('COMMIT');
     console.log(`Movie "${movie.title}" inserted successfully`);
+    console.log(movie)
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('Error inserting movie data:', error);
@@ -186,14 +188,14 @@ const insertMovieData = async (movie) => {
 };
 
 
-// // Function to fetch and insert a movie DO NOT DELETE!
-// (async () => {
-//   const movieId = 293660; // Desired movie ID
-//   const movieData = await fetchMovieData(movieId);
-//   if (movieData) {
-//     await insertMovieData(movieData);
-//   }
-// })();
+ // Function to fetch and insert a movie DO NOT DELETE!
+ (async () => {
+   const movieId = 1241982; // Desired movie ID
+   const movieData = await fetchMovieData(movieId);
+   if (movieData) {
+     await insertMovieData(movieData);
+   }
+ })();
 
 
 const getTableNames = async () => {
@@ -261,7 +263,7 @@ const getTableNames = async () => {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
-      const mediaID = 350
+      const mediaID = 353
       // Insert into the media table to get a mediaId
       const mediaResult = await client.query(
         `INSERT INTO media ("mediaId", title, description)
@@ -287,10 +289,11 @@ const getTableNames = async () => {
       client.release();
     }
   };
-  /* GET BOOKS DO NOT DELETE
+   //GET BOOKS DO NOT DELETE
   // Make sure to use a valid Open Library book ID
+  /*
   (async () => {
-    const bookId = 'OL15414803W'; // Use a valid Open Library book ID
+    const bookId = 'OL25607762M'; // Use a valid Open Library book ID
     const book = await fetchBookDetails(bookId);
     if (book) {
       await insertBookData(book);

@@ -145,7 +145,7 @@ const insertGameData = async (gameData) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const theMediaID = 500;
+    const theMediaID = 503;
     const mediaResult = await client.query(
       `INSERT INTO media ("mediaId", title, "releaseDate", description)
            VALUES ($1, $2, $3, $4) RETURNING "mediaId"`,
@@ -176,6 +176,7 @@ app.get('/api/insert-game/:gameId', async (req, res) => {
     const gameData = await fetchGameDetails(gameId);
     await insertGameData(gameData);
     res.json({ message: `Game "${gameData.title}" inserted successfully` });
+    res.json(gameData)
   } catch (error) {
     res.status(500).json({ error: 'Failed to insert game data' });
   }
