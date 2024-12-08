@@ -1,6 +1,14 @@
 # Marist-Capping
 Code Installation Documentation:
  
+ IMPORTANT NOTICE:
+ - The following instructions for code installation pertains to Dev_Local_Branch not the main (default) branch.
+ - Please navigate to that branch if you wish to install the Opinionate platform
+   on your local machine.
+ - The main branch of this repository is setup to work with the Marist ECRL server. 
+ - Additionally, this installation guide assumes that you will be running the web
+   application and your PostgreSQL server locally on your machine.
+  
  Dependencies:
  - Node.js
  - PostgreSQL
@@ -17,7 +25,7 @@ Code Installation Documentation:
    psql -U postgres -d opinionate -f "database/Opinionate_backup.sql"
 
  - Ensure that the database was indeed created before moving on to the next step.
- - The password for the created user reviewer is capping2024
+ - The password for the created user which is reviewer is capping2024
 
  Step 3: Updates to Code: <br/>
 
@@ -34,7 +42,7 @@ Code Installation Documentation:
       port: 5432
     });
 
- b. Next, do the same thing as above to update the database connection on line 7 of the databaseCommsTest.js file. <br/>
+ b. Next, do the same thing as above to update the database connection on line 7 of the databaseCommsTest.js file which is in the server folder. <br/>
   (Only do this step if you are interested in inserting media into the database).
 
  c. Navigate to line 140 in createAccount.html which is in client/pages. <br/>
