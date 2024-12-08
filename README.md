@@ -34,8 +34,6 @@ Code Installation Documentation:
       port: 5432
     });
 
-    - Note: You may also change this to whatever modifications you see fit!
-
  b. Next, do the same thing as above to update the database connection on line 7 of the databaseCommsTest.js file. 
   (Only do this step if you are interested in inserting media into the database).
 
