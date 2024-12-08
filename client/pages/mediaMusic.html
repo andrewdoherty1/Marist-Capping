@@ -225,7 +225,7 @@
             }
         }
 
-
+        // Function to call profile picture route and display on html
         async function loadUserPic() {
             console.log("loading user profile picture");
             try {
@@ -266,7 +266,7 @@
         
 
 
-
+        // Function to fetch an album's details from database
         async function fetchAlbumDetails(mediaId) {
             try {
                 const albumResponse = await fetch(`/api/albums/${mediaId}`);
@@ -322,7 +322,7 @@
         let selectedRating = 0; // Store the selected rating
 
         
-
+        // shows submit button if a rating is input
         function toggleSubmitButton() {
             if (ratingSelected || description.value.trim()) {
                 submitContainer.style.display = 'block';
@@ -427,6 +427,7 @@
             }
         });
 
+        // Function to call route to fetch all of an album's reviews
         async function loadFeed(mediaId) {
             try {
                 const response = await fetch(`/getReviewsForMedia/${mediaId}`);
@@ -440,6 +441,7 @@
             }
         }
 
+        // Function to display all of a title's reviews on html
         function displayReviews(reviews) {
             const mediaList = document.querySelector('.reviews-media-list');
             mediaList.innerHTML = ''; // Clear existing content
@@ -514,6 +516,7 @@
                 }
             });
 
+            // Function to call search route based on input
             function fetchSearchSuggestions(query) {
                 fetch(`/api/search?q=${encodeURIComponent(query)}`)
                     .then(response => response.json())
@@ -525,6 +528,7 @@
                     });
             }
 
+            // Function to display results of a search
             function displaySearchSuggestions(suggestions) {
                 suggestionsContainer.innerHTML = '';
 
@@ -573,6 +577,7 @@
             });
         });
 
+        // Function to call average rating route and display value on html
         async function fetchAndDisplayAverageRating(mediaId) {
             try {
                 const response = await fetch(`/getAverageRating/${mediaId}`);

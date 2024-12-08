@@ -223,6 +223,7 @@
             }
         }
 
+        // Function to call profile picture route and display on html
         async function loadUserPic() {
             console.log("loading user profile picture");
             try {
@@ -290,7 +291,7 @@
         let selectedRating = 0; // Store the selected rating
 
         
-
+        // Shows submit button if a rating is input
         function toggleSubmitButton() {
             if (ratingSelected || description.value.trim()) {
                 submitContainer.style.display = 'block';
@@ -394,6 +395,7 @@
             }
         });
 
+        // Function to call reviews for title route
         async function loadFeed(mediaId) {
             try {
                 const response = await fetch(`/getReviewsForMedia/${mediaId}`);
@@ -407,6 +409,7 @@
             }
         }
 
+        // Function to display all reviews for a title on html
         function displayReviews(reviews) {
             const mediaList = document.querySelector('.reviews-media-list');
             mediaList.innerHTML = ''; // Clear existing content
@@ -482,6 +485,7 @@
                 }
             });
 
+            // Function to call search route based on input
             function fetchSearchSuggestions(query) {
                 fetch(`/api/search?q=${encodeURIComponent(query)}`)
                     .then(response => response.json())
@@ -493,6 +497,7 @@
                     });
             }
 
+            // Function to display search results based on input
             function displaySearchSuggestions(suggestions) {
                 suggestionsContainer.innerHTML = '';
 
@@ -541,6 +546,7 @@
             });
         });
 
+        // Function to call average rating route and display value on html
         async function fetchAndDisplayAverageRating(mediaId) {
             try {
                 const response = await fetch(`/getAverageRating/${mediaId}`);
