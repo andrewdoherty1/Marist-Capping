@@ -20,6 +20,7 @@ Code Installation Documentation:
  - The password for the created user reviewer is capping2024
 
  Step 3: Updates to Code: <br/>
+
  a. You first want to ensure that you can talk to the database:
     - To do this navigate to line 21 in app.js in the server folder.
     - Update the database connection to the following:
@@ -33,7 +34,7 @@ Code Installation Documentation:
       port: 5432
     });
 
-    - You may also change this to whatever modifications you see fit!
+    Note: You may also change this to whatever modifications you see fit!
 
  b. Next, do the same thing as above to update the database connection on line 7 of the databaseCommsTest.js file. 
   (Only do this step if you are interested in inserting media into the database).
