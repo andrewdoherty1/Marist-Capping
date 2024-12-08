@@ -366,6 +366,7 @@ app.get('/api/media/:id', async (req, res) => {
   }
 });
 
+//route to display an album on media page
 app.get('/api/albums/:id', async (req, res) => {
   const mediaId = req.params.id;
 
@@ -401,7 +402,7 @@ app.get('/api/albums/:id', async (req, res) => {
   }
 });
 
-//For Books media page
+//Route for Books media page
 app.get('/api/books/:id', async (req, res) => {
   const mediaId = req.params.id;
 
@@ -534,7 +535,7 @@ app.get('/users', async (req, res) => {
 });
 
 
-
+//Route for fetching user information of currently signed in user
 app.get('/user-info', async (req, res) => {
   if (req.session.user) {
     const query = 'SELECT username, description, email, "profilePicture" FROM users WHERE "userID" = $1';
@@ -765,6 +766,8 @@ app.post('/update-email', async (req, res) => {
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+// route for changing a user's profile picture
+
 app.post('/update-profile-picture', upload.single('profilePicture'), async (req, res) => {
   if (!req.session.user) {
     return res.json({ success: false, message: 'User not logged in' });
@@ -857,7 +860,7 @@ app.post('/submitReview', async (req, res) => {
 });
 
 
-
+// route for displaying all reviews on feed
 app.get('/getReviews', async (req, res) => {
   try {
     const query = `
@@ -892,6 +895,7 @@ app.get('/getReviews', async (req, res) => {
   }
 });
 
+// route for displaying all reviews of a specific title
 app.get('/getReviewsForMedia/:id', async (req, res) => {
   const mediaID = req.params.id; // Get mediaID from the query parameters
 
@@ -927,7 +931,7 @@ app.get('/getReviewsForMedia/:id', async (req, res) => {
   }
 });
 
-
+// route to submit a new bookmark
 app.post('/submitBookmark', async (req, res) => {
   // Ensure the user is logged in
   if (!req.session.user) {
@@ -953,6 +957,7 @@ app.post('/submitBookmark', async (req, res) => {
   }
 });
 
+// Route to calculate the average rating of a title
 app.get('/getAverageRating/:mediaID', async (req, res) => {
   const { mediaID } = req.params;  // Extract mediaID from the request parameters
 
@@ -1025,6 +1030,7 @@ app.get('/getUserReviews', async (req, res) => {
   }
 });
 
+// route to fetch all of user's bookmarks to display on profile page
 app.get('/getUserBookmarks', async (req, res) => {
   // Ensure the user is logged in
   if (!req.session.user) {

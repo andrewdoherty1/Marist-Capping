@@ -114,6 +114,7 @@
             }
         });
 
+        // Function to call route to fetch user information
         async function loadUserProfile() {
             console.log("loading user profile");
             try {
@@ -172,6 +173,7 @@
             spotifyAccessToken = data.access_token;
         }
 
+        // Function to fetch movie data from database
         async function fetchAndDisplayMovies() {
             try {
                 const response = await fetch('/api/random-movies');
@@ -191,6 +193,7 @@
             }
         }
 
+        // Function to display movies on html
         function displayMovies(movies) {
             const moviesContainer = document.getElementById('movies-container');
             moviesContainer.innerHTML = ''; // Clear previous content
@@ -246,6 +249,7 @@
             });
         }
 
+        // Function to fetch games from database
         async function fetchAndDisplayGames() {
             try {
                 const response = await fetch('/api/random-games');
@@ -265,6 +269,7 @@
             }
         }
 
+        // Function to display games on html
         function displayGames(games) {
             const gamesContainer = document.getElementById('games-container');
             gamesContainer.innerHTML = ''; // Clear previous content
@@ -320,7 +325,7 @@
             });
         }
 
-        // Display Books from the database
+        // Function to fetch books from the database
         async function fetchAndDisplayBooks() {
             try {
                 const response = await fetch('/api/random-books');
@@ -396,6 +401,7 @@
             });
         }
 
+        // Function to fetch albums from the database
         async function fetchAndDisplayAlbums() {
             try {
                 const response = await fetch('/api/random-albums');
@@ -415,7 +421,7 @@
             }
         }
 
-
+        // Function to display albums on html
         function displayMusic(albums) {
             const albumsContainer = document.getElementById('albums-container');
             albumsContainer.innerHTML = ''; // Clear previous content
@@ -669,6 +675,7 @@
             }
         }
 
+        // Function to fill in stars of a page's 
         function setStarRating(averageRating) {
             const stars = document.querySelectorAll('.star');
             const ratingValue = document.getElementById('rating-value');
