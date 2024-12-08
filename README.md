@@ -24,7 +24,7 @@ Code Installation Documentation:
  a. You first want to ensure that you can talk to the database:
     - To do this navigate to line 21 in app.js in the server folder.
     - Update the database connection to the following:
-
+``` javascript
     //Connect to the Remote Database.
       const pool = new Pool({
       user: 'reviewer',
@@ -33,7 +33,7 @@ Code Installation Documentation:
       password: 'capping2024',
       port: 5432
     });
-
+```
     Note: You may also change this to whatever modifications you see fit!
 
  b. Next, do the same thing as above to update the database connection on line 7 of the databaseCommsTest.js file. 
