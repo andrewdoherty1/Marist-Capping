@@ -19,7 +19,7 @@ Code Installation Documentation:
  - Ensure that the database was indeed created before moving on to the next step.
  - The password for the created user reviewer is capping2024
 
- Step 3: Updates to Code:
+ Step 3: Updates to Code: <br/>
  a. You first want to ensure that you can talk to the database:
     - To do this navigate to line 21 in app.js in the server folder.
     - Update the database connection to the following:
@@ -39,10 +39,14 @@ Code Installation Documentation:
   (Only do this step if you are interested in inserting media into the database).
 
  c. Navigate to line 140 in createAccount.html which is in client/pages.
-    - replace the line with: const response = await fetch('http://localhost:3000/login', {
+    - replace the line with: 
+
+        const response = await fetch('http://localhost:3000/login', {
 
  d. Navigate to line 179 in createAccount.html which is in client/pages.
-    - replace the line with: const response = await fetch('http://localhost:3000/register', {
+    - replace the line with: 
+
+        const response = await fetch('http://localhost:3000/register', {
 
  e. Go to app.js which is in the server folder.
     - replace line 19 with: const PORT = 3000;
