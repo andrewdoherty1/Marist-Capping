@@ -57,7 +57,7 @@ Code Installation Documentation:
 
  e. Go to app.js which is in the server folder. <br/>
     - replace line 19 with: const PORT = 3000; <br/>
-    - replace line 1069-1072 with:
+    - replace line 1075-1078 with:
 
       // Server connection
       app.listen(PORT, () => {
